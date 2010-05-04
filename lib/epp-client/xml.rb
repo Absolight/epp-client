@@ -26,9 +26,17 @@ class EPPClient
     # or a series of procs, the first one being the commands, the other ones
     # being the extensions.
     #
-    # command do |xml|
-    #	xml.logout
-    # end
+    #   command do |xml|
+    #  	  xml.logout
+    #   end
+    #
+    # or
+    #
+    #   command(lambda do |xml|
+    #	    xml.logout
+    #	  end, lambda do |xml|
+    #	    xml.extension
+    #	  end)
     def command(*args, &block)
       builder do |xml|
 	xml.command do
