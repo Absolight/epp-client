@@ -12,10 +12,9 @@ class EPPClient
 
     # creates a Builder::XmlMarkup object, mostly only used by +command+
     def builder(opts = {})
-      opts = {:indent => 2}.merge(opts)
-      xml = Builder::XmlMarkup(opts)
+      xml = Builder::XmlMarkup.new(opts)
       xml.instruct! :xml, :version =>"1.0", :encoding => "UTF-8"
-      xml.epp('xmlns' => SCHEMAS_URL['epp']) do
+      xml.epp('xmlns' => SCHEMAS_URL['epp'], 'xmlns:epp' => SCHEMAS_URL['epp']) do
 	yield xml
       end
     end
@@ -51,7 +50,7 @@ class EPPClient
 	      end
 	    end
 	  end
-	  xml.clTRID(@clTRID)
+	  xml.clTRID(clTRID)
 	end
       end
     end

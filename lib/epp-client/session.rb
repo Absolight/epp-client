@@ -2,10 +2,16 @@
 
 class EPPClient
   module Session
+    def hello
+      send_request(command do |xml|
+	xml.hello
+      end)
+    end
+
     def login_xml
       command do |xml|
 	xml.login do
-	  xml.clID(@login)
+	  xml.clID(@client_id)
 	  xml.pw(@password)
 	  xml.options do
 	    xml.version(@version)
@@ -26,19 +32,29 @@ class EPPClient
 	end
       end
     end
+    private :login_xml
 
     def login
       response = send_request(login_xml)
 
+      get_result(response)
+    end
+
+    def logout
+      response = send_request(command do |xml|
+	xml.logout
+      end)
+
+      get_result(response)
     end
 
     def get_result(xml, range = 1000..1999)
-      res = doc.xpath('/epp/response/result')
+      res = xml.xpath('epp:epp/epp:response/epp:result', SCHEMAS_URL)
       code = res.attribute('code').value.to_i
       if range.include?(code)
-	return true
+	return xml
       else
-	raise EPPErrorResponse.new(:xml => xml, :code => code, :message => res.xpath('msg').text)
+	raise EPPErrorResponse.new(:xml => xml, :code => code, :message => res.xpath('epp:msg', SCHEMAS_URL).text)
       end
     end
   end

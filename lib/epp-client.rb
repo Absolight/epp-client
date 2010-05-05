@@ -9,11 +9,13 @@ require 'epp-client/xml'
 require 'epp-client/session'
 require 'epp-client/connection'
 require 'epp-client/exceptions'
+require 'epp-client/ssl'
 
 class EPPClient
   include XML
   include Session
   include Connection
+  include SSL
 
   HG_KEYWORD = %w$Abso$
 
@@ -31,12 +33,12 @@ class EPPClient
     a
   end
 
-  attr_accessor :login, :password, :server, :port, :services, :lang, :extensions, :version, :context, :clTRID
+  attr_accessor :client_id, :password, :server, :port, :services, :lang, :extensions, :version, :context, :clTRID
 
-  # ==== Required Attrbiutes
+  # ==== Required Attributes
   #
   # * <tt>:server</tt> - The EPP server to connect to
-  # * <tt>:login</tt> - The tag or username used with <tt><login></tt> requests.
+  # * <tt>:client_id</tt> - The tag or username used with <tt><login></tt> requests.
   # * <tt>:password</tt> - The password used with <tt><login></tt> requests.
   #
   # ==== Optional Attributes
@@ -54,9 +56,11 @@ class EPPClient
   #   these to extend the standard EPP (e.g., Nominet uses extensions).
   #   Defaults to none.
   # * <tt>:version</tt> - Set the EPP version. Defaults to "1.0".
+  # * <tt>:ssl_cert</tt> - The file containing the client certificate.
+  # * <tt>:ssl_key</tt> - The file containing the key of the certificate.
   def initialize(attrs)
-    unless attrs.key?(:server) && attrs.key?(:login) && attrs.key?(:password)
-      raise ArgumentError, "server, login and password are required"
+    unless attrs.key?(:server) && attrs.key?(:client_id) && attrs.key?(:password)
+      raise ArgumentError, "server, client_id and password are required"
     end
 
     attrs.each do |k,v|
@@ -73,9 +77,15 @@ class EPPClient
     @extensions ||= []
     @version ||= "1.0"
     @clTRID ||= "test-#{$$}-#{rand(1000)}"
+    @clTRID_index = 0
 
     @context ||= OpenSSL::SSL::SSLContext.new
 
     @logged_in = false
+  end
+
+  def clTRID
+    @clTRID_index += 1
+    @clTRID + "-#{@clTRID_index}"
   end
 end

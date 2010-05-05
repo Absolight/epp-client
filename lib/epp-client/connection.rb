@@ -8,13 +8,13 @@ class EPPClient
     def open_connection
       @tcpserver = TCPSocket.new(server, port)
       @socket = OpenSSL::SSL::SSLSocket.new(@tcpserver, @context)
-      
+
       # Synchronously close the connection & socket
       @socket.sync_close
-      
+
       # Connect
       @socket.connect
-      
+
       # Get the initial greeting frame
       get_frame
     end
