@@ -8,11 +8,12 @@ class EPPClient
       end)
     end
 
-    def login_xml
+    def login_xml(new_pw = nil)
       command do |xml|
 	xml.login do
 	  xml.clID(@client_id)
 	  xml.pw(@password)
+	  xml.newPW(new_pw) unless new_pw.nil?
 	  xml.options do
 	    xml.version(@version)
 	    xml.lang(@lang)
@@ -34,8 +35,8 @@ class EPPClient
     end
     private :login_xml
 
-    def login
-      response = send_request(login_xml)
+    def login(new_pw = nil)
+      response = send_request(login_xml(new_pw))
 
       get_result(response)
     end
