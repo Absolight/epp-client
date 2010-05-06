@@ -10,12 +10,14 @@ require 'epp-client/session'
 require 'epp-client/connection'
 require 'epp-client/exceptions'
 require 'epp-client/ssl'
+require 'epp-client/domain'
 
 class EPPClient
   include XML
   include Session
   include Connection
   include SSL
+  include Domain
 
   HG_KEYWORD = %w$Abso$
 

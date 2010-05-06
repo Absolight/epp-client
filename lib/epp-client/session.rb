@@ -49,11 +49,31 @@ class EPPClient
       get_result(response)
     end
 
-    def get_result(xml, range = 1000..1999)
+    def get_result(args)
+      xml = case args
+	    when Hash
+	      args.delete(:xml)
+	    else
+	      xml = args
+	      args = {}
+	      xml
+	    end
+
+      args[:range] ||= 1000..1999
+	
       res = xml.xpath('epp:epp/epp:response/epp:result', SCHEMAS_URL)
       code = res.attribute('code').value.to_i
-      if range.include?(code)
-	return xml
+      if args[:range].include?(code)
+	if args.key?(:callback)
+	  case cb = args[:callback]
+	  when Symbol
+	    return send(cb, xml.xpath('epp:epp/epp:response', SCHEMAS_URL))
+	  else
+	    raise ArgumentError, "Invalid callback type"
+	  end
+	else
+	  return xml
+	end
       else
 	raise EPPErrorResponse.new(:xml => xml, :code => code, :message => res.xpath('epp:msg', SCHEMAS_URL).text)
       end

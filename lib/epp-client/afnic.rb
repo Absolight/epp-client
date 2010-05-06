@@ -29,5 +29,25 @@ class EPPClient
       super(args)
       @extensions << SCHEMAS_URL['frnic']
     end
+
+
+    def domain_check_process_with_afnic(xml)
+      ret = domain_check_process_without_afnic(xml)
+      xml.xpath('epp:extension/frnic:ext/frnic:resData/frnic:chkData/frnic:domain/frnic:cd', SCHEMAS_URL).each do |dom|
+	name = dom.xpath('frnic:name', SCHEMAS_URL)
+	hash = ret.select {|d| d[:domain] == name.text}.first
+	hash[:reserved] = name.attr('reserved').value == "1"
+	unless (reason = dom.xpath('frnic:rsvReason', SCHEMAS_URL).text).empty?
+	  hash[:rsvReason] = reason
+	end
+	hash[:forbidden] = name.attr('forbidden').value == "1"
+	unless (reason = dom.xpath('frnic:fbdReason', SCHEMAS_URL).text).empty?
+	  hash[:fbdReason] = reason
+	end
+      end
+      return ret
+    end
+    alias_method :domain_check_process_without_afnic, :domain_check_process
+    alias_method :domain_check_process, :domain_check_process_with_afnic
   end
 end
