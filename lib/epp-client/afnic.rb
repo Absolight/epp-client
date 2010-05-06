@@ -16,6 +16,7 @@ class EPPClient
 
     # Sets the default for AFNIC, that is, server and port, according to
     # AFNIC's documentation.
+    # http://www.afnic.fr/doc/interface/epp
     #
     # ==== Optional Attributes 
     # * <tt>:test</tt> - sets the server to be the test server.

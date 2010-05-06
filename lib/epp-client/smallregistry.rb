@@ -17,6 +17,7 @@ class EPPClient
     #
     # Sets the default for Smallregistry, that is, server and port, according
     # to Smallregistry's documentation.
+    # https://www.smallregistry.net/faqs/quelles-sont-les-specificites-du-serveur-epp
     #
     # ==== Required Attributes
     #
