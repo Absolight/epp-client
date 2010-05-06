@@ -2,6 +2,15 @@
 
 class EPPClient
   module SSL
+    HG_KEYWORD_SSL = %q$Abso$
+    def self.included(base) # :nodoc:
+      base.class_eval do
+	HG_KEYWORD << HG_KEYWORD_SSL
+	alias_method :open_connection_without_ssl, :open_connection
+	alias_method :open_connection, :open_connection_with_ssl
+      end
+    end
+
     attr_reader :ssl_cert, :ssl_key
 
     def ssl_key=(key) #:nodoc:
@@ -29,13 +38,6 @@ class EPPClient
 	@ssl_cert = OpenSSL::X509::Certificate.new(cert)
       else
 	raise ArgumentError, "Must either be an OpenSSL::X509::Certificate object, a filename or a certificate"
-      end
-    end
-
-    def self.included(base) # :nodoc:
-      base.class_eval do
-	alias_method :open_connection_without_ssl, :open_connection
-	alias_method :open_connection, :open_connection_with_ssl
       end
     end
 

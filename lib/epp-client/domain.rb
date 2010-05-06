@@ -2,6 +2,13 @@
 
 class EPPClient
   module Domain
+    HG_KEYWORD_Domain = %q$Abso$
+    def self.included(base) # :nodoc:
+      base.class_eval do
+	HG_KEYWORD << HG_KEYWORD_Domain
+      end
+    end
+
     def domain_check_xml(*domains) # :nodoc:
       command do |xml|
 	xml.check do

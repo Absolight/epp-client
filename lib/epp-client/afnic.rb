@@ -4,6 +4,8 @@ require 'epp-client'
 
 class EPPClient
   class AFNIC < EPPClient
+    HG_KEYWORD << %q$Abso$
+
     SCHEMAS_AFNIC = %w[
       frnic-1.0
     ]

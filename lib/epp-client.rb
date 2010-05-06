@@ -14,13 +14,13 @@ require 'epp-client/ssl'
 require 'epp-client/domain'
 
 class EPPClient
+  HG_KEYWORD = [%q$Abso$]
+
   include XML
   include Session
   include Connection
   include SSL
   include Domain
-
-  HG_KEYWORD = %w$Abso$
 
   SCHEMAS = %w[
     epp-1.0
