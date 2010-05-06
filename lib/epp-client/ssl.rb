@@ -40,8 +40,8 @@ class EPPClient
     end
 
     def open_connection_with_ssl
-      @context.cert = ssl_cert if ssl_cert.is_a?(OpenSSL::X509::Certificate)
-      @context.key = ssl_key if ssl_key.is_a?(OpenSSL::PKey::RSA)
+      @context.cert ||= ssl_cert if ssl_cert.is_a?(OpenSSL::X509::Certificate)
+      @context.key ||= ssl_key if ssl_key.is_a?(OpenSSL::PKey::RSA)
       open_connection_without_ssl
     end
   end
