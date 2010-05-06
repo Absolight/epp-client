@@ -4,6 +4,7 @@ require 'openssl'
 require 'socket'
 require 'nokogiri'
 require 'builder'
+require 'date'
 
 require 'epp-client/xml'
 require 'epp-client/session'
