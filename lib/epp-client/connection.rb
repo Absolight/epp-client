@@ -42,6 +42,7 @@ class EPPClient
 
     # sends a frame
     def send_frame(xml)
+      puts parse_response(xml).to_s.gsub(/^/, '>> ') if $DEBUG
       @socket.write([xml.size + 4].pack("N") + xml)
     end
 
@@ -56,7 +57,9 @@ class EPPClient
 	end
       else
 	size = size.unpack('N')[0]
-	parse_response(@socket.read(size - 4))
+	response = parse_response(@socket.read(size - 4))
+	puts response.to_s.gsub(/^/, '<< ') if $DEBUG
+	response
       end
     end
   end
