@@ -29,6 +29,9 @@ class EPPClient
     contact-1.0
     secDNS-1.0
   ]
+  SCHEMAS_RGP = %w[
+    rgp-1.0
+  ]
 
   SCHEMAS_URL = SCHEMAS.inject({}) do |a,s|
     a[s.sub(/-1\.0$/, '')] = "urn:ietf:params:xml:ns:#{s}" if s =~ /-1\.0$/

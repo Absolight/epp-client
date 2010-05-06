@@ -14,7 +14,12 @@ class EPPClient
       a[s.sub(/-1\.0$/, '')] = "http://www.afnic.fr/xml/epp/#{s}" if s =~ /-1\.0$/
       a[s] = "http://www.afnic.fr/xml/epp/#{s}"
       a
+    end).merge!(SCHEMAS_RGP.inject({}) do |a,s|
+      a[s.sub(/-1\.0$/, '')] = "urn:ietf:params:xml:ns:#{s}" if s =~ /-1\.0$/
+      a[s] = "urn:ietf:params:xml:ns:#{s}"
+      a
     end)
+
 
     # Sets the default for AFNIC, that is, server and port, according to
     # AFNIC's documentation.
@@ -30,7 +35,7 @@ class EPPClient
       end
       args[:port] ||= 700
       super(args)
-      @extensions << SCHEMAS_URL['frnic']
+      @extensions << SCHEMAS_URL['frnic'] << SCHEMAS_URL['rgp']
     end
 
 
@@ -52,5 +57,18 @@ class EPPClient
     end
     alias_method :domain_check_process_without_afnic, :domain_check_process
     alias_method :domain_check_process, :domain_check_process_with_afnic
+
+    def domain_info_process_with_afnic(xml) #:nodoc:
+      ret = domain_info_process_without_afnic(xml)
+      if (rgp_status = xml.xpath('epp:extension/rgp:infData/rgp:rgpStatus', SCHEMAS_URL)).size > 0
+	ret[:status] += rgp_status.map {|s| s.attr('s')}
+      end
+      if (frnic_status = xml.xpath('epp:extension/frnic:ext/frnic:resData/frnic:infData/frnic:domain/frnic:status', SCHEMAS_URL)).size > 0
+	ret[:status] += frnic_status.map {|s| s.attr('s')}
+      end
+      ret
+    end
+    alias_method :domain_info_process_without_afnic, :domain_info_process
+    alias_method :domain_info_process, :domain_info_process_with_afnic
   end
 end
