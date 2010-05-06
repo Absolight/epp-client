@@ -86,7 +86,7 @@ class EPPClient
     @logged_in = false
   end
 
-  def clTRID
+  def clTRID # :nodoc:
     @clTRID_index += 1
     @clTRID + "-#{@clTRID_index}"
   end
