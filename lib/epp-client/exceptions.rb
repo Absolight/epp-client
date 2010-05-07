@@ -10,11 +10,11 @@ class EPPClient
       @message = attrs[:message]
     end
 
-    def to_s
+    def to_s #:nodoc:
       "#{@message} (code #{@response_code})"
     end
 
-    def inspect
+    def inspect #:nodoc:
       "#<#{self.class}: code: #{@response_code}, message: #{@message.inspect}, xml: #{@response_xml}>"
     end
   end
