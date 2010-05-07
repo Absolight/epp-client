@@ -125,23 +125,15 @@ class EPPClient
       if (host = dom.xpath('domain:host', SCHEMAS_URL)).size > 0
 	ret[:host] = host.map {|h| h.text}
       end
-      if (clID = dom.xpath('domain:clID', SCHEMAS_URL)).size > 0
-	ret[:clID] = clID.text
+      %w(clID upID).each do |val|
+	if (r = dom.xpath("domain:#{val}", SCHEMAS_URL)).size > 0
+	  ret[val.to_sym] = r.text
+	end
       end
-      if (crDate = dom.xpath('domain:crDate', SCHEMAS_URL)).size > 0
-	ret[:crDate] = DateTime.parse(crDate.text)
-      end
-      if (exDate = dom.xpath('domain:exDate', SCHEMAS_URL)).size > 0
-	ret[:exDate] = DateTime.parse(exDate.text)
-      end
-      if (upID = dom.xpath('domain:upID', SCHEMAS_URL)).size > 0
-	ret[:upID] = upID.text
-      end
-      if (upDate = dom.xpath('domain:upDate', SCHEMAS_URL)).size > 0
-	ret[:upDate] = DateTime.parse(upDate.text)
-      end
-      if (trDate = dom.xpath('domain:trDate', SCHEMAS_URL)).size > 0
-	ret[:trDate] = DateTime.parse(trDate.text)
+      %w(crDate exDate upDate trDate).each do |val|
+	if (r = dom.xpath("domain:#{val}", SCHEMAS_URL)).size > 0
+	  ret[val.to_sym] = DateTime.parse(r.text)
+	end
       end
       if (authInfo = dom.xpath('domain:authInfo', SCHEMAS_URL)).size > 0
 	ret[:authInfo_pw] = authInfo.xpath('domain:pw', SCHEMAS_URL).text
