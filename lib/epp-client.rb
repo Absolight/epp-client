@@ -12,6 +12,7 @@ require 'epp-client/connection'
 require 'epp-client/exceptions'
 require 'epp-client/ssl'
 require 'epp-client/domain'
+require 'epp-client/contact'
 
 class EPPClient
   HG_KEYWORD = [%q$Abso$]
@@ -21,6 +22,7 @@ class EPPClient
   include Connection
   include SSL
   include Domain
+  include Contact
 
   SCHEMAS = %w[
     epp-1.0

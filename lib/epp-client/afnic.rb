@@ -70,5 +70,38 @@ class EPPClient
     end
     alias_method :domain_info_process_without_afnic, :domain_info_process
     alias_method :domain_info_process, :domain_info_process_with_afnic
+
+    def contact_info_process_with_afnic(xml) #:nodoc:
+      ret = contact_info_process_without_afnic(xml)
+      if (contact = xml.xpath('epp:extension/frnic:ext/frnic:resData/frnic:infData/frnic:contact', SCHEMAS_URL)).size > 0
+	if (list = contact.xpath('frnic:list', SCHEMAS_URL)).size > 0
+	  ret[:list] = list.map {|l| l.text}
+	end
+	if (firstName = contact.xpath('frnic:firstName', SCHEMAS_URL)).size > 0
+	  ret[:firstName] = firstName.text
+	end
+	if (iI = contact.xpath('frnic:individualInfos', SCHEMAS_URL)).size > 0
+	  ret[:individualInfos] = {}
+	  ret[:individualInfos][:birthDate] = Date.parse(iI.xpath('frnic:birthDate', SCHEMAS_URL).text)
+	  %w(idStatus birthCity birthPc birthCc).each do |val|
+	    if (r = iI.xpath("frnic:#{val}", SCHEMAS_URL)).size > 0
+	      ret[:individualInfos][val.to_sym] = r.text
+	    end
+	  end
+	end
+	if (leI = contact.xpath('frnic:legalEntityInfos', SCHEMAS_URL)).size > 0
+	  ret[:legalEntityInfos] = {}
+	  ret[:legalEntityInfos][:legalStatus] = leI.xpath('frnic:legalStatus', SCHEMAS_URL).attr('s').value
+	  %w(idStatus siren VAT trademark asso).each do |val|
+	    if (r = leI.xpath("frnic:#{val}", SCHEMAS_URL)).size > 0
+	      ret[:legalEntityInfos][val.to_sym] = r.text
+	    end
+	  end
+	end
+      end
+      ret
+    end
+    alias_method :contact_info_process_without_afnic, :contact_info_process
+    alias_method :contact_info_process, :contact_info_process_with_afnic
   end
 end

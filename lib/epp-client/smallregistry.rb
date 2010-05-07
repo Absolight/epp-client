@@ -46,5 +46,23 @@ class EPPClient
       super(attrs)
       @extensions << SCHEMAS_URL['sr']
     end
+
+    def contact_info_process_with_smallregistry(xml) #:nodoc:
+      ret = contact_info_process_without_smallregistry(xml)
+      if (contact = xml.xpath('epp:extension/sr:ext/sr:infData/sr:contact', SCHEMAS_URL)).size > 0
+	if (pP = contact.xpath('sr:physicalPerson', SCHEMAS_URL)).size > 0
+	  ret[:individualInfos] = {
+	    :birthDate => Date.parse(pP.xpath('sr:birthDate', SCHEMAS_URL).text),
+	    :birthPlace => pP.xpath('sr:birthPlace', SCHEMAS_URL).text,
+	  }
+	end
+	if (lE = contact.xpath('sr:legalEntity', SCHEMAS_URL)).size > 0
+	  ret[:legalEntity] = { :companySerial => lE.xpath('sr:companySerial', SCHEMAS_URL).text }
+	end
+      end
+      ret
+    end
+    alias_method :contact_info_process_without_smallregistry, :contact_info_process
+    alias_method :contact_info_process, :contact_info_process_with_smallregistry
   end
 end
