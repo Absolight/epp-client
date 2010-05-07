@@ -37,7 +37,7 @@ class EPPClient
     end
 
     def domain_check_process(xml) # :nodoc:
-      xml.xpath('epp:resData/domain:chkData/domain:cd', SCHEMAS_URL).inject([]) do |acc, dom|
+      xml.xpath('epp:resData/domain:chkData/domain:cd', SCHEMAS_URL).map do |dom|
 	ret = {
 	  :name => dom.xpath('domain:name', SCHEMAS_URL).text,
 	  :avail => dom.xpath('domain:name', SCHEMAS_URL).attr('avail').value == '1',
@@ -45,7 +45,7 @@ class EPPClient
 	unless (reason = dom.xpath('domain:reason', SCHEMAS_URL).text).empty?
 	  ret[:reason] = reason
 	end
-	acc << ret
+	ret
       end
     end
 
@@ -54,12 +54,12 @@ class EPPClient
 	xml.info do
 	  xml.info('xmlns' => SCHEMAS_URL['domain-1.0']) do
 	    xml.name(args[:name])
-	    unless args[:authinfo].nil?
+	    if args.key?(:authinfo)
 	      xml.authInfo do
-		if args[:roid].nil?
-		  xml.pw(args[:authinfo])
-		else
+		if args.key?(:roid)
 		  xml.pw({:roid => args[:roid]}, args[:authinfo])
+		else
+		  xml.pw(args[:authinfo])
 		end
 	      end
 	    end
