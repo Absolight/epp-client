@@ -46,9 +46,9 @@ class EPPClient
 	xml.info do
 	  xml.info('xmlns' => SCHEMAS_URL['contact-1.0']) do
 	    xml.id(args[:id])
-	    if args.key?(:authinfo)
+	    if args.key?(:authInfo)
 	      xml.authInfo do
-		xml.pw(args[:authinfo])
+		xml.pw(args[:authInfo])
 	      end
 	    end
 	  end
@@ -77,7 +77,7 @@ class EPPClient
 
       if (postalInfo = contact.xpath('contact:postalInfo', SCHEMAS_URL)).size > 0
 	ret[:postalInfo] = postalInfo.inject({}) do |acc, p|
-	  type = p.attr('type')
+	  type = p.attr('type').to_sym
 	  acc[type] = { :name => p.xpath('contact:name', SCHEMAS_URL).text, :addr => {} }
 	  if (org = p.xpath('contact:org', SCHEMAS_URL)).size > 0
 	    acc[type][:org] = org.text
@@ -109,7 +109,7 @@ class EPPClient
 	end
       end
       if (authInfo = contact.xpath('contact:authInfo', SCHEMAS_URL)).size > 0
-	ret[:authInfo_pw] = authInfo.xpath('contact:pw', SCHEMAS_URL).text
+	ret[:authInfo] = authInfo.xpath('contact:pw', SCHEMAS_URL).text
       end
       if (disclose = contact.xpath('contact:disclose', SCHEMAS_URL)).size > 0
 	ret[:disclose] = { :flag => disclose.attr('flag').value == '1', :elements => [] }
@@ -122,6 +122,68 @@ class EPPClient
 	end
       end
       ret
+    end
+
+    def contact_create_xml(contact)
+      command do |xml|
+	xml.create do
+	  xml.create('xmlns' => SCHEMAS_URL['contact-1.0']) do
+	    if contact.key?(:id)
+	      xml.id(contact[:id])
+	    else
+	      xml.id('invalid')
+	    end
+	    contact[:postalInfo].each do |type,infos|
+	      xml.postalInfo :type => type do
+		xml.name(infos[:name])
+		xml.org(infos[:org]) if infos.key?(:org)
+		xml.addr do
+		  infos[:addr][:street].each do |street|
+		    xml.street(street)
+		  end
+		  xml.city(infos[:addr][:city])
+		  [:sp, :pc].each do |val|
+		    xml.__send__(val, infos[:addr][val]) if infos[:addr].key?(val)
+		  end
+		  xml.cc(infos[:addr][:cc])
+		end
+	      end
+	    end
+	    [:voice, :fax].each do |val|
+	      xml.__send__(val, contact[val]) if contact.key?(val)
+	    end
+	    xml.email(contact[:email])
+	    xml.authInfo do
+	      xml.pw(contact[:authInfo])
+	    end
+	    if contact.key?(:disclose)
+	      xml.disclose do
+		contact[:disclose].each do |disc|
+		  if disc.key?(:type)
+		    xml.__send__(disc[:name], :type => disc[:type])
+		  else
+		    xml.__send__(disc[:name])
+		  end
+		end
+	      end
+	    end
+	  end
+	end
+      end
+    end
+
+    def contact_create(contact)
+      response = send_request(contact_create_xml(contact))
+
+      get_result(:xml => response, :callback => :contact_create_process)
+    end
+
+    def contact_create_process(xml)
+      contact = xml.xpath('epp:resData/contact:creData', SCHEMAS_URL)
+      {
+	:id => contact.xpath('contact:id', SCHEMAS_URL).text,
+	:crDate => DateTime.parse(contact.xpath('contact:crDate', SCHEMAS_URL).text),
+      }
     end
   end
 end

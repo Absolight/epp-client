@@ -28,7 +28,7 @@ class EPPClient
     # * <tt>:ssl_cert</tt> - The file containing the client certificate.
     # * <tt>:ssl_key</tt> - The file containing the key of the certificate.
     #
-    # ==== Optional Attributes 
+    # ==== Optional Attributes
     # * <tt>:test</tt> - sets the server to be the test server.
     #
     # See EPPClient for other attributes.
@@ -64,5 +64,32 @@ class EPPClient
     end
     alias_method :contact_info_process_without_smallregistry, :contact_info_process
     alias_method :contact_info_process, :contact_info_process_with_smallregistry
+
+    def contact_create_xml_with_smallregistry(contact) #:nodoc:
+      ret = contact_create_xml_without_smallregistry(contact)
+
+      ext = extension do |xml|
+	xml.ext( :xmlns => SCHEMAS_URL['sr']) do
+	  xml.create do
+	    xml.contact do
+	      if contact.key?(:org)
+		xml.org do
+		  xml.companySerial(contact[:org][:companySerial])
+		end
+	      elsif contact.key?(:person)
+		xml.person do
+		  xml.birthDate(contact[:person][:birthDate])
+		  xml.birthPlace(contact[:person][:birthPlace])
+		end
+	      end
+	    end
+	  end
+	end
+      end
+
+      insert_extension(ret, ext)
+    end
+    alias_method :contact_create_xml_without_smallregistry, :contact_create_xml
+    alias_method :contact_create_xml, :contact_create_xml_with_smallregistry
   end
 end

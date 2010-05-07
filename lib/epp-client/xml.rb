@@ -17,12 +17,18 @@ class EPPClient
       end
     end
 
+    def raw_builder(opts = {})
+      xml = Builder::XmlMarkup.new(opts)
+      yield xml
+    end
+
     # creates a Builder::XmlMarkup object, mostly only used by +command+
     def builder(opts = {})
-      xml = Builder::XmlMarkup.new(opts)
-      xml.instruct! :xml, :version =>"1.0", :encoding => "UTF-8"
-      xml.epp('xmlns' => SCHEMAS_URL['epp'], 'xmlns:epp' => SCHEMAS_URL['epp']) do
-	yield xml
+      raw_builder(opts) do |xml|
+	xml.instruct! :xml, :version =>"1.0", :encoding => "UTF-8"
+	xml.epp('xmlns' => SCHEMAS_URL['epp'], 'xmlns:epp' => SCHEMAS_URL['epp']) do
+	  yield xml
+	end
       end
     end
 
@@ -60,6 +66,18 @@ class EPPClient
 	  xml.clTRID(clTRID)
 	end
       end
+    end
+
+    def extension
+      raw_builder do |xml|
+	xml.extension do
+	  yield(xml)
+	end
+      end
+    end
+
+    def insert_extension(xml1, xml2, pattern = /<clTRID>/)
+      xml1.sub(pattern, "#{xml2}\\&")
     end
   end
 end

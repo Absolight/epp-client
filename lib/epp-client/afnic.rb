@@ -25,7 +25,7 @@ class EPPClient
     # AFNIC's documentation.
     # http://www.afnic.fr/doc/interface/epp
     #
-    # ==== Optional Attributes 
+    # ==== Optional Attributes
     # * <tt>:test</tt> - sets the server to be the test server.
     def initialize(args)
       if args.delete(:test) == true
@@ -92,9 +92,23 @@ class EPPClient
 	if (leI = contact.xpath('frnic:legalEntityInfos', SCHEMAS_URL)).size > 0
 	  ret[:legalEntityInfos] = {}
 	  ret[:legalEntityInfos][:legalStatus] = leI.xpath('frnic:legalStatus', SCHEMAS_URL).attr('s').value
-	  %w(idStatus siren VAT trademark asso).each do |val|
+	  %w(idStatus siren VAT trademark).each do |val|
 	    if (r = leI.xpath("frnic:#{val}", SCHEMAS_URL)).size > 0
 	      ret[:legalEntityInfos][val.to_sym] = r.text
+	    end
+	  end
+	  if (asso = leI.xpath("frnic:asso", SCHEMAS_URL)).size > 0
+	    ret[:legalEntityInfos][:asso] = {}
+	    if (r = asso.xpath("frnic:waldec", SCHEMAS_URL)).size > 0
+	      ret[:legalEntityInfos][:asso][:waldec] = r.text
+	    else
+	      ret[:legalEntityInfos][:asso][:decl] = Date.parse(asso.xpath('frnic:decl', SCHEMAS_URL).text)
+	      publ = asso.xpath('frnic:publ', SCHEMAS_URL)
+	      ret[:legalEntityInfos][:asso][:publ] = {
+		:date => Date.parse(publ.text),
+		:announce => publ.attr('announce').value,
+		:page => publ.attr('page').value,
+	      }
 	    end
 	  end
 	end
@@ -103,5 +117,76 @@ class EPPClient
     end
     alias_method :contact_info_process_without_afnic, :contact_info_process
     alias_method :contact_info_process, :contact_info_process_with_afnic
+
+    def contact_create_xml_with_afnic(contact) #:nodoc:
+      ret = contact_create_xml_without_afnic(contact)
+
+      ext = extension do |xml|
+	xml.ext( :xmlns => SCHEMAS_URL['frnic']) do
+	  xml.create do
+	    xml.contact do
+	      if contact.key?(:legalEntityInfos)
+		lEI = contact[:legalEntityInfos]
+		xml.legalEntityInfos do
+		  xml.legalStatus(:s => lEI[:legalStatus])
+		  [:siren, :VAT, :trademark].each do |val|
+		    if lEI.key?(val)
+		      xml.__send__(val, lEI[val])
+		    end
+		  end
+		  if lEI.key?(:asso)
+		    asso = lEI[:asso]
+		    xml.asso do
+		      if asso.key?(:waldec)
+			xml.waldec(asso[:waldec])
+		      else
+			xml.decl(asso[:decl])
+			xml.publ({:announce => asso[:publ][:announce], :page => asso[:publ][:page]}, asso[:publ][:date])
+		      end
+		    end
+		  end
+		end
+	      else
+		if contact.key?(:list)
+		  xml.list(contact[:list])
+		end
+		if contact.key?(:individualInfos)
+		  iI = contact[:individualInfos]
+		  xml.individualInfos do
+		    xml.birthDate(iI[:birthDate])
+		    if iI.key?(:birthCity)
+		      xml.birthCity(iI[:birthCity])
+		    end
+		    if iI.key?(:birthPc)
+		      xml.birthPc(iI[:birthPc])
+		    end
+		    xml.birthCc(iI[:birthCc])
+		  end
+		end
+		if contact.key?(:firstName)
+		  xml.firstName(contact[:firstName])
+		end
+	      end
+	    end
+	  end
+	end
+      end
+
+      insert_extension(ret, ext)
+    end
+    alias_method :contact_create_xml_without_afnic, :contact_create_xml
+    alias_method :contact_create_xml, :contact_create_xml_with_afnic
+
+    def contact_create_process_with_afnic(xml) #:nodoc:
+      ret = contact_create_process_without_afnic(xml)
+      if (creData = xml.xpath('epp:extension/frnic:ext/frnic:resData/frnic:creData', SCHEMAS_URL)).size > 0
+	ret[:nhStatus] = creData.xpath('frnic:nhStatus', SCHEMAS_URL).attr('new').value == '1'
+	ret[:idStatus] = creData.xpath('frnic:idStatus', SCHEMAS_URL).text
+      end
+      ret
+    end
+    alias_method :contact_create_process_without_afnic, :contact_create_process
+    alias_method :contact_create_process, :contact_create_process_with_afnic
+
   end
 end
