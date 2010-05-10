@@ -140,5 +140,75 @@ class EPPClient
       end
       return ret
     end
+
+    def domain_create_xml(args) #:nodoc:
+      command do |xml|
+	xml.create do
+	  xml.create('xmlns' => SCHEMAS_URL['domain-1.0']) do
+	    xml.name args[:name]
+
+	    if args.key?(:period)
+	      xml.period({:unit => args[:period][:unit]}, args[:period][:number])
+	    end
+
+	    if args.key?(:ns)
+	      xml.ns do
+		if args[:ns].first.is_a?(Hash)
+		  args[:ns].each do |ns|
+		    xml.hostAttr do
+		      xml.hostName ns[:hostName]
+		      if ns.key?(:hostAddrv4)
+			ns[:hostAddrv4].each do |v4|
+			  xml.hostAddr({:ip => :v4}, v4)
+			end
+		      end
+		      if ns.key?(:hostAddrv6)
+			ns[:hostAddrv6].each do |v6|
+			  xml.hostAddr({:ip => :v6}, v6)
+			end
+		      end
+		    end
+		  end
+		else
+		  args[:ns].each do |ns|
+		    xml.hostObj ns
+		  end
+		end
+	      end
+	    end
+
+	    xml.registrant args[:registrant] if args.key?(:registrant)
+
+	    if args.key?(:contacts)
+	      args[:contacts].each do |type,contacts|
+		contacts.each do |c|
+		  xml.contact({:type => type}, c)
+		end
+	      end
+	    end
+
+	    xml.authInfo do
+	      xml.pw args[:authInfo]
+	    end
+	  end
+	end
+      end
+    end
+
+    # Creates a domain
+    def domain_create(args)
+      response = send_request(domain_create_xml(args))
+
+      get_result(:xml => response, :callback => :domain_create_process)
+    end
+
+    def domain_create_process(xml) #:nodoc:
+      dom = xml.xpath('epp:resData/domain:creData', SCHEMAS_URL)
+      ret = {
+	:name => dom.xpath('domain:name', SCHEMAS_URL),
+	:crDate => DateTime.parse(dom.xpath('domain:crDate', SCHEMAS_URL).text),
+	:upDate => DateTime.parse(dom.xpath('domain:crDate', SCHEMAS_URL).text),
+      }
+    end
   end
 end
