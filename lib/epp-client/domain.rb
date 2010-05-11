@@ -205,7 +205,7 @@ class EPPClient
     def domain_create_process(xml) #:nodoc:
       dom = xml.xpath('epp:resData/domain:creData', SCHEMAS_URL)
       ret = {
-	:name => dom.xpath('domain:name', SCHEMAS_URL),
+	:name => dom.xpath('domain:name', SCHEMAS_URL).text,
 	:crDate => DateTime.parse(dom.xpath('domain:crDate', SCHEMAS_URL).text),
 	:upDate => DateTime.parse(dom.xpath('domain:crDate', SCHEMAS_URL).text),
       }
