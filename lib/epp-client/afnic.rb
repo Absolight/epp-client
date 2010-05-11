@@ -39,8 +39,8 @@ class EPPClient
     end
 
 
-    def domain_check_process_with_afnic(xml) # :nodoc:
-      ret = domain_check_process_without_afnic(xml)
+    def domain_check_process(xml) # :nodoc:
+      ret = super
       xml.xpath('epp:extension/frnic:ext/frnic:resData/frnic:chkData/frnic:domain/frnic:cd', SCHEMAS_URL).each do |dom|
 	name = dom.xpath('frnic:name', SCHEMAS_URL)
 	hash = ret.select {|d| d[:name] == name.text}.first
@@ -55,11 +55,9 @@ class EPPClient
       end
       return ret
     end
-    alias_method :domain_check_process_without_afnic, :domain_check_process
-    alias_method :domain_check_process, :domain_check_process_with_afnic
 
-    def domain_info_process_with_afnic(xml) #:nodoc:
-      ret = domain_info_process_without_afnic(xml)
+    def domain_info_process(xml) #:nodoc:
+      ret = super
       if (rgp_status = xml.xpath('epp:extension/rgp:infData/rgp:rgpStatus', SCHEMAS_URL)).size > 0
 	ret[:status] += rgp_status.map {|s| s.attr('s')}
       end
@@ -68,11 +66,9 @@ class EPPClient
       end
       ret
     end
-    alias_method :domain_info_process_without_afnic, :domain_info_process
-    alias_method :domain_info_process, :domain_info_process_with_afnic
 
-    def contact_info_process_with_afnic(xml) #:nodoc:
-      ret = contact_info_process_without_afnic(xml)
+    def contact_info_process(xml) #:nodoc:
+      ret = super
       if (contact = xml.xpath('epp:extension/frnic:ext/frnic:resData/frnic:infData/frnic:contact', SCHEMAS_URL)).size > 0
 	if (list = contact.xpath('frnic:list', SCHEMAS_URL)).size > 0
 	  ret[:list] = list.map {|l| l.text}
@@ -115,11 +111,9 @@ class EPPClient
       end
       ret
     end
-    alias_method :contact_info_process_without_afnic, :contact_info_process
-    alias_method :contact_info_process, :contact_info_process_with_afnic
 
-    def contact_create_xml_with_afnic(contact) #:nodoc:
-      ret = contact_create_xml_without_afnic(contact)
+    def contact_create_xml(contact) #:nodoc:
+      ret = super
 
       ext = extension do |xml|
 	xml.ext( :xmlns => SCHEMAS_URL['frnic']) do
@@ -174,19 +168,15 @@ class EPPClient
 
       insert_extension(ret, ext)
     end
-    alias_method :contact_create_xml_without_afnic, :contact_create_xml
-    alias_method :contact_create_xml, :contact_create_xml_with_afnic
 
-    def contact_create_process_with_afnic(xml) #:nodoc:
-      ret = contact_create_process_without_afnic(xml)
+    def contact_create_process(xml) #:nodoc:
+      ret = super
       if (creData = xml.xpath('epp:extension/frnic:ext/frnic:resData/frnic:creData', SCHEMAS_URL)).size > 0
 	ret[:nhStatus] = creData.xpath('frnic:nhStatus', SCHEMAS_URL).attr('new').value == '1'
 	ret[:idStatus] = creData.xpath('frnic:idStatus', SCHEMAS_URL).text
       end
       ret
     end
-    alias_method :contact_create_process_without_afnic, :contact_create_process
-    alias_method :contact_create_process, :contact_create_process_with_afnic
 
   end
 end

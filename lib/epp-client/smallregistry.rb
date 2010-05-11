@@ -47,8 +47,8 @@ class EPPClient
       @extensions << SCHEMAS_URL['sr']
     end
 
-    def contact_info_process_with_smallregistry(xml) #:nodoc:
-      ret = contact_info_process_without_smallregistry(xml)
+    def contact_info_process(xml) #:nodoc:
+      ret = super
       if (contact = xml.xpath('epp:extension/sr:ext/sr:infData/sr:contact', SCHEMAS_URL)).size > 0
 	if (person = contact.xpath('sr:person', SCHEMAS_URL)).size > 0
 	  ret[:person] = {
@@ -62,11 +62,9 @@ class EPPClient
       end
       ret
     end
-    alias_method :contact_info_process_without_smallregistry, :contact_info_process
-    alias_method :contact_info_process, :contact_info_process_with_smallregistry
 
-    def contact_create_xml_with_smallregistry(contact) #:nodoc:
-      ret = contact_create_xml_without_smallregistry(contact)
+    def contact_create_xml(contact) #:nodoc:
+      ret = super
 
       ext = extension do |xml|
 	xml.ext( :xmlns => SCHEMAS_URL['sr']) do
@@ -89,7 +87,5 @@ class EPPClient
 
       insert_extension(ret, ext)
     end
-    alias_method :contact_create_xml_without_smallregistry, :contact_create_xml
-    alias_method :contact_create_xml, :contact_create_xml_with_smallregistry
   end
 end
