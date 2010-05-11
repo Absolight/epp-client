@@ -79,7 +79,7 @@ class EPPClient
 	    raise ArgumentError, "Invalid callback type"
 	  end
 	else
-	  return xml
+	  return true
 	end
       else
 	raise EPPErrorResponse.new(:xml => xml, :code => code, :message => res.xpath('epp:msg', SCHEMAS_URL).text)
