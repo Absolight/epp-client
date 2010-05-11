@@ -178,5 +178,10 @@ class EPPClient
       ret
     end
 
+    def domain_create(args)
+      raise ArgumentError, "You can't create a domain with ns records, you must do an update afterwards" if args.key?(:ns)
+      super
+    end
+
   end
 end
