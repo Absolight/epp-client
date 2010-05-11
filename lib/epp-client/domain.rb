@@ -54,12 +54,12 @@ class EPPClient
 	xml.info do
 	  xml.info('xmlns' => SCHEMAS_URL['domain-1.0']) do
 	    xml.name(args[:name])
-	    if args.key?(:authinfo)
+	    if args.key?(:authInfo)
 	      xml.authInfo do
 		if args.key?(:roid)
-		  xml.pw({:roid => args[:roid]}, args[:authinfo])
+		  xml.pw({:roid => args[:roid]}, args[:authInfo])
 		else
-		  xml.pw(args[:authinfo])
+		  xml.pw(args[:authInfo])
 		end
 	      end
 	    end
@@ -72,8 +72,8 @@ class EPPClient
     #
     # Takes either a unique argument, a string, representing the domain, or a
     # hash with : <tt>:name</tt> the domain name, and optionnaly
-    # <tt>:authinfo</tt> the authentication information and possibly
-    # <tt>:roid</tt> the contact the authinfo is about.
+    # <tt>:authInfo</tt> the authentication information and possibly
+    # <tt>:roid</tt> the contact the authInfo is about.
     #
     # Returned is a hash mapping as closely as possible the result expected
     # from the command as per Section 3.1.2 of RFC 5731
@@ -136,7 +136,7 @@ class EPPClient
 	end
       end
       if (authInfo = dom.xpath('domain:authInfo', SCHEMAS_URL)).size > 0
-	ret[:authInfo_pw] = authInfo.xpath('domain:pw', SCHEMAS_URL).text
+	ret[:authInfo] = authInfo.xpath('domain:pw', SCHEMAS_URL).text
       end
       return ret
     end
