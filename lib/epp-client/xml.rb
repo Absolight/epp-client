@@ -3,12 +3,27 @@
 class EPPClient
   module XML
 
+    attr_reader :sent_xml, :recv_xml
+
     # Parses a frame and returns a Nokogiri::XML::Document.
-    def parse_response(frame)
-      Nokogiri::XML::Document.parse(frame) do |opts|
+    def parse_xml(string) #:doc:
+      Nokogiri::XML::Document.parse(string) do |opts|
 	opts.options = 0
 	opts.noblanks
       end
+    end
+    private :parse_xml
+
+    def recv_frame_to_xml #:nodoc:
+      @recv_xml = parse_xml(@recv_frame)
+      puts @recv_xml.to_s.gsub(/^/, '<< ') if $DEBUG
+      return @recv_xml
+    end
+
+    def sent_frame_to_xml #:nodoc:
+      @send_xml = parse_xml(@sent_frame)
+      puts @send_xml.to_s.gsub(/^/, '>> ') if $DEBUG
+      return @send_xml
     end
 
     def raw_builder(opts = {}) #:nodoc:

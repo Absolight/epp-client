@@ -3,6 +3,8 @@
 class EPPClient
   module Connection
 
+    attr_reader :sent_frame, :recv_frame
+
     # Establishes the connection to the server, if successful, will return the
     # greeting frame.
     def open_connection
@@ -42,8 +44,10 @@ class EPPClient
 
     # sends a frame
     def send_frame(xml)
-      puts parse_response(xml).to_s.gsub(/^/, '>> ') if $DEBUG
+      @sent_frame = xml
       @socket.write([xml.size + 4].pack("N") + xml)
+      sent_frame_to_xml
+      return
     end
 
     # gets a frame from the socket and returns the parsed response.
@@ -57,9 +61,8 @@ class EPPClient
 	end
       else
 	size = size.unpack('N')[0]
-	response = parse_response(@socket.read(size - 4))
-	puts response.to_s.gsub(/^/, '<< ') if $DEBUG
-	response
+	@recv_frame = @socket.read(size - 4)
+	recv_frame_to_xml
       end
     end
   end
