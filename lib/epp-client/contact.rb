@@ -84,16 +84,16 @@ class EPPClient
     #   information. The value is a hash with the following keys :
     #   [<tt>:name</tt>]
     #     the name of the individual or role represented by the contact.
-    #	[<tt>:org</tt>]
-    #	  the name of the organization with which the contact is affiliated.
-    #	[<tt>:addr</tt>]
-    #	  a hash with the following keys :
-    #	  [<tt>:street</tt>]
-    #	    an array that contains the contact's street address.
-    #	  [<tt>:city</tt>] the contact's city.
-    #	  [<tt>:sp</tt>] the contact's state or province.
-    #	  [<tt>:pc</tt>] the contact's postal code.
-    #	  [<tt>:cc</tt>] the contact's country code.
+    #   [<tt>:org</tt>]
+    #     the name of the organization with which the contact is affiliated.
+    #   [<tt>:addr</tt>]
+    #     a hash with the following keys :
+    #     [<tt>:street</tt>]
+    #       an array that contains the contact's street address.
+    #     [<tt>:city</tt>] the contact's city.
+    #     [<tt>:sp</tt>] the contact's state or province.
+    #     [<tt>:pc</tt>] the contact's postal code.
+    #     [<tt>:cc</tt>] the contact's country code.
     # [<tt>:voice</tt>] the contact's optional voice telephone number.
     # [<tt>:fax</tt>] the contact's optional facsimile telephone number.
     # [<tt>:email</tt>] the contact's email address.
@@ -247,16 +247,16 @@ class EPPClient
     #   information. The value is a hash with the following keys :
     #   [<tt>:name</tt>]
     #     the name of the individual or role represented by the contact.
-    #	[<tt>:org</tt>]
-    #	  the name of the organization with which the contact is affiliated.
-    #	[<tt>:addr</tt>]
-    #	  a hash with the following keys :
-    #	  [<tt>:street</tt>]
-    #	    an array that contains the contact's street address.
-    #	  [<tt>:city</tt>] the contact's city.
-    #	  [<tt>:sp</tt>] the contact's state or province.
-    #	  [<tt>:pc</tt>] the contact's postal code.
-    #	  [<tt>:cc</tt>] the contact's country code.
+    #   [<tt>:org</tt>]
+    #     the name of the organization with which the contact is affiliated.
+    #   [<tt>:addr</tt>]
+    #     a hash with the following keys :
+    #     [<tt>:street</tt>]
+    #       an array that contains the contact's street address.
+    #     [<tt>:city</tt>] the contact's city.
+    #     [<tt>:sp</tt>] the contact's state or province.
+    #     [<tt>:pc</tt>] the contact's postal code.
+    #     [<tt>:cc</tt>] the contact's country code.
     # [<tt>:voice</tt>] the contact's optional voice telephone number.
     # [<tt>:fax</tt>] the contact's optional facsimile telephone number.
     # [<tt>:email</tt>] the contact's email address.

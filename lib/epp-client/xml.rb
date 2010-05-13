@@ -54,10 +54,10 @@ class EPPClient
     # or
     #
     #   command(lambda do |xml|
-    #	    xml.logout
-    #	  end, lambda do |xml|
-    #	    xml.extension
-    #	  end)
+    #       xml.logout
+    #     end, lambda do |xml|
+    #       xml.extension
+    #     end)
     def command(*args, &block)
       builder do |xml|
 	xml.command do

@@ -86,37 +86,37 @@ class EPPClient
     #
     # either :
     # [<tt>:legalEntityInfos</tt>]
-    #	indicating that the contact is an organisation with the following
-    #	informations :
-    #	[<tt>:legalStatus</tt>]
-    #	  should be either +company+, +association+ or +other+.
-    #	[<tt>:idStatus</tt>] indicates the identification process status.
-    #	[<tt>:siren</tt>] contains the SIREN number of the organisation.
-    #	[<tt>:VAT</tt>]
-    #	  is optional and contains the VAT number of the organisation.
-    #	[<tt>:trademark</tt>]
-    #	  is optional and contains the trademark number of the organisation.
-    #	[<tt>:asso</tt>]
-    #	  indicates the organisation is an association and contains either a
-    #	  +waldec+ or a +decl+ and a +publ+ :
-    #	  [<tt>:waldec</tt>] contains the waldec id of the association.
-    #	  [<tt>:decl</tt>]
-    #	    indicate the date of the association was declared at the
-    #	    prefecture.
-    #	  [<tt>:publ</tt>]
-    #	    contains informations regarding the publication in the "Journal
-    #	    Officiel" :
-    #	    [<tt>:date</tt>] the date of publication.
-    #	    [<tt>:page</tt>] the page the announce is on.
-    #	    [<tt>:announce</tt>] the announce number on the page.
+    #   indicating that the contact is an organisation with the following
+    #   informations :
+    #   [<tt>:legalStatus</tt>]
+    #     should be either +company+, +association+ or +other+.
+    #   [<tt>:idStatus</tt>] indicates the identification process status.
+    #   [<tt>:siren</tt>] contains the SIREN number of the organisation.
+    #   [<tt>:VAT</tt>]
+    #     is optional and contains the VAT number of the organisation.
+    #   [<tt>:trademark</tt>]
+    #     is optional and contains the trademark number of the organisation.
+    #   [<tt>:asso</tt>]
+    #     indicates the organisation is an association and contains either a
+    #     +waldec+ or a +decl+ and a +publ+ :
+    #     [<tt>:waldec</tt>] contains the waldec id of the association.
+    #     [<tt>:decl</tt>]
+    #       indicate the date of the association was declared at the
+    #       prefecture.
+    #     [<tt>:publ</tt>]
+    #       contains informations regarding the publication in the "Journal
+    #       Officiel" :
+    #       [<tt>:date</tt>] the date of publication.
+    #       [<tt>:page</tt>] the page the announce is on.
+    #       [<tt>:announce</tt>] the announce number on the page.
     # [<tt>:individualInfos</tt>]
     #   indicating that the contact is a person with the following
     #   informations :
-    #	[<tt>:idStatus</tt>] indicates the identification process status.
-    #	[<tt>:birthDate</tt>] the date of birth of the contact.
-    #	[<tt>:birthCity</tt>] the city of birth of the contact.
-    #	[<tt>:birthPc</tt>] the postal code of the city of birth.
-    #	[<tt>:birthCc</tt>] the country code of the place of birth.
+    #   [<tt>:idStatus</tt>] indicates the identification process status.
+    #   [<tt>:birthDate</tt>] the date of birth of the contact.
+    #   [<tt>:birthCity</tt>] the city of birth of the contact.
+    #   [<tt>:birthPc</tt>] the postal code of the city of birth.
+    #   [<tt>:birthCc</tt>] the country code of the place of birth.
     #
     # Additionnaly, when the contact is a person, there can be the following
     # informations :
@@ -124,8 +124,8 @@ class EPPClient
     #   the first name of the person. (The last name being stored in the +name+
     #   field in the +postalInfo+.)
     # [<tt>:list</tt>]
-    #	with the value of +restrictedPublication+ mean that the element
-    #	diffusion should be restricted.
+    #   with the value of +restrictedPublication+ mean that the element
+    #   diffusion should be restricted.
     def contact_info(contact)
       super # placeholder so that I can add some doc
     end
@@ -237,35 +237,35 @@ class EPPClient
     #
     # either :
     # [<tt>:legalEntityInfos</tt>]
-    #	indicating that the contact is an organisation with the following
-    #	informations :
-    #	[<tt>:legalStatus</tt>]
-    #	  should be either +company+, +association+ or +other+.
-    #	[<tt>:siren</tt>] contains the SIREN number of the organisation.
-    #	[<tt>:VAT</tt>]
-    #	  is optional and contains the VAT number of the organisation.
-    #	[<tt>:trademark</tt>]
-    #	  is optional and contains the trademark number of the organisation.
-    #	[<tt>:asso</tt>]
-    #	  indicates the organisation is an association and contains either a
-    #	  +waldec+ or a +decl+ and a +publ+ :
-    #	  [<tt>:waldec</tt>] contains the waldec id of the association.
-    #	  [<tt>:decl</tt>]
-    #	    indicate the date of the association was declared at the
-    #	    prefecture.
-    #	  [<tt>:publ</tt>]
-    #	    contains informations regarding the publication in the "Journal
-    #	    Officiel" :
-    #	    [<tt>:date</tt>] the date of publication.
-    #	    [<tt>:page</tt>] the page the announce is on.
-    #	    [<tt>:announce</tt>] the announce number on the page.
+    #   indicating that the contact is an organisation with the following
+    #   informations :
+    #   [<tt>:legalStatus</tt>]
+    #     should be either +company+, +association+ or +other+.
+    #   [<tt>:siren</tt>] contains the SIREN number of the organisation.
+    #   [<tt>:VAT</tt>]
+    #     is optional and contains the VAT number of the organisation.
+    #   [<tt>:trademark</tt>]
+    #     is optional and contains the trademark number of the organisation.
+    #   [<tt>:asso</tt>]
+    #     indicates the organisation is an association and contains either a
+    #     +waldec+ or a +decl+ and a +publ+ :
+    #     [<tt>:waldec</tt>] contains the waldec id of the association.
+    #     [<tt>:decl</tt>]
+    #       indicate the date of the association was declared at the
+    #       prefecture.
+    #     [<tt>:publ</tt>]
+    #       contains informations regarding the publication in the "Journal
+    #       Officiel" :
+    #       [<tt>:date</tt>] the date of publication.
+    #       [<tt>:page</tt>] the page the announce is on.
+    #       [<tt>:announce</tt>] the announce number on the page.
     # [<tt>:individualInfos</tt>]
     #   indicating that the contact is a person with the following
     #   informations :
-    #	[<tt>:birthDate</tt>] the date of birth of the contact.
-    #	[<tt>:birthCity</tt>] the city of birth of the contact.
-    #	[<tt>:birthPc</tt>] the postal code of the city of birth.
-    #	[<tt>:birthCc</tt>] the country code of the place of birth.
+    #   [<tt>:birthDate</tt>] the date of birth of the contact.
+    #   [<tt>:birthCity</tt>] the city of birth of the contact.
+    #   [<tt>:birthPc</tt>] the postal code of the city of birth.
+    #   [<tt>:birthCc</tt>] the country code of the place of birth.
     #
     # Additionnaly, when the contact is a person, there can be the following
     # informations :
@@ -273,8 +273,8 @@ class EPPClient
     #   the first name of the person. (The last name being stored in the +name+
     #   field in the +postalInfo+.)
     # [<tt>:list</tt>]
-    #	with the value of +restrictedPublication+ mean that the element
-    #	diffusion should be restricted.
+    #   with the value of +restrictedPublication+ mean that the element
+    #   diffusion should be restricted.
     #
     # The returned information contains new keys :
     # [<tt>:idStatus</tt>]
@@ -343,15 +343,15 @@ class EPPClient
     # informations can be sent, the additionnal informations are :
     #
     # [<tt>:add</tt>]
-    #	add the following datas :
+    #   add the following datas :
     #   [<tt>:list</tt>]
-    #	  with the value of +restrictedPublication+ mean that the element
-    #	  diffusion should be restricted.
+    #     with the value of +restrictedPublication+ mean that the element
+    #     diffusion should be restricted.
     # [<tt>:rem</tt>]
-    #	removes the following datas :
+    #   removes the following datas :
     #   [<tt>:list</tt>]
-    #	  with the value of +restrictedPublication+ mean that the element
-    #	  diffusion should not be restricted any more.
+    #     with the value of +restrictedPublication+ mean that the element
+    #     diffusion should not be restricted any more.
     #
     def contact_update(args)
       super # placeholder so that I can add some doc

@@ -51,10 +51,10 @@ class EPPClient
     #
     # one of :
     # [<tt>:org</tt>]
-    #	indicating that the contact is an organisation with the following
-    #	informations :
-    #	[<tt>:companySerial</tt>]
-    #	  the company's SIREN / RPPS / whatever serial number is required.
+    #   indicating that the contact is an organisation with the following
+    #   informations :
+    #   [<tt>:companySerial</tt>]
+    #     the company's SIREN / RPPS / whatever serial number is required.
     # [<tt>:person</tt>]
     #   indicating that the contact is a human person with the following
     #   informations :
@@ -85,10 +85,10 @@ class EPPClient
     #
     # one of :
     # [<tt>:org</tt>]
-    #	indicating that the contact is an organisation with the following
-    #	informations :
-    #	[<tt>:companySerial</tt>]
-    #	  the company's SIREN / RPPS / whatever serial number is required.
+    #   indicating that the contact is an organisation with the following
+    #   informations :
+    #   [<tt>:companySerial</tt>]
+    #     the company's SIREN / RPPS / whatever serial number is required.
     # [<tt>:person</tt>]
     #   indicating that the contact is a human person with the following
     #   informations :
@@ -156,7 +156,7 @@ class EPPClient
     # informations can be sent, the additionnal informations are :
     #
     # [<tt>:chg</tt>]
-    #	changes one of :
+    #   changes one of :
     #   [<tt>:org</tt>]
     #     indicating that the contact is an organisation with the following
     #     informations :
