@@ -342,16 +342,11 @@ class EPPClient
     # Extends the base contact update so that the specific afnic update
     # informations can be sent, the additionnal informations are :
     #
-    # [<tt>:add</tt>]
-    #   add the following datas :
+    # [<tt>:add</tt>/<tt>:rem</tt>]
+    #   adds or removes the following datas :
     #   [<tt>:list</tt>]
     #     with the value of +restrictedPublication+ mean that the element
-    #     diffusion should be restricted.
-    # [<tt>:rem</tt>]
-    #   removes the following datas :
-    #   [<tt>:list</tt>]
-    #     with the value of +restrictedPublication+ mean that the element
-    #     diffusion should not be restricted any more.
+    #     diffusion should/should not be restricted.
     #
     def contact_update(args)
       super # placeholder so that I can add some doc

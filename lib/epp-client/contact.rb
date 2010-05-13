@@ -379,12 +379,9 @@ class EPPClient
     # Takes a hash with the id, and at least one of the following keys :
     # [<tt>:id</tt>]
     #   the server-unique identifier of the contact object to be updated.
-    # [<tt>:add</tt>]
-    #   adds the following data to the contact object :
-    #   [<tt>:status</tt>] an array of status to add to the object.
-    # [<tt>:rem</tt>]
-    #   removes the following data from the contact object :
-    #   [<tt>:status</tt>] an array of status to remove from the object.
+    # [<tt>:add</tt>/<tt>:rem</tt>]
+    #   adds or removes the following data from the contact object :
+    #   [<tt>:status</tt>] an array of status to add to/remove from the object.
     # [<tt>:chg</tt>]
     #   changes the datas of the contact object, takes the same arguments as
     #   the creation of the contact, except the id, with the small change that
