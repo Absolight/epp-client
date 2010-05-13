@@ -96,13 +96,13 @@ class EPPClient
     #    an optionnal array of fully qualified names of the subordinate host
     #    objects that exist under this superordinate domain object.
     # [<tt>:clID</tt>] the identifier of the sponsoring client.
-    # [<tt>crID</tt>]
+    # [<tt>:crID</tt>]
     #   an optional identifier of the client that created the domain object.
     # [<tt>:crDate</tt>] an optional date and time of domain object creation.
     # [<tt>:exDate</tt>]
     #   the date and time identifying the end of the domain object's
     #   registration period.
-    # [<tt>upID</tt>]
+    # [<tt>:upID</tt>]
     #   the identifier of the client that last updated the domain object.
     # [<tt>:upDate</tt>]
     #   the date and time of the most recent domain-object modification.
@@ -174,6 +174,40 @@ class EPPClient
       return ret
     end
 
+    def domain_nss_xml(xml, nss)
+      xml.ns do
+	if nss.first.is_a?(Hash)
+	  nss.each do |ns|
+	    xml.hostAttr do
+	      xml.hostName ns[:hostName]
+	      if ns.key?(:hostAddrv4)
+		ns[:hostAddrv4].each do |v4|
+		  xml.hostAddr({:ip => :v4}, v4)
+		end
+	      end
+	      if ns.key?(:hostAddrv6)
+		ns[:hostAddrv6].each do |v6|
+		  xml.hostAddr({:ip => :v6}, v6)
+		end
+	      end
+	    end
+	  end
+	else
+	  nss.each do |ns|
+	    xml.hostObj ns
+	  end
+	end
+      end
+    end
+
+    def domain_contacts_xml(xml, args)
+      args.each do |type,contacts|
+	contacts.each do |c|
+	  xml.contact({:type => type}, c)
+	end
+      end
+    end
+
     def domain_create_xml(args) #:nodoc:
       command do |xml|
 	xml.create do
@@ -185,39 +219,13 @@ class EPPClient
 	    end
 
 	    if args.key?(:ns)
-	      xml.ns do
-		if args[:ns].first.is_a?(Hash)
-		  args[:ns].each do |ns|
-		    xml.hostAttr do
-		      xml.hostName ns[:hostName]
-		      if ns.key?(:hostAddrv4)
-			ns[:hostAddrv4].each do |v4|
-			  xml.hostAddr({:ip => :v4}, v4)
-			end
-		      end
-		      if ns.key?(:hostAddrv6)
-			ns[:hostAddrv6].each do |v6|
-			  xml.hostAddr({:ip => :v6}, v6)
-			end
-		      end
-		    end
-		  end
-		else
-		  args[:ns].each do |ns|
-		    xml.hostObj ns
-		  end
-		end
-	      end
+	      domain_nss_xml(xml, args[:ns])
 	    end
 
 	    xml.registrant args[:registrant] if args.key?(:registrant)
 
 	    if args.key?(:contacts)
-	      args[:contacts].each do |type,contacts|
-		contacts.each do |c|
-		  xml.contact({:type => type}, c)
-		end
-	      end
+	      domain_contacts_xml(xml, args[:contacts])
 	    end
 
 	    xml.authInfo do
@@ -291,6 +299,84 @@ class EPPClient
     # Returns true on success, or raises an exception.
     def domain_delete(domain)
       response = send_request(domain_delete_xml(domain))
+
+      get_result(response)
+    end
+
+    def domain_update_xml(args) #:nodoc:
+      command do |xml|
+	xml.update do
+	  xml.update('xmlns' => SCHEMAS_URL['domain-1.0']) do
+	    xml.name args[:name]
+	    [:add, :rem].each do |ar|
+	      if args.key?(ar) && (args[ar].key?(:ns) || args[ar].key?(:contacts) || args[ar].key?(:status))
+		xml.__send__(ar) do
+		  if args[ar].key?(:ns)
+		    domain_nss_xml(xml, args[ar][:ns])
+		  end
+		  if args[ar].key?(:contacts)
+		    domain_contacts_xml(xml, args[ar][:contacts])
+		  end
+		  if args[ar].key?(:status)
+		    args[ar][:status].each do |st,text|
+		      if text.nil?
+			xml.status(:s => st)
+		      else
+			xml.status({:s => st}, text)
+		      end
+		    end
+		  end
+		end
+	      end
+	    end
+	    if args.key?(:chg) && (args[:chg].key?(:registrant) || args[:chg].key?(:authInfo))
+	      xml.chg do
+		if args[:chg].key?(:registrant)
+		  xml.registrant args[:chg][:registrant]
+		end
+		if args[:chg].key?(:authInfo)
+		  xml.authInfo do
+		    xml.pw args[:chg][:authInfo]
+		  end
+		end
+	      end
+	    end
+	  end
+	end
+      end
+    end
+
+    # Updates a domain
+    #
+    # Takes a hash with the name, and at least one of the following keys :
+    # [<tt>:name</tt>]
+    #   the fully qualified name of the domain object to be updated.
+    # [<tt>:add</tt>/<tt>:rem</tt>]
+    #   adds / removes the following data to/from the domain object :
+    #   [<tt>:ns</tt>]
+    #     an optional array containing nameservers informations, which can either
+    #     be an array of strings containing the nameserver's hostname, or an
+    #     array of hashes containing the following keys :
+    #     [<tt>:hostName</tt>] the hostname of the nameserver.
+    #     [<tt>:hostAddrv4</tt>] an optionnal array of ipv4 addresses.
+    #     [<tt>:hostAddrv6</tt>] an optionnal array of ipv6 addresses.
+    #   [<tt>:contacts</tt>]
+    #     an optionnal hash which keys are choosen between +admin+, +billing+ and
+    #     +tech+ and which values are arrays of nic handles for the corresponding
+    #     contact types.
+    #   [<tt>:status</tt>]
+    #     an optional hash with status values to be applied to or removed from
+    #     the object. When specifying a value to be removed, only the attribute
+    #     value is significant; element text is not required to match a value
+    #     for removal.
+    # [<tt>:chg</tt>]
+    #   changes the following in the domain object.
+    #   [<tt>:registrant</tt>] an optionnal registrant nic handle.
+    #   [<tt>:authInfo</tt>] an optional password associated with the domain.
+    #
+    # Returns true on success, or raises an exception.
+    def domain_update(args)
+      response = send_request(domain_update_xml(args))
 
       get_result(response)
     end

@@ -351,5 +351,32 @@ class EPPClient
     def contact_update(args)
       super # placeholder so that I can add some doc
     end
+
+    # Extends the base domain update so that afnic's weirdnesses can be taken
+    # into account.
+    #
+    # AFNIC does not support ns/hostObj, only ns/hostAttr/Host*, so, take care
+    # of this here.
+    # Also, you can only do one of the following at a time :
+    # * update contacts
+    # * update name servers
+    # * update status & authInfo
+    def domain_update(args)
+      if args.key?(:chg) && args[:chg].key?(:registrant)
+	raise ArgumentError, "You need to do a trade or recover operation to change the registrant"
+      end
+      has_contacts = args.key?(:add) && args[:add].key?(:contacts) || args.key?(:add) && args[:add].key?(:contacts)
+      has_ns = args.key?(:add) && args[:add].key?(:ns) || args.key?(:add) && args[:add].key?(:ns)
+      has_other = args.key?(:add) && args[:add].key?(:status) || args.key?(:add) && args[:add].key?(:status) || args.key?(:chg) && args[:chg].key?(:authInfo)
+      if [has_contacts, has_ns, has_other].select {|v| v}.size > 1
+	raise ArgumentError, "You can't update all that at one time"
+      end
+      [:add, :rem].each do |ar|
+	if args.key?(ar) && args[ar].key?(:ns) && String === args[ar][:ns].first
+	  args[ar][:ns] = args[ar][:ns].map {|ns| {:hostName => ns}}
+	end
+      end
+      super
+    end
   end
 end
