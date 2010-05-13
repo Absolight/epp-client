@@ -26,7 +26,7 @@ class EPPClient
     # http://www.afnic.fr/doc/interface/epp
     #
     # ==== Optional Attributes
-    # * <tt>:test</tt> - sets the server to be the test server.
+    # [<tt>:test</tt>] sets the server to be the test server.
     def initialize(args)
       if args.delete(:test) == true
 	args[:server] ||= 'epp.test.nic.fr'
@@ -38,6 +38,16 @@ class EPPClient
       @extensions << SCHEMAS_URL['frnic'] << SCHEMAS_URL['rgp']
     end
 
+    # Extends the base domain check so that the specific afnic check
+    # informations are processed, the additionnal informations are :
+    #
+    # [<tt>:reserved</tt>] the domain is a reserved name.
+    # [<tt>:rsvReason</tt>] the optional reason why the domain is reserved.
+    # [<tt>:forbidden</tt>] the domain is a forbidden name.
+    # [<tt>:fbdReason</tt>] the optional reason why the domain is forbidden.
+    def domain_check(*domains)
+      super # placeholder so that I can add some doc
+    end
 
     def domain_check_process(xml) # :nodoc:
       ret = super
@@ -56,6 +66,12 @@ class EPPClient
       return ret
     end
 
+    # Extends the base domain info so that the specific afnic <tt>:status</tt>
+    # can be added.
+    def domain_info(domain)
+      super # placeholder so that I can add some doc
+    end
+
     def domain_info_process(xml) #:nodoc:
       ret = super
       if (rgp_status = xml.xpath('epp:extension/rgp:infData/rgp:rgpStatus', SCHEMAS_URL)).size > 0
@@ -65,6 +81,55 @@ class EPPClient
 	ret[:status] += frnic_status.map {|s| s.attr('s')}
       end
       ret
+    end
+
+    # Extends the base contact info so that the specific afnic check
+    # informations are processed, the additionnal informations are :
+    #
+    # either :
+    # [<tt>:legalEntityInfos</tt>]
+    #	indicating that the contact is an organisation with the following
+    #	informations :
+    #	[<tt>:legalStatus</tt>]
+    #	  should be either +company+, +association+ or +other+.
+    #	[<tt>:idStatus</tt>] indicates the identification process status.
+    #	[<tt>:siren</tt>] contains the SIREN number of the organisation.
+    #	[<tt>:VAT</tt>]
+    #	  is optional and contains the VAT number of the organisation.
+    #	[<tt>:trademark</tt>]
+    #	  is optional and contains the trademark number of the organisation.
+    #	[<tt>:asso</tt>]
+    #	  indicates the organisation is an association and contains either a
+    #	  +waldec+ or a +decl+ and a +publ+ :
+    #	  [<tt>:waldec</tt>] contains the waldec id of the association.
+    #	  [<tt>:decl</tt>]
+    #	    indicate the date of the association was declared at the
+    #	    prefecture.
+    #	  [<tt>:publ</tt>]
+    #	    contains informations regarding the publication in the "Journal
+    #	    Officiel" :
+    #	    [<tt>:date</tt>] the date of publication.
+    #	    [<tt>:page</tt>] the page the announce is on.
+    #	    [<tt>:announce</tt>] the announce number on the page.
+    # [<tt>:individualInfos</tt>]
+    #   indicating that the contact is a person with the following
+    #   informations :
+    #	[<tt>:idStatus</tt>] indicates the identification process status.
+    #	[<tt>:birthDate</tt>] the date of birth of the contact.
+    #	[<tt>:birthCity</tt>] the city of birth of the contact.
+    #	[<tt>:birthPc</tt>] the postal code of the city of birth.
+    #	[<tt>:birthCc</tt>] the country code of the place of birth.
+    #
+    # Additionnaly, when the contact is a person, there can be the following
+    # informations :
+    # [<tt>:firstName</tt>]
+    #   the first name of the person. (The last name being stored in the +name+
+    #   field in the +postalInfo+.)
+    # [<tt>:list</tt>]
+    #	with the value of +restrictedPublication+ mean that the element
+    #	diffusion should be restricted.
+    def contact_info(contact)
+      super # placeholder so that I can add some doc
     end
 
     def contact_info_process(xml) #:nodoc:
@@ -169,6 +234,63 @@ class EPPClient
       insert_extension(ret, ext)
     end
 
+    # Extends the base contact create so that the specific afnic create
+    # informations can be sent, the additionnal informations are :
+    #
+    # either :
+    # [<tt>:legalEntityInfos</tt>]
+    #	indicating that the contact is an organisation with the following
+    #	informations :
+    #	[<tt>:legalStatus</tt>]
+    #	  should be either +company+, +association+ or +other+.
+    #	[<tt>:siren</tt>] contains the SIREN number of the organisation.
+    #	[<tt>:VAT</tt>]
+    #	  is optional and contains the VAT number of the organisation.
+    #	[<tt>:trademark</tt>]
+    #	  is optional and contains the trademark number of the organisation.
+    #	[<tt>:asso</tt>]
+    #	  indicates the organisation is an association and contains either a
+    #	  +waldec+ or a +decl+ and a +publ+ :
+    #	  [<tt>:waldec</tt>] contains the waldec id of the association.
+    #	  [<tt>:decl</tt>]
+    #	    indicate the date of the association was declared at the
+    #	    prefecture.
+    #	  [<tt>:publ</tt>]
+    #	    contains informations regarding the publication in the "Journal
+    #	    Officiel" :
+    #	    [<tt>:date</tt>] the date of publication.
+    #	    [<tt>:page</tt>] the page the announce is on.
+    #	    [<tt>:announce</tt>] the announce number on the page.
+    # [<tt>:individualInfos</tt>]
+    #   indicating that the contact is a person with the following
+    #   informations :
+    #	[<tt>:birthDate</tt>] the date of birth of the contact.
+    #	[<tt>:birthCity</tt>] the city of birth of the contact.
+    #	[<tt>:birthPc</tt>] the postal code of the city of birth.
+    #	[<tt>:birthCc</tt>] the country code of the place of birth.
+    #
+    # Additionnaly, when the contact is a person, there can be the following
+    # informations :
+    # [<tt>:firstName</tt>]
+    #   the first name of the person. (The last name being stored in the +name+
+    #   field in the +postalInfo+.)
+    # [<tt>:list</tt>]
+    #	with the value of +restrictedPublication+ mean that the element
+    #	diffusion should be restricted.
+    #
+    # The returned information contains new keys :
+    # [<tt>:idStatus</tt>]
+    #   indicates the identification process status. It's only present when the
+    #   created contact was created with the +:individualInfos+ or
+    #   +:legalEntityInfos+ extensions.
+    # [<tt>:nhStatus</tt>]
+    #   is a boolean indicating wether the contact is really new, or if there
+    #   was already a contact with the exact same informations in the database,
+    #   in which case, it has been returned.
+    def contact_create(contact)
+      super # placeholder so that I can add some doc
+    end
+
     def contact_create_process(xml) #:nodoc:
       ret = super
       if (creData = xml.xpath('epp:extension/frnic:ext/frnic:resData/frnic:creData', SCHEMAS_URL)).size > 0
@@ -178,10 +300,16 @@ class EPPClient
       ret
     end
 
+    # Make sure there's no <tt>:ns</tt> records, AFNIC's servers sends quite
+    # a strange error when there is.
     def domain_create(args)
       raise ArgumentError, "You can't create a domain with ns records, you must do an update afterwards" if args.key?(:ns)
       super
     end
 
+    # Raises an exception, as contacts are deleted with a garbage collector.
+    def contact_delete(args)
+      raise NotImplementedError, "Contacts are deleted with a garbage collector"
+    end
   end
 end

@@ -23,13 +23,13 @@ class EPPClient
     #
     # ==== Required Attributes
     #
-    # * <tt>:client_id</tt> - The tag or username used with <tt><login></tt> requests.
-    # * <tt>:password</tt> - The password used with <tt><login></tt> requests.
-    # * <tt>:ssl_cert</tt> - The file containing the client certificate.
-    # * <tt>:ssl_key</tt> - The file containing the key of the certificate.
+    # [<tt>:client_id</tt>] the tag or username used with <tt><login></tt> requests.
+    # [<tt>:password</tt>] the password used with <tt><login></tt> requests.
+    # [<tt>:ssl_cert</tt>] the file containing the client certificate.
+    # [<tt>:ssl_key</tt>] the file containing the key of the certificate.
     #
     # ==== Optional Attributes
-    # * <tt>:test</tt> - sets the server to be the test server.
+    # [<tt>:test</tt>] sets the server to be the test server.
     #
     # See EPPClient for other attributes.
     def initialize(attrs)
@@ -47,6 +47,24 @@ class EPPClient
       @extensions << SCHEMAS_URL['sr']
     end
 
+    # Extends the base contact info so that the specific smallregistry's
+    # informations are processed, the additionnal informations are :
+    #
+    # one of :
+    # [<tt>:org</tt>]
+    #	indicating that the contact is an organisation with the following
+    #	informations :
+    #	[<tt>:companySerial</tt>]
+    #	  the company's SIREN / RPPS / whatever serial number is required.
+    # [<tt>:person</tt>]
+    #   indicating that the contact is a human person with the following
+    #   informations :
+    #   [<tt>:birthDate</tt>] the person's birth date.
+    #   [<tt>:birthPlace</tt>] the person's birth place.
+    def contact_info(xml)
+      super # placeholder so that I can add some doc
+    end 
+
     def contact_info_process(xml) #:nodoc:
       ret = super
       if (contact = xml.xpath('epp:extension/sr:ext/sr:infData/sr:contact', SCHEMAS_URL)).size > 0
@@ -61,6 +79,24 @@ class EPPClient
 	end
       end
       ret
+    end
+
+    # Extends the base contact create so that the specific smallregistry's
+    # information are sent, the additionnal informations are :
+    #
+    # one of :
+    # [<tt>:org</tt>]
+    #	indicating that the contact is an organisation with the following
+    #	informations :
+    #	[<tt>:companySerial</tt>]
+    #	  the company's SIREN / RPPS / whatever serial number is required.
+    # [<tt>:person</tt>]
+    #   indicating that the contact is a human person with the following
+    #   informations :
+    #   [<tt>:birthDate</tt>] the person's birth date.
+    #   [<tt>:birthPlace</tt>] the person's birth place.
+    def contact_create(contact)
+      super # placeholder so that I can add some doc
     end
 
     def contact_create_xml(contact) #:nodoc:

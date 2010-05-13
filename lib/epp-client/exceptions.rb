@@ -4,6 +4,8 @@ class EPPClient
   class EPPErrorResponse < StandardError
     attr_accessor :response_xml, :response_code, :message
 
+    # An exception with an added field so that it can store the xml response
+    # that generated it.
     def initialize(attrs = {})
       @response_xml = attrs[:xml]
       @response_code = attrs[:code]

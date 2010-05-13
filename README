@@ -1,1 +1,5 @@
 An extensible EPP client library
+
+When possible, the objects that are received via EPP are translated to their
+equivalent in ruby, that is, dates in Date object, timestamps in DateTime
+objects.

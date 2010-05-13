@@ -17,7 +17,7 @@ class EPPClient
       end
     end
 
-    def raw_builder(opts = {})
+    def raw_builder(opts = {}) #:nodoc:
       xml = Builder::XmlMarkup.new(opts)
       yield xml
     end
@@ -68,6 +68,7 @@ class EPPClient
       end
     end
 
+    # Wraps the content in an epp:extension.
     def extension
       raw_builder do |xml|
 	xml.extension do
@@ -76,6 +77,7 @@ class EPPClient
       end
     end
 
+    # Insert xml2 in xml1 before pattern
     def insert_extension(xml1, xml2, pattern = /<clTRID>/)
       xml1.sub(pattern, "#{xml2}\\&")
     end

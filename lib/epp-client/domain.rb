@@ -21,14 +21,14 @@ class EPPClient
       end
     end
 
-    # Check the availability of a domain
+    # Check the availability of domains
     #
-    # takes an array of domains as arguments
+    # takes a list of domains as arguments
     #
     # returns an array of hashes containing three fields :
-    # * <tt>:name</tt> - The domain name
-    # * <tt>:avail</tt> - Wether the domain is available or not.
-    # * <tt>:reason</tt> - The reason for non availability, if given.
+    # [<tt>:name</tt>] The domain name
+    # [<tt>:avail</tt>] Wether the domain is available or not.
+    # [<tt>:reason</tt>] The reason for non availability, if given.
     def domain_check(*domains)
       domains.flatten!
       response = send_request(domain_check_xml(*domains))
@@ -76,7 +76,46 @@ class EPPClient
     # <tt>:roid</tt> the contact the authInfo is about.
     #
     # Returned is a hash mapping as closely as possible the result expected
-    # from the command as per Section 3.1.2 of RFC 5731
+    # from the command as per Section 3.1.2 of RFC 5731 :
+    # [<tt>:name</tt>] The fully qualified name of the domain object.
+    # [<tt>:roid</tt>]
+    #    The Repository Object IDentifier assigned to the domain object when
+    #    the object was created.
+    # [<tt>:status</tt>]
+    #    an optionnal array of elements that contain the current status
+    #    descriptors associated with the domain.
+    # [<tt>:registrant</tt>] one optionnal registrant nic handle.
+    # [<tt>:contacts</tt>]
+    #   an optionnal hash which keys are choosen between +admin+, +billing+ and
+    #   +tech+ and which values are arrays of nic handles for the corresponding
+    #   contact types.
+    # [<tt>:ns</tt>]
+    #   an optional array containing nameservers informations, which can either
+    #   be an array of strings containing the the fully qualified name of a
+    #   host, or an array of hashes containing the following keys :
+    #   [<tt>:hostName</tt>] the fully qualified name of a host.
+    #   [<tt>:hostAddrv4</tt>]
+    #      an optionnal array of ipv4 addresses to be associated with the host.
+    #   [<tt>:hostAddrv6</tt>]
+    #      an optionnal array of ipv6 addresses to be associated with the host.
+    # [<tt>:host</tt>]
+    #    an optionnal array of fully qualified names of the subordinate host
+    #    objects that exist under this superordinate domain object.
+    # [<tt>:clID</tt>] the identifier of the sponsoring client.
+    # [<tt>crID</tt>]
+    #   an optional identifier of the client that created the domain object.
+    # [<tt>:crDate</tt>] an optional date and time of domain object creation.
+    # [<tt>:exDate</tt>]
+    #   the date and time identifying the end of the domain object's
+    #   registration period.
+    # [<tt>upID</tt>]
+    #   the identifier of the client that last updated the domain object.
+    # [<tt>:upDate</tt>]
+    #   the date and time of the most recent domain-object modification.
+    # [<tt>:trDate</tt>]
+    #   the date and time of the most recent successful domain-object transfer.
+    # [<tt>:authInfo</tt>]
+    #   authorization information associated with the domain object.
     def domain_info(args)
       if String === args
 	args = {:name => args}
@@ -196,6 +235,36 @@ class EPPClient
     end
 
     # Creates a domain
+    #
+    # Takes a hash as an argument, containing the following keys :
+    #
+    # [<tt>:name</tt>] the domain name
+    # [<tt>:period</tt>]
+    #   an optionnal hash containing the period for withch the domain is
+    #   registered with the following keys :
+    #   [<tt>:unit</tt>] the unit of time, either "m"onth or "y"ear.
+    #   [<tt>:number</tt>] the number of unit of time.
+    # [<tt>:ns</tt>]
+    #   an optional array containing nameservers informations, which can either
+    #   be an array of strings containing the nameserver's hostname, or an
+    #   array of hashes containing the following keys :
+    #   [<tt>:hostName</tt>] the hostname of the nameserver.
+    #   [<tt>:hostAddrv4</tt>] an optionnal array of ipv4 addresses.
+    #   [<tt>:hostAddrv6</tt>] an optionnal array of ipv6 addresses.
+    # [<tt>:registrant</tt>] an optionnal registrant nic handle.
+    # [<tt>:contacts</tt>]
+    #   an optionnal hash which keys are choosen between +admin+, +billing+ and
+    #   +tech+ and which values are arrays of nic handles for the corresponding
+    #   contact types.
+    # [<tt>:authInfo</tt>] the password associated with the domain.
+    #
+    # Returns a hash with the following keys :
+    #
+    # [<tt>:name</tt>] the fully qualified name of the domain object.
+    # [<tt>:crDate</tt>] the date and time of domain object creation.
+    # [<tt>:exDate</tt>]
+    #   the date and time identifying the end of the domain object's
+    #   registration period.
     def domain_create(args)
       response = send_request(domain_create_xml(args))
 

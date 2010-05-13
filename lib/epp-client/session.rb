@@ -9,13 +9,14 @@ class EPPClient
       end
     end
 
+    # Sends an hello epp command.
     def hello
       send_request(command do |xml|
 	xml.hello
       end)
     end
 
-    def login_xml(new_pw = nil)
+    def login_xml(new_pw = nil) #:nodoc:
       command do |xml|
 	xml.login do
 	  xml.clID(@client_id)
@@ -42,12 +43,16 @@ class EPPClient
     end
     private :login_xml
 
+    # Perform the login command on the server. Takes an optionnal argument, the
+    # new password for the account.
     def login(new_pw = nil)
       response = send_request(login_xml(new_pw))
 
       get_result(response)
     end
 
+    # Performs the logout command, after it, the server terminates the
+    # connection.
     def logout
       response = send_request(command do |xml|
 	xml.logout
@@ -56,6 +61,14 @@ class EPPClient
       get_result(response)
     end
 
+    # Takes a xml response and checks that the result is in the right range of
+    # results, that is, between 1000 and 1999, which are results meaning all
+    # went well.
+    #
+    # In case all went well, it either calls the callback if given, or returns
+    # true.
+    #
+    # In case there was a problem, an EPPErrorResponse exception is raised.
     def get_result(args)
       xml = case args
 	    when Hash
