@@ -2,10 +2,8 @@
 
 class EPPClient
   module SSL
-    HG_KEYWORD_SSL = %q$Abso$
     def self.included(base) # :nodoc:
       base.class_eval do
-	HG_KEYWORD << HG_KEYWORD_SSL
 	alias_method :open_connection_without_ssl, :open_connection
 	alias_method :open_connection, :open_connection_with_ssl
       end

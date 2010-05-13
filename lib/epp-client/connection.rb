@@ -2,12 +2,6 @@
 
 class EPPClient
   module Connection
-    HG_KEYWORD_Connection = %q$Abso$
-    def self.included(base) # :nodoc:
-      base.class_eval do
-	HG_KEYWORD << HG_KEYWORD_Connection
-      end
-    end
 
     # Establishes the connection to the server, if successful, will return the
     # greeting frame.

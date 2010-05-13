@@ -4,7 +4,6 @@ require 'epp-client'
 
 class EPPClient
   class SmallRegistry < EPPClient
-    HG_KEYWORD << %q$Abso$
 
     SCHEMAS_SR = %w[
       sr-1.0

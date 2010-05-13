@@ -2,12 +2,6 @@
 
 class EPPClient
   module Contact
-    HG_KEYWORD_Contact = %q$Abso$
-    def self.included(base) # :nodoc:
-      base.class_eval do
-	HG_KEYWORD << HG_KEYWORD_Contact
-      end
-    end
 
     def contact_check_xml(*contacts) #:nodoc:
       command do |xml|

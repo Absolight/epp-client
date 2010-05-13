@@ -2,12 +2,6 @@
 
 class EPPClient
   module Session
-    HG_KEYWORD_Session = %q$Abso$
-    def self.included(base) # :nodoc:
-      base.class_eval do
-	HG_KEYWORD << HG_KEYWORD_Session
-      end
-    end
 
     # Sends an hello epp command.
     def hello

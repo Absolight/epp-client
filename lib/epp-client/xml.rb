@@ -2,12 +2,6 @@
 
 class EPPClient
   module XML
-    HG_KEYWORD_XML = %q$Abso$
-    def self.included(base) # :nodoc:
-      base.class_eval do
-	HG_KEYWORD << HG_KEYWORD_XML
-      end
-    end
 
     # Parses a frame and returns a Nokogiri::XML::Document.
     def parse_response(frame)
