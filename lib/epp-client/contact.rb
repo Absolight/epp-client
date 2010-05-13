@@ -299,7 +299,7 @@ class EPPClient
 
     # Deletes a contact
     #
-    # Takes a single nic handle for argument
+    # Takes a single nic handle for argument.
     #
     # Returns true on success, or raises an exception.
     def contact_delete(contact)
