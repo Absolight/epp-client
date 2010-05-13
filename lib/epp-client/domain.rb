@@ -273,5 +273,26 @@ class EPPClient
 	:upDate => DateTime.parse(dom.xpath('domain:crDate', SCHEMAS_URL).text),
       }
     end
+
+    def domain_delete_xml(domain) #:nodoc:
+      command do |xml|
+	xml.delete do
+	  xml.delete('xmlns' => SCHEMAS_URL['domain-1.0']) do
+	    xml.name domain
+	  end
+	end
+      end
+    end
+
+    # Deletes a domain
+    #
+    # Takes a single fully qualified domain name for argument.
+    #
+    # Returns true on success, or raises an exception.
+    def domain_delete(domain)
+      response = send_request(domain_delete_xml(domain))
+
+      get_result(response)
+    end
   end
 end
