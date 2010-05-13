@@ -309,5 +309,52 @@ class EPPClient
     def contact_delete(args)
       raise NotImplementedError, "Contacts are deleted with a garbage collector"
     end
+
+    def contact_update_xml(args) #:nodoc:
+      ret = super
+
+      if args.key?(:add) && args[:add].key?(:list) || args.key?(:rem) && args[:rem].key?(:list) 
+	ext = extension do |xml|
+	  xml.ext( :xmlns => SCHEMAS_URL['frnic']) do
+	    xml.update do
+	      xml.contact do
+		if args.key?(:add) && args[:add].key?(:list)
+		  xml.add do
+		    xml.list(args[:add][:list])
+		  end
+		end
+		if args.key?(:rem) && args[:rem].key?(:list)
+		  xml.rem do
+		    xml.list(args[:add][:list])
+		  end
+		end
+	      end
+	    end
+	  end
+	end
+
+	return insert_extension(ret, ext)
+      else
+	return ret
+      end
+    end
+
+    # Extends the base contact update so that the specific afnic update
+    # informations can be sent, the additionnal informations are :
+    #
+    # [<tt>:add</tt>]
+    #	add the following datas :
+    #   [<tt>:list</tt>]
+    #	  with the value of +restrictedPublication+ mean that the element
+    #	  diffusion should be restricted.
+    # [<tt>:rem</tt>]
+    #	removes the following datas :
+    #   [<tt>:list</tt>]
+    #	  with the value of +restrictedPublication+ mean that the element
+    #	  diffusion should not be restricted any more.
+    #
+    def contact_update(args)
+      super # placeholder so that I can add some doc
+    end
   end
 end

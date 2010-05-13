@@ -307,5 +307,96 @@ class EPPClient
 
       get_result(response)
     end
+
+    def contact_update_xml(args) #:nodoc:
+      command do |xml|
+	xml.update do
+	  xml.update('xmlns' => SCHEMAS_URL['contact-1.0']) do
+	    xml.id args[:id]
+	    if args.key?(:add)
+	      xml.add do
+		args[:add][:status].each do |s|
+		  xml.status :s => s
+		end
+	      end
+	    end
+	    if args.key?(:rem)
+	      xml.rem do
+		args[:rem][:status].each do |s|
+		  xml.status :s => s
+		end
+	      end
+	    end
+	    if args.key?(:chg)
+	      contact = args[:chg]
+	      xml.chg do
+		if contact.key?(:postalInfo)
+		  contact[:postalInfo].each do |type,infos|
+		    xml.postalInfo :type => type do
+		      xml.name(infos[:name])
+		      xml.org(infos[:org]) if infos.key?(:org)
+		      xml.addr do
+			infos[:addr][:street].each do |street|
+			  xml.street(street)
+			end
+			xml.city(infos[:addr][:city])
+			[:sp, :pc].each do |val|
+			  xml.__send__(val, infos[:addr][val]) if infos[:addr].key?(val)
+			end
+			xml.cc(infos[:addr][:cc])
+		      end
+		    end
+		  end
+		end
+		[:voice, :fax, :email].each do |val|
+		  xml.__send__(val, contact[val]) if contact.key?(val)
+		end
+		if contact.key?(:authInfo)
+		  xml.authInfo do
+		    xml.pw(contact[:authInfo])
+		  end
+		end
+		if contact.key?(:disclose)
+		  xml.disclose do
+		    contact[:disclose].each do |disc|
+		      if disc.key?(:type)
+			xml.__send__(disc[:name], :type => disc[:type])
+		      else
+			xml.__send__(disc[:name])
+		      end
+		    end
+		  end
+		end
+	      end
+	    end
+	  end
+	end
+      end
+    end
+
+    # Updates a contact
+    #
+    # Takes a hash with the id, and at least one of the following keys :
+    # [<tt>:id</tt>]
+    #   the server-unique identifier of the contact object to be updated.
+    # [<tt>:add</tt>]
+    #   adds the following data to the contact object :
+    #   [<tt>:status</tt>] an array of status to add to the object.
+    # [<tt>:rem</tt>]
+    #   removes the following data from the contact object :
+    #   [<tt>:status</tt>] an array of status to remove from the object.
+    # [<tt>:chg</tt>]
+    #   changes the datas of the contact object, takes the same arguments as
+    #   the creation of the contact, except the id, with the small change that
+    #   each first level key is now optional. (Meaning that you don't have to
+    #   supply a <tt>:postalInfo</tt> if you don't need to, but if you do, all
+    #   it's mandatory fields are mandatory.)
+    #
+    # Returns true on success, or raises an exception.
+    def contact_update(args)
+      response = send_request(contact_update_xml(args))
+
+      get_result(response)
+    end
   end
 end

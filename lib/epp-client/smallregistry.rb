@@ -122,5 +122,54 @@ class EPPClient
 
       insert_extension(ret, ext)
     end
+
+    def contact_update_xml(args) #:nodoc:
+      ret = super
+
+      if args.key?(:chg) && (args[:chg].key?(:org) || args[:chg].key?(:person))
+	ext = extension do |xml|
+	  xml.ext( :xmlns => SCHEMAS_URL['sr']) do
+	    xml.update do
+	      xml.contact do
+		if args[:chg].key?(:org)
+		  xml.org do
+		    xml.companySerial(args[:chg][:org][:companySerial])
+		  end
+		elsif args[:chg].key?(:person)
+		  xml.person do
+		    xml.birthDate(args[:chg][:person][:birthDate])
+		    xml.birthPlace(args[:chg][:person][:birthPlace])
+		  end
+		end
+	      end
+	    end
+	  end
+	end
+
+	return insert_extension(ret, ext)
+      else
+	return ret
+      end
+    end
+
+    # Extends the base contact update so that the specific afnic update
+    # informations can be sent, the additionnal informations are :
+    #
+    # [<tt>:chg</tt>]
+    #	changes one of :
+    #   [<tt>:org</tt>]
+    #     indicating that the contact is an organisation with the following
+    #     informations :
+    #  	  [<tt>:companySerial</tt>]
+    #  	    the company's SIREN / RPPS / whatever serial number is required.
+    #   [<tt>:person</tt>]
+    #     indicating that the contact is a human person with the following
+    #     informations :
+    #     [<tt>:birthDate</tt>] the person's birth date.
+    #     [<tt>:birthPlace</tt>] the person's birth place.
+    #
+    def contact_update(args)
+      super # placeholder so that I can add some doc
+    end
   end
 end
