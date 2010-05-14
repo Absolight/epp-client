@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<schema targetNamespace="https://www.smallregistry.net/schemas/sr-1.0.xsd"
+       xmlns:sr="https://www.smallregistry.net/schemas/sr-1.0.xsd"
+       xmlns:contact="urn:ietf:params:xml:ns:contact-1.0"
+       xmlns:epp="urn:ietf:params:xml:ns:epp-1.0"
+       xmlns:eppcom="urn:ietf:params:xml:ns:eppcom-1.0"
+       xmlns="http://www.w3.org/2001/XMLSchema"
+       elementFormDefault="qualified">
+
+<!--
+Import common element types.
+-->
+ <import namespace="urn:ietf:params:xml:ns:eppcom-1.0" schemaLocation="vendor/ietf/eppcom-1.0.xsd"/>
+ <import namespace="urn:ietf:params:xml:ns:epp-1.0" schemaLocation="vendor/ietf/epp-1.0.xsd"/>
+ <import namespace="urn:ietf:params:xml:ns:contact-1.0" schemaLocation="vendor/ietf/contact-1.0.xsd"/>
+
+ <annotation>
+   <documentation>
+     Extensible Provisioning Protocol v1.0
+     SmallRegistry extensions.
+   </documentation>
+ </annotation>
+
+ <element name="ext" type="sr:extType"/>
+
+ <complexType name="extType">
+   <choice>
+     <element name="infData" type="sr:infDataType"/>
+     <element name="create" type="sr:createType"/>
+     <element name="update" type="sr:updateType"/>
+   </choice>
+ </complexType>
+
+ <complexType name="infDataType">
+   <choice>
+     <element name="contact" type="sr:contactType"/>
+   </choice>
+ </complexType>
+
+ <complexType name="createType">
+   <choice>
+     <element name="contact" type="sr:contactType"/>
+   </choice>
+ </complexType>
+
+ <complexType name="updateType">
+   <choice>
+     <element name="contact" type="sr:contactType"/>
+   </choice>
+ </complexType>
+
+ <complexType name="contactType">
+   <choice>
+     <element name="org" type="sr:legalEntity"/>
+     <element name="person" type="sr:physicalPerson"/>
+   </choice>
+ </complexType>
+
+ <complexType name="legalEntity">
+   <sequence>
+     <element name="companySerial" type="eppcom:minTokenType"/>
+   </sequence>
+ </complexType>
+
+ <complexType name="physicalPerson">
+   <sequence>
+     <element name="birthDate" type="date"/>
+     <element name="birthPlace" type="eppcom:minTokenType"/>
+   </sequence>
+ </complexType>
+
+<!--
+End of schema.
+-->
+</schema>
