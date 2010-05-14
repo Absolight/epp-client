@@ -6,6 +6,8 @@ module EPPClient::Poll
       xml.poll(:op => :req)
     end
   end
+
+  # sends a <epp:poll op="req"> command to the server.
   def poll_req
     response = send_request(poll_req_xml)
 
@@ -14,7 +16,7 @@ module EPPClient::Poll
 
   PARSERS = {}
 
-  def poll_req_process(xml)
+  def poll_req_process(xml) #:nodoc:
     obj = xml.xpath('epp:resData', EPPClient::SCHEMAS_URL)
     ret = { :obj => obj.to_s }
     if (date = xml.xpath("epp:msgQ/epp:qDate", EPPClient::SCHEMAS_URL)).size > 0
