@@ -1,0 +1,70 @@
+#!/usr/bin/env ruby
+
+require 'pp'
+require 'rubygems'
+require 'epp-client/afnic'
+
+c = EPPClient::AFNIC.new(
+  :client_id => '-test-.fr',
+  :password => 'pass',
+  :ssl_cert => 'server.crt',
+  :ssl_key => 'server.key',
+  :test => true
+)
+
+begin
+
+  c.open_connection
+  c.login
+  if c.msgQ_count > 0
+    pp msg = c.poll_req
+    pp c.poll_ack if Hash === msg[:obj]
+  end
+  pp c.domain_check('mat.fr', 'nonexistantdomain.fr', 'paris.fr', 'trafiquants.fr', 'toto.wf')
+  pp c.domain_info('afnic.fr')
+  # pas de contact check
+  pp c.contact_info('A7534') # legal
+  pp c.contact_info('CT214') # particulier
+  pp contact = c.contact_create( {
+    :email=>"foo@example.org",
+    :authInfo => "foobar",
+    :voice=>"+33.123456787",
+    :postalInfo=> { "loc"=> { :addr=> { :city=>"Paris", :cc=>"FR", :pc=>"75001", :street=>["BP 18", "1, rue Royale"] }, :name=>"Dupond", :org => 'FooBar Inc.' }, },
+    #:list => 'restrictedPublication',
+    #:individualInfos => {:birthDate => '1978-01-01', :birthCc => 'FR', :birthPc => '75013', :birthCity => 'Paris'},
+    #:firstName => 'Jean',
+    :legalEntityInfos=> {:siren=>"418565404", :legalStatus=>"company"},
+    #:legalEntityInfos=> {:siren=>"418565404", :legalStatus=>"association", :asso => { :decl => '2001-01-01', :publ => {:date => '2001-01-02', :announce => 5, :page => 3}}},
+    #:legalEntityInfos=> {:siren=>"418565404", :legalStatus=>"association", :asso => { :waldec => 2 }},
+  })
+  pp c.contact_info(contact[:id])
+  pp c.contact_update({
+    :id => contact[:id],
+    :chg => {
+    :email => 'bazar@example.com',
+  }})
+  pp c.contact_info(contact[:id])
+  pp c.contact_info(contact[:id])
+  pp c.domain_create({
+    :registrant => "A7534",
+    :contacts => {:tech => ["ADM3"], :admin => ["ADM3"]},
+    :name => "truc-#{$$}.fr",
+    :authInfo => "PN16IZ0V"
+  })
+  pp c.domain_info(:name => "truc-#{$$}.fr")
+  pp c.domain_update({
+    :name => "truc-#{$$}.fr",
+    #:chg => { :authInfo => 'bazar' },
+    :add => {
+      :ns => %w(ns1.absolight.net ns2.absolight.net ns3.absolight.net ns4.absolight.net),
+    },
+  })
+  pp c.domain_info(:name => "truc-#{$$}.fr")
+  pp c.domain_delete("truc-#{$$}.fr")
+  pp c.domain_info(:name => "truc-#{$$}.fr")
+  pp c.domain_restore(:name => "truc-#{$$}.fr")
+  pp c.domain_info(:name => "truc-#{$$}.fr")
+
+ensure
+  c.logout
+end

@@ -1,0 +1,61 @@
+#!/usr/bin/env ruby
+
+require 'pp'
+require 'rubygems'
+require 'epp-client/smallregistry'
+
+c = EPPClient::SmallRegistry.new(
+  :client_id => 'test',
+  :password => 'test',
+  :ssl_cert => 'test.crt',
+  :ssl_key => 'test.key',
+  :test => true
+)
+
+begin
+
+  c.open_connection
+  c.login
+  pp c.domain_check('mat.cc', 'bidule-truc.aeroport.fr', 'truc-chose.aeroport.fr')
+  pp c.domain_info('truc-chose.aeroport.fr')
+  pp c.contact_check('PP1-SMALL', 'PP2-SMALL', 'foobar')
+  pp c.contact_info('PP1-SMALL')
+  pp contact = c.contact_create( {
+    :email=>"foo@example.org",
+    :authInfo => "foobar",
+    :voice=>"+33.821801821",
+    :postalInfo=> { "loc"=> { :addr=> { :city=>"Paris", :cc=>"FR", :pc=>"75001", :street=>["BP 18", "1, rue Royale"] }, :name=>"Dupond, Jean", :org => "FooBar Inc." }, },
+    # l'un ou l'autre
+    #:person => { :birthDate => '1978-01-01', :birthPlace => 'Paris', },
+    :org => { :companySerial => '505404125', },
+  })
+  pp c.contact_info(contact[:id])
+  pp c.contact_update({
+    :id => contact[:id],
+    :chg => {
+    :email => 'bazar@example.com',
+    :org => { :companySerial => '505404126', },
+  }})
+  pp c.contact_delete(contact[:id])
+  pp c.contact_info(contact[:id])
+  pp c.domain_create({
+    :registrant => "PP1-SMALL",
+    :contacts => {:billing => ["PP1-SMALL"], :tech => ["PP1-SMALL"], :admin => ["PP1-SMALL"]},
+    :ns => ["ns1.absolight.net", "ns2.absolight.net", "ns3.absolight.net", "ns4.absolight.net"], 
+    #:ns => [{:hostAddrv4 => ["1.2.3.4", "1.4.2.3"], :hostName => "ns1.truc-#{$$}.aeroport.fr"}, {:hostAddrv4 => ["1.2.3.5"], :hostAddrv6 => ["2a01:678::1", "2a01:678::2"], :hostName => "ns2.truc-#{$$}.aeroport.fr"}],
+    :name => "truc-#{$$}.aeroport.fr",
+    :authInfo => "PN16IZ0V-XLYDZC-AT70X58L"
+  })
+  pp c.domain_info("truc-#{$$}.aeroport.fr")
+  pp c.domain_update({
+    :name => "truc-#{$$}.aeroport.fr",
+    :chg => { :authInfo => 'Bazar' },
+    :rem => {
+      :ns => ["ns4.absolight.net"],
+    }
+  })
+  pp c.domain_info("truc-#{$$}.aeroport.fr")
+  pp c.domain_delete('truc-70487.aeroport.fr')
+ensure
+  c.logout
+end

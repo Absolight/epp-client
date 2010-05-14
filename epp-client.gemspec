@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.summary = 'An extensible EPP client library'
   s.description = 'An extensible EPP client library.'
 
-  s.files = Dir[ "README", "ChangeLog", "lib/**/*.rb"]
+  s.files = Dir[ "README", "ChangeLog", "EXAMPLE*", "lib/**/*.rb"]
 
   s.has_rdoc = true
 
