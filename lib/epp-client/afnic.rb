@@ -1,6 +1,7 @@
 # $Abso$
 
 require 'epp-client/base'
+require 'epp-client/rgp'
 
 class EPPClient::AFNIC < EPPClient::Base
   SCHEMAS_AFNIC = %w[
@@ -27,7 +28,7 @@ class EPPClient::AFNIC < EPPClient::Base
     end
     args[:port] ||= 700
     super(args)
-    @extensions << EPPClient::SCHEMAS_URL['frnic'] << EPPClient::SCHEMAS_URL['rgp']
+    @extensions << EPPClient::SCHEMAS_URL['frnic']
   end
 
   # Extends the base domain check so that the specific afnic check
@@ -66,9 +67,6 @@ class EPPClient::AFNIC < EPPClient::Base
 
   def domain_info_process(xml) #:nodoc:
     ret = super
-    if (rgp_status = xml.xpath('epp:extension/rgp:infData/rgp:rgpStatus', EPPClient::SCHEMAS_URL)).size > 0
-      ret[:status] += rgp_status.map {|s| s.attr('s')}
-    end
     if (frnic_status = xml.xpath('epp:extension/frnic:ext/frnic:resData/frnic:infData/frnic:domain/frnic:status', EPPClient::SCHEMAS_URL)).size > 0
       ret[:status] += frnic_status.map {|s| s.attr('s')}
     end
@@ -372,4 +370,7 @@ class EPPClient::AFNIC < EPPClient::Base
     end
     super
   end
+
+  # keep that at the end.
+  include EPPClient::RGP
 end
