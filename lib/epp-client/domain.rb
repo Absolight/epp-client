@@ -1,6 +1,7 @@
 # $Abso$
 
 module EPPClient::Domain
+  EPPClient::Poll::PARSERS['domain:panData'] = :domain_pending_action_process
 
   def domain_check_xml(*domains) # :nodoc:
     command do |xml|
@@ -378,5 +379,16 @@ module EPPClient::Domain
     response = send_request(domain_update_xml(args))
 
     get_result(response)
+  end
+
+
+  def domain_pending_action_process(xml) #:nodoc:
+    dom = xml.xpath('epp:resData/domain:panData', EPPClient::SCHEMAS_URL)
+    ret = {
+      :name => dom.xpath('domain:name', EPPClient::SCHEMAS_URL).text,
+      :paResult => dom.xpath('domain:name', EPPClient::SCHEMAS_URL).attribute('paResult').value,
+      :paTRID => get_trid(dom.xpath('domain:paTRID', EPPClient::SCHEMAS_URL)),
+      :paDate => DateTime.parse(dom.xpath('domain:paDate', EPPClient::SCHEMAS_URL).text),
+    }
   end
 end

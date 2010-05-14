@@ -2,7 +2,7 @@
 
 module EPPClient::XML
 
-  attr_reader :sent_xml, :recv_xml, :msgQ_count, :msgQ_id
+  attr_reader :sent_xml, :recv_xml, :msgQ_count, :msgQ_id, :trID
 
   # Parses a frame and returns a Nokogiri::XML::Document.
   def parse_xml(string) #:doc:
@@ -69,6 +69,10 @@ module EPPClient::XML
       @msgQ_id = nil
     end
 
+    if (trID = xml.xpath('epp:epp/epp:response/epp:trID', EPPClient::SCHEMAS_URL)).size > 0
+      @trID = get_trid(trID)
+    end
+
     res = xml.xpath('epp:epp/epp:response/epp:result', EPPClient::SCHEMAS_URL)
     code = res.attribute('code').value.to_i
     if args[:range].include?(code)
@@ -85,6 +89,13 @@ module EPPClient::XML
     else
       raise EPPClient::EPPErrorResponse.new(:xml => xml, :code => code, :message => res.xpath('epp:msg', EPPClient::SCHEMAS_URL).text)
     end
+  end
+
+  def get_trid(xml)
+    {
+      :clTRID => xml.xpath('epp:clTRID', EPPClient::SCHEMAS_URL).text,
+      :svTRID => xml.xpath('epp:svTRID', EPPClient::SCHEMAS_URL).text,
+    }
   end
 
   # Creates the xml for the command.
