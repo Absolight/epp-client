@@ -2,7 +2,7 @@
 
 module EPPClient::XML
 
-  attr_reader :sent_xml, :recv_xml
+  attr_reader :sent_xml, :recv_xml, :msgQ_count, :msgQ_id
 
   # Parses a frame and returns a Nokogiri::XML::Document.
   def parse_xml(string) #:doc:
@@ -59,6 +59,15 @@ module EPPClient::XML
 	  end
 
     args[:range] ||= 1000..1999
+
+    if (mq = xml.xpath('epp:epp/epp:response/epp:msgQ', EPPClient::SCHEMAS_URL)).size > 0
+      @msgQ_count = mq.attribute('count').value.to_i
+      @msgQ_id = mq.attribute('id').value
+      puts "DEBUG: MSGQ : count=#{@msgQ_count}, id=#{@msgQ_id}\n" if $DEBUG
+    else
+      @msgQ_count = 0
+      @msgQ_id = nil
+    end
 
     res = xml.xpath('epp:epp/epp:response/epp:result', EPPClient::SCHEMAS_URL)
     code = res.attribute('code').value.to_i

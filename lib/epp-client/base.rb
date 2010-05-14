@@ -6,6 +6,7 @@ require 'epp-client/session'
 require 'epp-client/connection'
 require 'epp-client/exceptions'
 require 'epp-client/ssl'
+require 'epp-client/poll'
 require 'epp-client/domain'
 require 'epp-client/contact'
 
@@ -36,6 +37,7 @@ class EPPClient::Base
   include EPPClient::Session
   include EPPClient::Connection
   include EPPClient::SSL
+  include EPPClient::Poll # keep before object definition modules.
   include EPPClient::Domain
   include EPPClient::Contact
 

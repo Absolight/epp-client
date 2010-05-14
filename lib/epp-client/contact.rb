@@ -1,6 +1,7 @@
 # $Abso$
 
 module EPPClient::Contact
+  EPPClient::Poll::PARSERS['contact:infData'] = :contact_info_process
 
   def contact_check_xml(*contacts) #:nodoc:
     command do |xml|
