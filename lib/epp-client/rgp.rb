@@ -92,8 +92,6 @@ module EPPClient::RGP
   #     an optional element that contains any information needed to support the
   #     statements provided by the client.
   #
-  #
-  #
   # Returns an array of rgpStatus.
   def domain_restore(args)
     response = send_request(domain_restore_xml(args))
