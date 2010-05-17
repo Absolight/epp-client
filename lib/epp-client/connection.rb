@@ -2,7 +2,7 @@
 
 module EPPClient::Connection
 
-  attr_reader :sent_frame, :recv_frame, :srv_ns, :srv_ext
+  attr_reader :sent_frame, :recv_frame, :srv_version, :srv_lang, :srv_ns, :srv_ext
 
   # Establishes the connection to the server, if successful, will return the
   # greeting frame.
@@ -21,11 +21,11 @@ module EPPClient::Connection
   end
 
   def greeting_process(xml)
-    if (ns = xml.xpath('epp:epp/epp:greeting/epp:svcMenu/epp:objURI', EPPClient::SCHEMAS_URL)).size > 0
-      @srv_ns = ns.map {|n| n.text}
-    end
+    @srv_version = xml.xpath('epp:epp/epp:greeting/epp:svcMenu/epp:version', EPPClient::SCHEMAS_URL).map {|n| n.text}
+    @srv_lang = xml.xpath('epp:epp/epp:greeting/epp:svcMenu/epp:lang', EPPClient::SCHEMAS_URL).map {|n| n.text}
+    @srv_ns = xml.xpath('epp:epp/epp:greeting/epp:svcMenu/epp:objURI', EPPClient::SCHEMAS_URL).map {|n| n.text}
     if (ext = xml.xpath('epp:epp/epp:greeting/epp:svcMenu/epp:svcExtension/epp:extURI', EPPClient::SCHEMAS_URL)).size > 0
-      #@srv_ext = ext.map {|n| n.text}
+      @srv_ext = ext.map {|n| n.text}
     end
 
     return xml
