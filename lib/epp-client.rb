@@ -6,7 +6,8 @@ require 'nokogiri'
 require 'builder'
 require 'date'
 
-require 'epp-client/base'
-
 module EPPClient
 end
+
+require 'epp-client/base'
+
