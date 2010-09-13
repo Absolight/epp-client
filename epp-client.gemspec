@@ -1,14 +1,14 @@
 # $Abso$
 Gem::Specification.new do |s|
   s.name = 'epp-client'
-  s.version = '0.9.2'
+  s.version = '0.9.3'
   s.date = '2010-05-14'
   s.author = 'Mathieu Arnold'
   s.email = 'm@absolight.fr'
   s.summary = 'An extensible EPP client library'
   s.description = 'An extensible EPP client library.'
 
-  s.files = Dir[ "README", "ChangeLog", "EXAMPLE*", "lib/**/*.rb"]
+  s.files = Dir[ __FILE__, "README", "ChangeLog", "EXAMPLE*", "lib/**/*.rb"]
 
   s.has_rdoc = true
 
