@@ -1,7 +1,7 @@
 # $Abso$
 Gem::Specification.new do |s|
   s.name = 'epp-client'
-  s.version = '0.9.3'
+  s.version = '0.9.4'
   s.date = '2010-05-14'
   s.author = 'Mathieu Arnold'
   s.email = 'm@absolight.fr'

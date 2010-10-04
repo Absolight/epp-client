@@ -102,4 +102,8 @@ class EPPClient::Base
     @clTRID_index += 1
     @clTRID + "-#{@clTRID_index}"
   end
+
+  def debug
+    $DEBUG || $ENV['EPP_CLIENT_DEBUG']
+  end
 end

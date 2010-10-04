@@ -15,13 +15,13 @@ module EPPClient::XML
 
   def recv_frame_to_xml #:nodoc:
     @recv_xml = parse_xml(@recv_frame)
-    puts @recv_xml.to_s.gsub(/^/, '<< ') if $DEBUG
+    puts @recv_xml.to_s.gsub(/^/, '<< ') if debug
     return @recv_xml
   end
 
   def sent_frame_to_xml #:nodoc:
     @send_xml = parse_xml(@sent_frame)
-    puts @send_xml.to_s.gsub(/^/, '>> ') if $DEBUG
+    puts @send_xml.to_s.gsub(/^/, '>> ') if debug
     return @send_xml
   end
 
@@ -63,7 +63,7 @@ module EPPClient::XML
     if (mq = xml.xpath('epp:epp/epp:response/epp:msgQ', EPPClient::SCHEMAS_URL)).size > 0
       @msgQ_count = mq.attribute('count').value.to_i
       @msgQ_id = mq.attribute('id').value
-      puts "DEBUG: MSGQ : count=#{@msgQ_count}, id=#{@msgQ_id}\n" if $DEBUG
+      puts "DEBUG: MSGQ : count=#{@msgQ_count}, id=#{@msgQ_id}\n" if debug
     else
       @msgQ_count = 0
       @msgQ_id = nil
