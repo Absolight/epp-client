@@ -1,5 +1,3 @@
-# $Abso$
-
 require 'epp-client'
 require 'epp-client/xml'
 require 'epp-client/session'

@@ -1,5 +1,3 @@
-# $Abso$
-
 module EPPClient::Domain
   EPPClient::Poll::PARSERS['domain:panData'] = :domain_pending_action_process
 

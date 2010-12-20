@@ -1,5 +1,3 @@
-# $Abso$
-
 class EPPClient::EPPErrorResponse < StandardError
   attr_accessor :response_xml, :response_code, :message
 

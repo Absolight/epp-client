@@ -1,4 +1,5 @@
-.*/\..*\.orig
-\..*\.sw?
-^.*\.gem$
-^doc
+*/.*.orig
+..*.sw?
+pkg/*
+*.gem
+doc

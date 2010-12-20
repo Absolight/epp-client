@@ -1,5 +1,3 @@
-# $Abso$
-
 module EPPClient::Contact
   EPPClient::Poll::PARSERS['contact:infData'] = :contact_info_process
 

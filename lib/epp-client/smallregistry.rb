@@ -1,5 +1,3 @@
-# $Abso$
-
 require 'epp-client/base'
 
 class EPPClient::SmallRegistry < EPPClient::Base

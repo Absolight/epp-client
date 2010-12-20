@@ -1,5 +1,3 @@
-# $Abso$
-
 require 'epp-client/base'
 require 'epp-client/rgp'
 

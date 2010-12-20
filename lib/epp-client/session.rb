@@ -1,5 +1,3 @@
-# $Abso$
-
 module EPPClient::Session
 
   # Sends an hello epp command.

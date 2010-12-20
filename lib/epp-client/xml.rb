@@ -1,5 +1,3 @@
-# $Abso$
-
 module EPPClient::XML
 
   attr_reader :sent_xml, :recv_xml, :msgQ_count, :msgQ_id, :trID

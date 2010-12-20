@@ -1,5 +1,3 @@
-# $Abso$
-
 module EPPClient::Connection
 
   attr_reader :sent_frame, :recv_frame, :srv_version, :srv_lang, :srv_ns, :srv_ext

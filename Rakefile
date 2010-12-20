@@ -2,6 +2,9 @@ require 'rake'
 require 'rake/rdoctask'
 require 'rake/gempackagetask'
 
+require 'bundler'
+Bundler::GemHelper.install_tasks
+
 desc "Generate documentation for the Rails framework"
 Rake::RDocTask.new do |rdoc|
   rdoc.rdoc_dir = 'doc/rdoc'

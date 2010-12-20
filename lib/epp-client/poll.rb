@@ -1,5 +1,3 @@
-# $Abso$
-
 module EPPClient::Poll
   def poll_req_xml #:nodoc:
     command do |xml|

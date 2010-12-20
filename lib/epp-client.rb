@@ -1,5 +1,3 @@
-# $Abso$
-
 require 'openssl'
 require 'socket'
 require 'nokogiri'

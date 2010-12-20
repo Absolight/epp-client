@@ -1,5 +1,3 @@
-# $Abso$
-
 # RFC3915[http://tools.ietf.org/html/rfc3915]
 #
 # Domain Registry Grace Period Mapping for the
