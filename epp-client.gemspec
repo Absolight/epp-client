@@ -21,8 +21,6 @@ Gem::Specification.new do |s|
   s.executables  = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_path = 'lib'
 
-  s.has_rdoc = true
-
   s.add_development_dependency "bundler", ">= 1.0.0.rc.5"
   s.add_dependency('nokogiri', '~> 1.4.0')
   s.add_dependency('builder',  '~> 2.1.2')
