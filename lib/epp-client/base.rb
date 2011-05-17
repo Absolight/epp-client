@@ -102,6 +102,6 @@ class EPPClient::Base
   end
 
   def debug
-    $DEBUG || $ENV['EPP_CLIENT_DEBUG']
+    $DEBUG || ENV['EPP_CLIENT_DEBUG']
   end
 end
