@@ -39,6 +39,7 @@ class EPPClient::SmallRegistry < EPPClient::Base
       attrs[:server] ||= 'epp.smallregistry.net'
       attrs[:port] ||= 700
     end
+    @services = EPPClient::SCHEMAS_URL.values_at('domain', 'contact')
     super(attrs)
     @extensions << EPPClient::SCHEMAS_URL['sr']
   end
