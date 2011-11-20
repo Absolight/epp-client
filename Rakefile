@@ -1,7 +1,7 @@
 #!/usr/bin/env rake
 require 'rake'
-require 'rake/rdoctask'
-require 'rake/gempackagetask'
+require 'rdoc/task'
+require 'rubygems/package_task'
 require "bundler/gem_tasks"
 
 desc "Generate documentation for the Rails framework"
