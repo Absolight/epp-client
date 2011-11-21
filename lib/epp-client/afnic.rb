@@ -24,6 +24,7 @@ class EPPClient::AFNIC < EPPClient::Base
     else
       args[:server] ||= 'epp.nic.fr'
     end
+    @services = EPPClient::SCHEMAS_URL.values_at('domain', 'contact')
     args[:port] ||= 700
     super(args)
     @extensions << EPPClient::SCHEMAS_URL['frnic']
