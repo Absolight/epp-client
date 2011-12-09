@@ -37,14 +37,14 @@ module EPPClient::Poll
     if (obj = xml.xpath('epp:resData', EPPClient::SCHEMAS_URL)).size > 0
       ret[:obj_xml] = obj.to_s 
       PARSERS.each do |xpath,parser|
-	if obj.xpath(xpath, EPPClient::SCHEMAS_URL).size > 0
-	  ret[:obj] = case parser
-		      when Symbol
-			send(parser, xml)
-		      else
-			raise NotImplementedError
-		      end
-	end
+        if obj.xpath(xpath, EPPClient::SCHEMAS_URL).size > 0
+          ret[:obj] = case parser
+                      when Symbol
+                        send(parser, xml)
+                      else
+                        raise NotImplementedError
+                      end
+        end
       end
     end
     ret

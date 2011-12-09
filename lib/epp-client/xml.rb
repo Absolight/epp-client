@@ -33,7 +33,7 @@ module EPPClient::XML
     raw_builder(opts) do |xml|
       xml.instruct! :xml, :version =>"1.0", :encoding => "UTF-8"
       xml.epp('xmlns' => EPPClient::SCHEMAS_URL['epp'], 'xmlns:epp' => EPPClient::SCHEMAS_URL['epp']) do
-	yield xml
+        yield xml
       end
     end
   end
@@ -48,13 +48,13 @@ module EPPClient::XML
   # In case there was a problem, an EPPErrorResponse exception is raised.
   def get_result(args)
     xml = case args
-	  when Hash
-	    args.delete(:xml)
-	  else
-	    xml = args
-	    args = {}
-	    xml
-	  end
+          when Hash
+            args.delete(:xml)
+          else
+            xml = args
+            args = {}
+            xml
+          end
 
     args[:range] ||= 1000..1999
 
@@ -75,14 +75,14 @@ module EPPClient::XML
     code = res.attribute('code').value.to_i
     if args[:range].include?(code)
       if args.key?(:callback)
-	case cb = args[:callback]
-	when Symbol
-	  return send(cb, xml.xpath('epp:epp/epp:response', EPPClient::SCHEMAS_URL))
-	else
-	  raise ArgumentError, "Invalid callback type"
-	end
+        case cb = args[:callback]
+        when Symbol
+          return send(cb, xml.xpath('epp:epp/epp:response', EPPClient::SCHEMAS_URL))
+        else
+          raise ArgumentError, "Invalid callback type"
+        end
       else
-	return true
+        return true
       end
     else
       raise EPPClient::EPPErrorResponse.new(:xml => xml, :code => code, :message => res.xpath('epp:msg', EPPClient::SCHEMAS_URL).text)
@@ -103,7 +103,7 @@ module EPPClient::XML
   # being the extensions.
   #
   #   command do |xml|
-  #  	  xml.logout
+  #       xml.logout
   #   end
   #
   # or
@@ -116,18 +116,18 @@ module EPPClient::XML
   def command(*args, &block)
     builder do |xml|
       xml.command do
-	if block_given?
-	  yield xml
-	else
-	  command = args.shift
-	  command.call(xml)
-	  args.each do |ext|
-	    xml.extension do
-	      ext.call(xml)
-	    end
-	  end
-	end
-	xml.clTRID(clTRID)
+        if block_given?
+          yield xml
+        else
+          command = args.shift
+          command.call(xml)
+          args.each do |ext|
+            xml.extension do
+              ext.call(xml)
+            end
+          end
+        end
+        xml.clTRID(clTRID)
       end
     end
   end
@@ -136,7 +136,7 @@ module EPPClient::XML
   def extension
     raw_builder do |xml|
       xml.extension do
-	yield(xml)
+        yield(xml)
       end
     end
   end

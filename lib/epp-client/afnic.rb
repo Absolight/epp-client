@@ -48,11 +48,11 @@ class EPPClient::AFNIC < EPPClient::Base
       hash = ret.select {|d| d[:name] == name.text}.first
       hash[:reserved] = name.attr('reserved').value == "1"
       unless (reason = dom.xpath('frnic:rsvReason', EPPClient::SCHEMAS_URL).text).empty?
-	hash[:rsvReason] = reason
+        hash[:rsvReason] = reason
       end
       hash[:forbidden] = name.attr('forbidden').value == "1"
       unless (reason = dom.xpath('frnic:fbdReason', EPPClient::SCHEMAS_URL).text).empty?
-	hash[:fbdReason] = reason
+        hash[:fbdReason] = reason
       end
     end
     return ret
@@ -125,42 +125,42 @@ class EPPClient::AFNIC < EPPClient::Base
     ret = super
     if (contact = xml.xpath('epp:extension/frnic:ext/frnic:resData/frnic:infData/frnic:contact', EPPClient::SCHEMAS_URL)).size > 0
       if (list = contact.xpath('frnic:list', EPPClient::SCHEMAS_URL)).size > 0
-	ret[:list] = list.map {|l| l.text}
+        ret[:list] = list.map {|l| l.text}
       end
       if (firstName = contact.xpath('frnic:firstName', EPPClient::SCHEMAS_URL)).size > 0
-	ret[:firstName] = firstName.text
+        ret[:firstName] = firstName.text
       end
       if (iI = contact.xpath('frnic:individualInfos', EPPClient::SCHEMAS_URL)).size > 0
-	ret[:individualInfos] = {}
-	ret[:individualInfos][:birthDate] = Date.parse(iI.xpath('frnic:birthDate', EPPClient::SCHEMAS_URL).text)
-	%w(idStatus birthCity birthPc birthCc).each do |val|
-	  if (r = iI.xpath("frnic:#{val}", EPPClient::SCHEMAS_URL)).size > 0
-	    ret[:individualInfos][val.to_sym] = r.text
-	  end
-	end
+        ret[:individualInfos] = {}
+        ret[:individualInfos][:birthDate] = Date.parse(iI.xpath('frnic:birthDate', EPPClient::SCHEMAS_URL).text)
+        %w(idStatus birthCity birthPc birthCc).each do |val|
+          if (r = iI.xpath("frnic:#{val}", EPPClient::SCHEMAS_URL)).size > 0
+            ret[:individualInfos][val.to_sym] = r.text
+          end
+        end
       end
       if (leI = contact.xpath('frnic:legalEntityInfos', EPPClient::SCHEMAS_URL)).size > 0
-	ret[:legalEntityInfos] = {}
-	ret[:legalEntityInfos][:legalStatus] = leI.xpath('frnic:legalStatus', EPPClient::SCHEMAS_URL).attr('s').value
-	%w(idStatus siren VAT trademark).each do |val|
-	  if (r = leI.xpath("frnic:#{val}", EPPClient::SCHEMAS_URL)).size > 0
-	    ret[:legalEntityInfos][val.to_sym] = r.text
-	  end
-	end
-	if (asso = leI.xpath("frnic:asso", EPPClient::SCHEMAS_URL)).size > 0
-	  ret[:legalEntityInfos][:asso] = {}
-	  if (r = asso.xpath("frnic:waldec", EPPClient::SCHEMAS_URL)).size > 0
-	    ret[:legalEntityInfos][:asso][:waldec] = r.text
-	  else
-	    ret[:legalEntityInfos][:asso][:decl] = Date.parse(asso.xpath('frnic:decl', EPPClient::SCHEMAS_URL).text)
-	    publ = asso.xpath('frnic:publ', EPPClient::SCHEMAS_URL)
-	    ret[:legalEntityInfos][:asso][:publ] = {
-	      :date => Date.parse(publ.text),
-	      :announce => publ.attr('announce').value,
-	      :page => publ.attr('page').value,
-	    }
-	  end
-	end
+        ret[:legalEntityInfos] = {}
+        ret[:legalEntityInfos][:legalStatus] = leI.xpath('frnic:legalStatus', EPPClient::SCHEMAS_URL).attr('s').value
+        %w(idStatus siren VAT trademark).each do |val|
+          if (r = leI.xpath("frnic:#{val}", EPPClient::SCHEMAS_URL)).size > 0
+            ret[:legalEntityInfos][val.to_sym] = r.text
+          end
+        end
+        if (asso = leI.xpath("frnic:asso", EPPClient::SCHEMAS_URL)).size > 0
+          ret[:legalEntityInfos][:asso] = {}
+          if (r = asso.xpath("frnic:waldec", EPPClient::SCHEMAS_URL)).size > 0
+            ret[:legalEntityInfos][:asso][:waldec] = r.text
+          else
+            ret[:legalEntityInfos][:asso][:decl] = Date.parse(asso.xpath('frnic:decl', EPPClient::SCHEMAS_URL).text)
+            publ = asso.xpath('frnic:publ', EPPClient::SCHEMAS_URL)
+            ret[:legalEntityInfos][:asso][:publ] = {
+              :date => Date.parse(publ.text),
+              :announce => publ.attr('announce').value,
+              :page => publ.attr('page').value,
+            }
+          end
+        end
       end
     end
     ret
@@ -171,52 +171,52 @@ class EPPClient::AFNIC < EPPClient::Base
 
     ext = extension do |xml|
       xml.ext( :xmlns => EPPClient::SCHEMAS_URL['frnic']) do
-	xml.create do
-	  xml.contact do
-	    if contact.key?(:legalEntityInfos)
-	      lEI = contact[:legalEntityInfos]
-	      xml.legalEntityInfos do
-		xml.legalStatus(:s => lEI[:legalStatus])
-		[:siren, :VAT, :trademark].each do |val|
-		  if lEI.key?(val)
-		    xml.__send__(val, lEI[val])
-		  end
-		end
-		if lEI.key?(:asso)
-		  asso = lEI[:asso]
-		  xml.asso do
-		    if asso.key?(:waldec)
-		      xml.waldec(asso[:waldec])
-		    else
-		      xml.decl(asso[:decl])
-		      xml.publ({:announce => asso[:publ][:announce], :page => asso[:publ][:page]}, asso[:publ][:date])
-		    end
-		  end
-		end
-	      end
-	    else
-	      if contact.key?(:list)
-		xml.list(contact[:list])
-	      end
-	      if contact.key?(:individualInfos)
-		iI = contact[:individualInfos]
-		xml.individualInfos do
-		  xml.birthDate(iI[:birthDate])
-		  if iI.key?(:birthCity)
-		    xml.birthCity(iI[:birthCity])
-		  end
-		  if iI.key?(:birthPc)
-		    xml.birthPc(iI[:birthPc])
-		  end
-		  xml.birthCc(iI[:birthCc])
-		end
-	      end
-	      if contact.key?(:firstName)
-		xml.firstName(contact[:firstName])
-	      end
-	    end
-	  end
-	end
+        xml.create do
+          xml.contact do
+            if contact.key?(:legalEntityInfos)
+              lEI = contact[:legalEntityInfos]
+              xml.legalEntityInfos do
+                xml.legalStatus(:s => lEI[:legalStatus])
+                [:siren, :VAT, :trademark].each do |val|
+                  if lEI.key?(val)
+                    xml.__send__(val, lEI[val])
+                  end
+                end
+                if lEI.key?(:asso)
+                  asso = lEI[:asso]
+                  xml.asso do
+                    if asso.key?(:waldec)
+                      xml.waldec(asso[:waldec])
+                    else
+                      xml.decl(asso[:decl])
+                      xml.publ({:announce => asso[:publ][:announce], :page => asso[:publ][:page]}, asso[:publ][:date])
+                    end
+                  end
+                end
+              end
+            else
+              if contact.key?(:list)
+                xml.list(contact[:list])
+              end
+              if contact.key?(:individualInfos)
+                iI = contact[:individualInfos]
+                xml.individualInfos do
+                  xml.birthDate(iI[:birthDate])
+                  if iI.key?(:birthCity)
+                    xml.birthCity(iI[:birthCity])
+                  end
+                  if iI.key?(:birthPc)
+                    xml.birthPc(iI[:birthPc])
+                  end
+                  xml.birthCc(iI[:birthCc])
+                end
+              end
+              if contact.key?(:firstName)
+                xml.firstName(contact[:firstName])
+              end
+            end
+          end
+        end
       end
     end
 
@@ -306,22 +306,22 @@ class EPPClient::AFNIC < EPPClient::Base
 
     if args.key?(:add) && args[:add].key?(:list) || args.key?(:rem) && args[:rem].key?(:list) 
       ext = extension do |xml|
-	xml.ext( :xmlns => EPPClient::SCHEMAS_URL['frnic']) do
-	  xml.update do
-	    xml.contact do
-	      if args.key?(:add) && args[:add].key?(:list)
-		xml.add do
-		  xml.list(args[:add][:list])
-		end
-	      end
-	      if args.key?(:rem) && args[:rem].key?(:list)
-		xml.rem do
-		  xml.list(args[:add][:list])
-		end
-	      end
-	    end
-	  end
-	end
+        xml.ext( :xmlns => EPPClient::SCHEMAS_URL['frnic']) do
+          xml.update do
+            xml.contact do
+              if args.key?(:add) && args[:add].key?(:list)
+                xml.add do
+                  xml.list(args[:add][:list])
+                end
+              end
+              if args.key?(:rem) && args[:rem].key?(:list)
+                xml.rem do
+                  xml.list(args[:add][:list])
+                end
+              end
+            end
+          end
+        end
       end
 
       return insert_extension(ret, ext)
@@ -364,7 +364,7 @@ class EPPClient::AFNIC < EPPClient::Base
     end
     [:add, :rem].each do |ar|
       if args.key?(ar) && args[ar].key?(:ns) && String === args[ar][:ns].first
-	args[ar][:ns] = args[ar][:ns].map {|ns| {:hostName => ns}}
+        args[ar][:ns] = args[ar][:ns].map {|ns| {:hostName => ns}}
       end
     end
     super

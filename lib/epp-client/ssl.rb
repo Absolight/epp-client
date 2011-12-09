@@ -14,7 +14,7 @@ module EPPClient::SSL
       @ssl_key = key
     when String
       unless key =~ /-----BEGIN RSA PRIVATE KEY-----/
-	key = File.read(key)
+        key = File.read(key)
       end
       @ssl_key = OpenSSL::PKey::RSA.new(key)
     else
@@ -28,7 +28,7 @@ module EPPClient::SSL
       @ssl_cert = cert
     when String
       unless cert =~ /-----BEGIN CERTIFICATE-----/
-	cert = File.read(cert)
+        cert = File.read(cert)
       end
       @ssl_cert = OpenSSL::X509::Certificate.new(cert)
     else
