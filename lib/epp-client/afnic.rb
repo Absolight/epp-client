@@ -87,6 +87,11 @@ class EPPClient::AFNIC < EPPClient::Base
   #     is optional and contains the VAT number of the organisation.
   #   [<tt>:trademark</tt>]
   #     is optional and contains the trademark number of the organisation.
+  #   [<tt>:DUNS</tt>]
+  #     is optional and contains the Data Universal Numbering System number of
+  #     the organisation.
+  #   [<tt>:local</tt>]
+  #     is optional and contains an identifier local to the eligible country.
   #   [<tt>:asso</tt>]
   #     indicates the organisation is an association and contains either a
   #     +waldec+ or a +decl+ and a +publ+ :
@@ -142,7 +147,7 @@ class EPPClient::AFNIC < EPPClient::Base
       if (leI = contact.xpath('frnic:legalEntityInfos', EPPClient::SCHEMAS_URL)).size > 0
         ret[:legalEntityInfos] = {}
         ret[:legalEntityInfos][:legalStatus] = leI.xpath('frnic:legalStatus', EPPClient::SCHEMAS_URL).attr('s').value
-        %w(idStatus siren VAT trademark).each do |val|
+        %w(idStatus siren VAT trademark DUNS local).each do |val|
           if (r = leI.xpath("frnic:#{val}", EPPClient::SCHEMAS_URL)).size > 0
             ret[:legalEntityInfos][val.to_sym] = r.text
           end
@@ -177,7 +182,7 @@ class EPPClient::AFNIC < EPPClient::Base
               lEI = contact[:legalEntityInfos]
               xml.legalEntityInfos do
                 xml.legalStatus(:s => lEI[:legalStatus])
-                [:siren, :VAT, :trademark].each do |val|
+                [:siren, :VAT, :trademark, :DUNS, :local].each do |val|
                   if lEI.key?(val)
                     xml.__send__(val, lEI[val])
                   end
@@ -237,6 +242,11 @@ class EPPClient::AFNIC < EPPClient::Base
   #     is optional and contains the VAT number of the organisation.
   #   [<tt>:trademark</tt>]
   #     is optional and contains the trademark number of the organisation.
+  #   [<tt>:DUNS</tt>]
+  #     is optional and contains the Data Universal Numbering System number of
+  #     the organisation.
+  #   [<tt>:local</tt>]
+  #     is optional and contains an identifier local to the eligible country.
   #   [<tt>:asso</tt>]
   #     indicates the organisation is an association and contains either a
   #     +waldec+ or a +decl+ and a +publ+ :
