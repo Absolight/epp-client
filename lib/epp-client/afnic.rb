@@ -248,6 +248,13 @@ class EPPClient::AFNIC < EPPClient::Base
                 xml.firstName(contact[:firstName])
               end
             end
+            if contact.key?(:reachable)
+              if Hash === (reachable = contact[:reachable])
+                xml.reachable(reachable, 1)
+              else
+                raise ArgumentError, "reachable has to be a Hash"
+              end
+            end
           end
         end
       end
@@ -305,6 +312,10 @@ class EPPClient::AFNIC < EPPClient::Base
   #   with the value of +restrictedPublication+ mean that the element
   #   diffusion should be restricted.
   #
+  # Optionnaly, there can be :
+  # [<tt>:reachable</tt>]
+  #   the contact is reachable through the optional <tt>:media</tt>.
+  #
   # The returned information contains new keys :
   # [<tt>:idStatus</tt>]
   #   indicates the identification process status. It's only present when the
@@ -342,19 +353,37 @@ class EPPClient::AFNIC < EPPClient::Base
   def contact_update_xml(args) #:nodoc:
     ret = super
 
-    if args.key?(:add) && args[:add].key?(:list) || args.key?(:rem) && args[:rem].key?(:list) 
+    if args.key?(:add) && ( args[:add].key?(:list) || args[:add].key?(:reachable) ) || args.key?(:rem) && ( args[:rem].key?(:list) || args[:rem].key?(:reachable) )
       ext = extension do |xml|
         xml.ext( :xmlns => EPPClient::SCHEMAS_URL['frnic']) do
           xml.update do
             xml.contact do
-              if args.key?(:add) && args[:add].key?(:list)
+              if args.key?(:add)
                 xml.add do
-                  xml.list(args[:add][:list])
+                  if args[:add].key?(:list) && ( args[:add].key?(:list) || args[:add].key?(:reachable) )
+                    xml.list(args[:add][:list])
+                  end
+                  if args[:add].key?(:reachable)
+                    if Hash === (reachable = args[:add][:reachable])
+                      xml.reachable(reachable, 1)
+                    else
+                      raise ArgumentError, "reachable has to be a Hash"
+                    end
+                  end
                 end
               end
-              if args.key?(:rem) && args[:rem].key?(:list)
+              if args.key?(:rem) && ( args[:rem].key?(:list) || args[:rem].key?(:reachable) )
                 xml.rem do
-                  xml.list(args[:add][:list])
+                  if args[:rem].key?(:list)
+                    xml.list(args[:add][:list])
+                  end
+                  if args[:rem].key?(:reachable)
+                    if Hash === (reachable = args[:rem][:reachable])
+                      xml.reachable(reachable, 1)
+                    else
+                      raise ArgumentError, "reachable has to be a Hash"
+                    end
+                  end
                 end
               end
             end
@@ -376,7 +405,8 @@ class EPPClient::AFNIC < EPPClient::Base
   #   [<tt>:list</tt>]
   #     with the value of +restrictedPublication+ mean that the element
   #     diffusion should/should not be restricted.
-  #
+  #   [<tt>:reachable</tt>]
+  #     the contact is reachable through the optional <tt>:media</tt>.
   def contact_update(args)
     super # placeholder so that I can add some doc
   end

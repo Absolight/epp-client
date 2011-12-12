@@ -311,14 +311,14 @@ module EPPClient::Contact
       xml.update do
         xml.update('xmlns' => EPPClient::SCHEMAS_URL['contact-1.0']) do
           xml.id args[:id]
-          if args.key?(:add)
+          if args.key?(:add) && args[:add].key?(:status)
             xml.add do
               args[:add][:status].each do |s|
                 xml.status :s => s
               end
             end
           end
-          if args.key?(:rem)
+          if args.key?(:rem) && args[:rem].key?(:status)
             xml.rem do
               args[:rem][:status].each do |s|
                 xml.status :s => s
