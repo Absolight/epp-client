@@ -66,13 +66,13 @@ class EPPClient::SmallRegistry < EPPClient::Base
     ret = super
     if (contact = xml.xpath('epp:extension/sr:ext/sr:infData/sr:contact', EPPClient::SCHEMAS_URL)).size > 0
       if (person = contact.xpath('sr:person', EPPClient::SCHEMAS_URL)).size > 0
-	ret[:person] = {
-	  :birthDate => Date.parse(person.xpath('sr:birthDate', EPPClient::SCHEMAS_URL).text),
-	  :birthPlace => person.xpath('sr:birthPlace', EPPClient::SCHEMAS_URL).text,
-	}
+        ret[:person] = {
+          :birthDate => Date.parse(person.xpath('sr:birthDate', EPPClient::SCHEMAS_URL).text),
+          :birthPlace => person.xpath('sr:birthPlace', EPPClient::SCHEMAS_URL).text,
+        }
       end
       if (org = contact.xpath('sr:org', EPPClient::SCHEMAS_URL)).size > 0
-	ret[:org] = { :companySerial => org.xpath('sr:companySerial', EPPClient::SCHEMAS_URL).text }
+        ret[:org] = { :companySerial => org.xpath('sr:companySerial', EPPClient::SCHEMAS_URL).text }
       end
     end
     ret
@@ -101,20 +101,20 @@ class EPPClient::SmallRegistry < EPPClient::Base
 
     ext = extension do |xml|
       xml.ext( :xmlns => EPPClient::SCHEMAS_URL['sr']) do
-	xml.create do
-	  xml.contact do
-	    if contact.key?(:org)
-	      xml.org do
-		xml.companySerial(contact[:org][:companySerial])
-	      end
-	    elsif contact.key?(:person)
-	      xml.person do
-		xml.birthDate(contact[:person][:birthDate])
-		xml.birthPlace(contact[:person][:birthPlace])
-	      end
-	    end
-	  end
-	end
+        xml.create do
+          xml.contact do
+            if contact.key?(:org)
+              xml.org do
+                xml.companySerial(contact[:org][:companySerial])
+              end
+            elsif contact.key?(:person)
+              xml.person do
+                xml.birthDate(contact[:person][:birthDate])
+                xml.birthPlace(contact[:person][:birthPlace])
+              end
+            end
+          end
+        end
       end
     end
 
@@ -126,22 +126,22 @@ class EPPClient::SmallRegistry < EPPClient::Base
 
     if args.key?(:chg) && (args[:chg].key?(:org) || args[:chg].key?(:person))
       ext = extension do |xml|
-	xml.ext( :xmlns => EPPClient::SCHEMAS_URL['sr']) do
-	  xml.update do
-	    xml.contact do
-	      if args[:chg].key?(:org)
-		xml.org do
-		  xml.companySerial(args[:chg][:org][:companySerial])
-		end
-	      elsif args[:chg].key?(:person)
-		xml.person do
-		  xml.birthDate(args[:chg][:person][:birthDate])
-		  xml.birthPlace(args[:chg][:person][:birthPlace])
-		end
-	      end
-	    end
-	  end
-	end
+        xml.ext( :xmlns => EPPClient::SCHEMAS_URL['sr']) do
+          xml.update do
+            xml.contact do
+              if args[:chg].key?(:org)
+                xml.org do
+                  xml.companySerial(args[:chg][:org][:companySerial])
+                end
+              elsif args[:chg].key?(:person)
+                xml.person do
+                  xml.birthDate(args[:chg][:person][:birthDate])
+                  xml.birthPlace(args[:chg][:person][:birthPlace])
+                end
+              end
+            end
+          end
+        end
       end
 
       return insert_extension(ret, ext)
@@ -158,8 +158,8 @@ class EPPClient::SmallRegistry < EPPClient::Base
   #   [<tt>:org</tt>]
   #     indicating that the contact is an organisation with the following
   #     informations :
-  #  	  [<tt>:companySerial</tt>]
-  #  	    the company's SIREN / RPPS / whatever serial number is required.
+  #       [<tt>:companySerial</tt>]
+  #         the company's SIREN / RPPS / whatever serial number is required.
   #   [<tt>:person</tt>]
   #     indicating that the contact is a human person with the following
   #     informations :

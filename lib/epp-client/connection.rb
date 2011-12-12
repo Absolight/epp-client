@@ -63,9 +63,9 @@ module EPPClient::Connection
     size = @socket.read(4)
     if size.nil?
       if @socket.eof?
-	raise SocketError, "Connection closed by remote server"
+        raise SocketError, "Connection closed by remote server"
       else
-	raise SocketError, "Error reading frame from remote server"
+        raise SocketError, "Error reading frame from remote server"
       end
     else
       size = size.unpack('N')[0]

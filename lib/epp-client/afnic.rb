@@ -3,11 +3,11 @@ require 'epp-client/rgp'
 
 class EPPClient::AFNIC < EPPClient::Base
   SCHEMAS_AFNIC = %w[
-    frnic-1.0
+    frnic-1.2
   ]
 
   EPPClient::SCHEMAS_URL.merge!(SCHEMAS_AFNIC.inject({}) do |a,s|
-    a[s.sub(/-1\.0$/, '')] = "http://www.afnic.fr/xml/epp/#{s}" if s =~ /-1\.0$/
+    a[s.sub(/-1\.2$/, '')] = "http://www.afnic.fr/xml/epp/#{s}" if s =~ /-1\.2$/
     a[s] = "http://www.afnic.fr/xml/epp/#{s}"
     a
   end)
@@ -24,6 +24,7 @@ class EPPClient::AFNIC < EPPClient::Base
     else
       args[:server] ||= 'epp.nic.fr'
     end
+    @services = EPPClient::SCHEMAS_URL.values_at('domain', 'contact')
     args[:port] ||= 700
     super(args)
     @extensions << EPPClient::SCHEMAS_URL['frnic']
@@ -47,11 +48,11 @@ class EPPClient::AFNIC < EPPClient::Base
       hash = ret.select {|d| d[:name] == name.text}.first
       hash[:reserved] = name.attr('reserved').value == "1"
       unless (reason = dom.xpath('frnic:rsvReason', EPPClient::SCHEMAS_URL).text).empty?
-	hash[:rsvReason] = reason
+        hash[:rsvReason] = reason
       end
       hash[:forbidden] = name.attr('forbidden').value == "1"
       unless (reason = dom.xpath('frnic:fbdReason', EPPClient::SCHEMAS_URL).text).empty?
-	hash[:fbdReason] = reason
+        hash[:fbdReason] = reason
       end
     end
     return ret
@@ -71,6 +72,42 @@ class EPPClient::AFNIC < EPPClient::Base
     ret
   end
 
+  # parse legalEntityInfos content.
+  def legalEntityInfos(leI) #:nodoc:
+    ret = {}
+    ret[:legalStatus] = leI.xpath('frnic:legalStatus', EPPClient::SCHEMAS_URL).attr('s').value
+    if (r = leI.xpath("frnic:idStatus", EPPClient::SCHEMAS_URL)).size > 0
+      ret[:idStatus] = {:value => r.text}
+      ret[:idStatus][:when] = r.attr('when').value if r.attr('when')
+      ret[:idStatus][:source] = r.attr('source').value if r.attr('source')
+      end
+    %w(siren VAT trademark DUNS local).each do |val|
+      if (r = leI.xpath("frnic:#{val}", EPPClient::SCHEMAS_URL)).size > 0
+        ret[val.to_sym] = r.text
+      end
+    end
+    if (asso = leI.xpath("frnic:asso", EPPClient::SCHEMAS_URL)).size > 0
+      ret[:asso] = {}
+      if (r = asso.xpath("frnic:waldec", EPPClient::SCHEMAS_URL)).size > 0
+        ret[:asso][:waldec] = r.text
+      else
+        if (decl = asso.xpath('frnic:decl', EPPClient::SCHEMAS_URL)).size > 0
+          ret[:asso][:decl] = Date.parse(decl.text)
+        end
+        publ = asso.xpath('frnic:publ', EPPClient::SCHEMAS_URL)
+        ret[:asso][:publ] = {
+          :date => Date.parse(publ.text),
+          :page => publ.attr('page').value,
+        }
+        if (announce = publ.attr('announce')) && announce.value != '0'
+          ret[:asso][:publ][:announce] = announce.value
+        end
+      end
+    end
+    ret
+  end
+  private :legalEntityInfos
+
   # Extends the base contact info so that the specific afnic check
   # informations are processed, the additionnal informations are :
   #
@@ -80,29 +117,38 @@ class EPPClient::AFNIC < EPPClient::Base
   #   informations :
   #   [<tt>:legalStatus</tt>]
   #     should be either +company+, +association+ or +other+.
-  #   [<tt>:idStatus</tt>] indicates the identification process status.
+  #   [<tt>:idStatus</tt>]
+  #     indicates the identification process status. Has optional
+  #     <tt>:when</tt> and <tt>:source</tt> attributes.
   #   [<tt>:siren</tt>] contains the SIREN number of the organisation.
   #   [<tt>:VAT</tt>]
   #     is optional and contains the VAT number of the organisation.
   #   [<tt>:trademark</tt>]
   #     is optional and contains the trademark number of the organisation.
+  #   [<tt>:DUNS</tt>]
+  #     is optional and contains the Data Universal Numbering System number of
+  #     the organisation.
+  #   [<tt>:local</tt>]
+  #     is optional and contains an identifier local to the eligible country.
   #   [<tt>:asso</tt>]
   #     indicates the organisation is an association and contains either a
   #     +waldec+ or a +decl+ and a +publ+ :
   #     [<tt>:waldec</tt>] contains the waldec id of the association.
   #     [<tt>:decl</tt>]
-  #       indicate the date of the association was declared at the
+  #       optionally indicate the date of the association was declared at the
   #       prefecture.
   #     [<tt>:publ</tt>]
   #       contains informations regarding the publication in the "Journal
   #       Officiel" :
   #       [<tt>:date</tt>] the date of publication.
   #       [<tt>:page</tt>] the page the announce is on.
-  #       [<tt>:announce</tt>] the announce number on the page.
+  #       [<tt>:announce</tt>] the announce number on the page (optional).
   # [<tt>:individualInfos</tt>]
   #   indicating that the contact is a person with the following
   #   informations :
-  #   [<tt>:idStatus</tt>] indicates the identification process status.
+  #   [<tt>:idStatus</tt>]
+  #     indicates the identification process status. Has optional
+  #     <tt>:when</tt> and <tt>:source</tt> attributes.
   #   [<tt>:birthDate</tt>] the date of birth of the contact.
   #   [<tt>:birthCity</tt>] the city of birth of the contact.
   #   [<tt>:birthPc</tt>] the postal code of the city of birth.
@@ -116,6 +162,14 @@ class EPPClient::AFNIC < EPPClient::Base
   # [<tt>:list</tt>]
   #   with the value of +restrictedPublication+ mean that the element
   #   diffusion should be restricted.
+  #
+  # Optionnaly, there can be :
+  # [<tt>:obsoleted</tt>]
+  #   the contact info is obsolete since/from the optional date <tt>:when</tt>.
+  # [<tt>:reachable</tt>]
+  #   the contact is reachable through the optional <tt>:media</tt> since/from
+  #   the optional date <tt>:when</tt>. The info having been specified by the
+  #   <tt>:source</tt>.
   def contact_info(contact)
     super # placeholder so that I can add some doc
   end
@@ -124,42 +178,47 @@ class EPPClient::AFNIC < EPPClient::Base
     ret = super
     if (contact = xml.xpath('epp:extension/frnic:ext/frnic:resData/frnic:infData/frnic:contact', EPPClient::SCHEMAS_URL)).size > 0
       if (list = contact.xpath('frnic:list', EPPClient::SCHEMAS_URL)).size > 0
-	ret[:list] = list.map {|l| l.text}
+        ret[:list] = list.map {|l| l.text}
       end
       if (firstName = contact.xpath('frnic:firstName', EPPClient::SCHEMAS_URL)).size > 0
-	ret[:firstName] = firstName.text
+        ret[:firstName] = firstName.text
       end
       if (iI = contact.xpath('frnic:individualInfos', EPPClient::SCHEMAS_URL)).size > 0
-	ret[:individualInfos] = {}
-	ret[:individualInfos][:birthDate] = Date.parse(iI.xpath('frnic:birthDate', EPPClient::SCHEMAS_URL).text)
-	%w(idStatus birthCity birthPc birthCc).each do |val|
-	  if (r = iI.xpath("frnic:#{val}", EPPClient::SCHEMAS_URL)).size > 0
-	    ret[:individualInfos][val.to_sym] = r.text
-	  end
-	end
+        ret[:individualInfos] = {}
+        ret[:individualInfos][:birthDate] = Date.parse(iI.xpath('frnic:birthDate', EPPClient::SCHEMAS_URL).text)
+        if (r = iI.xpath("frnic:idStatus", EPPClient::SCHEMAS_URL)).size > 0
+          ret[:individualInfos][:idStatus] = {:value => r.text}
+          ret[:individualInfos][:idStatus][:when] = r.attr('when').value if r.attr('when')
+          ret[:individualInfos][:idStatus][:source] = r.attr('source').value if r.attr('source')
+        end
+        %w(birthCity birthPc birthCc).each do |val|
+          if (r = iI.xpath("frnic:#{val}", EPPClient::SCHEMAS_URL)).size > 0
+            ret[:individualInfos][val.to_sym] = r.text
+          end
+        end
       end
       if (leI = contact.xpath('frnic:legalEntityInfos', EPPClient::SCHEMAS_URL)).size > 0
-	ret[:legalEntityInfos] = {}
-	ret[:legalEntityInfos][:legalStatus] = leI.xpath('frnic:legalStatus', EPPClient::SCHEMAS_URL).attr('s').value
-	%w(idStatus siren VAT trademark).each do |val|
-	  if (r = leI.xpath("frnic:#{val}", EPPClient::SCHEMAS_URL)).size > 0
-	    ret[:legalEntityInfos][val.to_sym] = r.text
-	  end
-	end
-	if (asso = leI.xpath("frnic:asso", EPPClient::SCHEMAS_URL)).size > 0
-	  ret[:legalEntityInfos][:asso] = {}
-	  if (r = asso.xpath("frnic:waldec", EPPClient::SCHEMAS_URL)).size > 0
-	    ret[:legalEntityInfos][:asso][:waldec] = r.text
-	  else
-	    ret[:legalEntityInfos][:asso][:decl] = Date.parse(asso.xpath('frnic:decl', EPPClient::SCHEMAS_URL).text)
-	    publ = asso.xpath('frnic:publ', EPPClient::SCHEMAS_URL)
-	    ret[:legalEntityInfos][:asso][:publ] = {
-	      :date => Date.parse(publ.text),
-	      :announce => publ.attr('announce').value,
-	      :page => publ.attr('page').value,
-	    }
-	  end
-	end
+        ret[:legalEntityInfos] = legalEntityInfos(leI)
+      end
+      if (obsoleted = contact.xpath('frnic:obsoleted', EPPClient::SCHEMAS_URL)).size > 0
+        if obsoleted.text != '0'
+          ret[:obsoleted] = {}
+          ret[:obsoleted][:when] = DateTime.parse(v_when.value) if v_when = obsoleted.attr('when')
+        end
+      end
+      if (reachable = contact.xpath('frnic:reachable', EPPClient::SCHEMAS_URL)).size > 0
+        if reachable.text != '0'
+          ret[:reachable] = {}
+          if v_when = reachable.attr('when')
+            ret[:reachable][:when] = DateTime.parse(v_when.value)
+          end
+          if media = reachable.attr('media')
+            ret[:reachable][:media] = media.value
+          end
+          if source = reachable.attr('source')
+            ret[:reachable][:source] = source.value
+          end
+        end
       end
     end
     ret
@@ -170,52 +229,63 @@ class EPPClient::AFNIC < EPPClient::Base
 
     ext = extension do |xml|
       xml.ext( :xmlns => EPPClient::SCHEMAS_URL['frnic']) do
-	xml.create do
-	  xml.contact do
-	    if contact.key?(:legalEntityInfos)
-	      lEI = contact[:legalEntityInfos]
-	      xml.legalEntityInfos do
-		xml.legalStatus(:s => lEI[:legalStatus])
-		[:siren, :VAT, :trademark].each do |val|
-		  if lEI.key?(val)
-		    xml.__send__(val, lEI[val])
-		  end
-		end
-		if lEI.key?(:asso)
-		  asso = lEI[:asso]
-		  xml.asso do
-		    if asso.key?(:waldec)
-		      xml.waldec(asso[:waldec])
-		    else
-		      xml.decl(asso[:decl])
-		      xml.publ({:announce => asso[:publ][:announce], :page => asso[:publ][:page]}, asso[:publ][:date])
-		    end
-		  end
-		end
-	      end
-	    else
-	      if contact.key?(:list)
-		xml.list(contact[:list])
-	      end
-	      if contact.key?(:individualInfos)
-		iI = contact[:individualInfos]
-		xml.individualInfos do
-		  xml.birthDate(iI[:birthDate])
-		  if iI.key?(:birthCity)
-		    xml.birthCity(iI[:birthCity])
-		  end
-		  if iI.key?(:birthPc)
-		    xml.birthPc(iI[:birthPc])
-		  end
-		  xml.birthCc(iI[:birthCc])
-		end
-	      end
-	      if contact.key?(:firstName)
-		xml.firstName(contact[:firstName])
-	      end
-	    end
-	  end
-	end
+        xml.create do
+          xml.contact do
+            if contact.key?(:legalEntityInfos)
+              lEI = contact[:legalEntityInfos]
+              xml.legalEntityInfos do
+                xml.idStatus(lEI[:idStatus]) if lEI.key?(:idStatus)
+                xml.legalStatus(:s => lEI[:legalStatus])
+                [:siren, :VAT, :trademark, :DUNS, :local].each do |val|
+                  if lEI.key?(val)
+                    xml.__send__(val, lEI[val])
+                  end
+                end
+                if lEI.key?(:asso)
+                  asso = lEI[:asso]
+                  xml.asso do
+                    if asso.key?(:waldec)
+                      xml.waldec(asso[:waldec])
+                    else
+                      xml.decl(asso[:decl]) if asso.key?(:decl)
+                      attrs = {:page => asso[:publ][:page]}
+                      attrs[:announce] = asso[:publ][:announce] if asso[:publ].key?(:announce)
+                      xml.publ(attrs, asso[:publ][:date])
+                    end
+                  end
+                end
+              end
+            else
+              if contact.key?(:list)
+                xml.list(contact[:list])
+              end
+              if contact.key?(:individualInfos)
+                iI = contact[:individualInfos]
+                xml.individualInfos do
+                  xml.idStatus(iI[:idStatus]) if iI.key?(:idStatus)
+                  xml.birthDate(iI[:birthDate])
+                  if iI.key?(:birthCity)
+                    xml.birthCity(iI[:birthCity])
+                  end
+                  if iI.key?(:birthPc)
+                    xml.birthPc(iI[:birthPc])
+                  end
+                  xml.birthCc(iI[:birthCc])
+                end
+              end
+              if contact.key?(:firstName)
+                xml.firstName(contact[:firstName])
+              end
+            end
+            if contact.key?(:reachable)
+              if Hash === (reachable = contact[:reachable])
+                xml.reachable(reachable, 1)
+              else
+                raise ArgumentError, "reachable has to be a Hash"
+              end
+            end
+          end
+        end
       end
     end
 
@@ -229,6 +299,8 @@ class EPPClient::AFNIC < EPPClient::Base
   # [<tt>:legalEntityInfos</tt>]
   #   indicating that the contact is an organisation with the following
   #   informations :
+  #   [<tt>:idStatus</tt>]
+  #     indicates the identification process status.
   #   [<tt>:legalStatus</tt>]
   #     should be either +company+, +association+ or +other+.
   #   [<tt>:siren</tt>] contains the SIREN number of the organisation.
@@ -236,22 +308,29 @@ class EPPClient::AFNIC < EPPClient::Base
   #     is optional and contains the VAT number of the organisation.
   #   [<tt>:trademark</tt>]
   #     is optional and contains the trademark number of the organisation.
+  #   [<tt>:DUNS</tt>]
+  #     is optional and contains the Data Universal Numbering System number of
+  #     the organisation.
+  #   [<tt>:local</tt>]
+  #     is optional and contains an identifier local to the eligible country.
   #   [<tt>:asso</tt>]
   #     indicates the organisation is an association and contains either a
   #     +waldec+ or a +decl+ and a +publ+ :
   #     [<tt>:waldec</tt>] contains the waldec id of the association.
   #     [<tt>:decl</tt>]
-  #       indicate the date of the association was declared at the
+  #       optionally indicate the date of the association was declared at the
   #       prefecture.
   #     [<tt>:publ</tt>]
   #       contains informations regarding the publication in the "Journal
   #       Officiel" :
   #       [<tt>:date</tt>] the date of publication.
   #       [<tt>:page</tt>] the page the announce is on.
-  #       [<tt>:announce</tt>] the announce number on the page.
+  #       [<tt>:announce</tt>] the announce number on the page (optional).
   # [<tt>:individualInfos</tt>]
   #   indicating that the contact is a person with the following
   #   informations :
+  #   [<tt>:idStatus</tt>]
+  #     indicates the identification process status.
   #   [<tt>:birthDate</tt>] the date of birth of the contact.
   #   [<tt>:birthCity</tt>] the city of birth of the contact.
   #   [<tt>:birthPc</tt>] the postal code of the city of birth.
@@ -265,6 +344,10 @@ class EPPClient::AFNIC < EPPClient::Base
   # [<tt>:list</tt>]
   #   with the value of +restrictedPublication+ mean that the element
   #   diffusion should be restricted.
+  #
+  # Optionnaly, there can be :
+  # [<tt>:reachable</tt>]
+  #   the contact is reachable through the optional <tt>:media</tt>.
   #
   # The returned information contains new keys :
   # [<tt>:idStatus</tt>]
@@ -303,24 +386,33 @@ class EPPClient::AFNIC < EPPClient::Base
   def contact_update_xml(args) #:nodoc:
     ret = super
 
-    if args.key?(:add) && args[:add].key?(:list) || args.key?(:rem) && args[:rem].key?(:list) 
+    if [:add, :rem].any? {|c| args.key?(c) && [:list, :reachable, :idStatus].any? {|k| args[c].key?(k)}}
       ext = extension do |xml|
-	xml.ext( :xmlns => EPPClient::SCHEMAS_URL['frnic']) do
-	  xml.update do
-	    xml.contact do
-	      if args.key?(:add) && args[:add].key?(:list)
-		xml.add do
-		  xml.list(args[:add][:list])
-		end
-	      end
-	      if args.key?(:rem) && args[:rem].key?(:list)
-		xml.rem do
-		  xml.list(args[:add][:list])
-		end
-	      end
-	    end
-	  end
-	end
+        xml.ext( :xmlns => EPPClient::SCHEMAS_URL['frnic']) do
+          xml.update do
+            xml.contact do
+              [:add, :rem].each do |c|
+                if args.key?(c) && [:list, :reachable, :idStatus].any? {|k| args[c].key?(k)}
+                  xml.__send__(c) do
+                    if args[c].key?(:list)
+                      xml.list(args[c][:list])
+                    end
+                    if args[c].key?(:idStatus)
+                      xml.idStatus(args[c][:idStatus])
+                    end
+                    if args[c].key?(:reachable)
+                      if Hash === (reachable = args[c][:reachable])
+                        xml.reachable(reachable, 1)
+                      else
+                        raise ArgumentError, "reachable has to be a Hash"
+                      end
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end
       end
 
       return insert_extension(ret, ext)
@@ -337,7 +429,10 @@ class EPPClient::AFNIC < EPPClient::Base
   #   [<tt>:list</tt>]
   #     with the value of +restrictedPublication+ mean that the element
   #     diffusion should/should not be restricted.
-  #
+  #   [<tt>:idStatus</tt>]
+  #     indicates the identification process status.
+  #   [<tt>:reachable</tt>]
+  #     the contact is reachable through the optional <tt>:media</tt>.
   def contact_update(args)
     super # placeholder so that I can add some doc
   end
@@ -363,10 +458,41 @@ class EPPClient::AFNIC < EPPClient::Base
     end
     [:add, :rem].each do |ar|
       if args.key?(ar) && args[ar].key?(:ns) && String === args[ar][:ns].first
-	args[ar][:ns] = args[ar][:ns].map {|ns| {:hostName => ns}}
+        args[ar][:ns] = args[ar][:ns].map {|ns| {:hostName => ns}}
       end
     end
     super
+  end
+
+  # Extends the base poll req to be able to parse quallification response
+  # extension.
+  def poll_req
+    super # placeholder so that I can add some doc
+  end
+
+  def poll_req_process(xml) #:nodoc:
+    ret = super(xml)
+    if (quaData = xml.xpath('epp:extension/frnic:resData/frnic:quaData', EPPClient::SCHEMAS_URL)).size > 0
+      if (contact = xml.xpath('frnic:contact', EPPClient::SCHEMAS_URL)).size > 0
+        cret = {:id => contact.xpath('frnic:id', EPPClient::SCHEMAS_URL).text}
+        qP = contact.xpath('frnic:qualificationProcess', EPPClient::SCHEMAS_URL)
+        cret[:qualificationProcess][:s] = qP.attr('s').value
+        cret[:qualificationProcess][:lang] = qP.attr('lang').value if qP.attr('lang')
+        if (leI = contact.xpath('frnic:legalEntityInfos', EPPClient::SCHEMAS_URL)).size > 0
+          ret[:legalEntityInfos] = legalEntityInfos(leI)
+        end
+        reach = contact.xpath('frnic:reachability', EPPClient::SCHEMAS_URL)
+        cret[:reachability] = {:reStatus => reach.xpath('frnic:reStatus', EPPClient::SCHEMAS_URL).text}
+        if (voice = reach.xpath('frnic:voice', EPPClient::SCHEMAS_URL)).size > 0
+          cret[:reachability][:voice] = voice.text
+        end
+        if (email = reach.xpath('frnic:email', EPPClient::SCHEMAS_URL)).size > 0
+          cret[:reachability][:email] = email.text
+        end
+        ret[:quaData] = {:contact => cret}
+      end
+    end
+    ret
   end
 
   # keep that at the end.

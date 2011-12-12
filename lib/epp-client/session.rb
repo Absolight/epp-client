@@ -10,25 +10,25 @@ module EPPClient::Session
   def login_xml(new_pw = nil) #:nodoc:
     command do |xml|
       xml.login do
-	xml.clID(@client_id)
-	xml.pw(@password)
-	xml.newPW(new_pw) unless new_pw.nil?
-	xml.options do
-	  xml.version(@version)
-	  xml.lang(@lang)
-	end
-	xml.svcs do
-	  services.each do |s|
-	    xml.objURI(s)
-	  end
-	  unless extensions.empty?
-	    xml.svcExtension do
-	      extensions.each do |e|
-		xml.extURI(e)
-	      end
-	    end
-	  end
-	end
+        xml.clID(@client_id)
+        xml.pw(@password)
+        xml.newPW(new_pw) unless new_pw.nil?
+        xml.options do
+          xml.version(@version)
+          xml.lang(@lang)
+        end
+        xml.svcs do
+          services.each do |s|
+            xml.objURI(s)
+          end
+          unless extensions.empty?
+            xml.svcExtension do
+              extensions.each do |e|
+                xml.extURI(e)
+              end
+            end
+          end
+        end
       end
     end
   end
