@@ -122,6 +122,14 @@ class EPPClient::AFNIC < EPPClient::Base
   # [<tt>:list</tt>]
   #   with the value of +restrictedPublication+ mean that the element
   #   diffusion should be restricted.
+  #
+  # Optionnaly, there can be :
+  # [<tt>:obsoleted</tt>]
+  #   the contact info is obsolete since/from the optional date <tt>:when</tt>.
+  # [<tt>:reachable</tt>]
+  #   the contact is reachable through the optional <tt>:media</tt> since/from
+  #   the optional date <tt>:when</tt>. The info having been specified by the
+  #   <tt>:source</tt>.
   def contact_info(contact)
     super # placeholder so that I can add some doc
   end
@@ -164,6 +172,26 @@ class EPPClient::AFNIC < EPPClient::Base
               :announce => publ.attr('announce').value,
               :page => publ.attr('page').value,
             }
+          end
+        end
+      end
+      if (obsoleted = contact.xpath('frnic:obsoleted', EPPClient::SCHEMAS_URL)).size > 0
+        if obsoleted.text != '0'
+          ret[:obsoleted] = {}
+          ret[:obsoleted][:when] = DateTime.parse(v_when.value) if v_when = obsoleted.attr('when')
+        end
+      end
+      if (reachable = contact.xpath('frnic:reachable', EPPClient::SCHEMAS_URL)).size > 0
+        if reachable.text != '0'
+          ret[:reachable] = {}
+          if v_when = reachable.attr('when')
+            ret[:reachable][:when] = DateTime.parse(v_when.value)
+          end
+          if media = reachable.attr('media')
+            ret[:reachable][:media] = media.value
+          end
+          if source = reachable.attr('source')
+            ret[:reachable][:source] = source.value
           end
         end
       end
