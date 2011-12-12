@@ -464,6 +464,37 @@ class EPPClient::AFNIC < EPPClient::Base
     super
   end
 
+  # Extends the base poll req to be able to parse quallification response
+  # extension.
+  def poll_req
+    super # placeholder so that I can add some doc
+  end
+
+  def poll_req_process(xml) #:nodoc:
+    ret = super(xml)
+    if (quaData = xml.xpath('epp:extension/frnic:resData/frnic:quaData', EPPClient::SCHEMAS_URL)).size > 0
+      if (contact = xml.xpath('frnic:contact', EPPClient::SCHEMAS_URL)).size > 0
+        cret = {:id => contact.xpath('frnic:id', EPPClient::SCHEMAS_URL).text}
+        qP = contact.xpath('frnic:qualificationProcess', EPPClient::SCHEMAS_URL)
+        cret[:qualificationProcess][:s] = qP.attr('s').value
+        cret[:qualificationProcess][:lang] = qP.attr('lang').value if qP.attr('lang')
+        if (leI = contact.xpath('frnic:legalEntityInfos', EPPClient::SCHEMAS_URL)).size > 0
+          ret[:legalEntityInfos] = legalEntityInfos(leI)
+        end
+        reach = contact.xpath('frnic:reachability', EPPClient::SCHEMAS_URL)
+        cret[:reachability] = {:reStatus => reach.xpath('frnic:reStatus', EPPClient::SCHEMAS_URL).text}
+        if (voice = reach.xpath('frnic:voice', EPPClient::SCHEMAS_URL)).size > 0
+          cret[:reachability][:voice] = voice.text
+        end
+        if (email = reach.xpath('frnic:email', EPPClient::SCHEMAS_URL)).size > 0
+          cret[:reachability][:email] = email.text
+        end
+        ret[:quaData] = {:contact => cret}
+      end
+    end
+    ret
+  end
+
   # keep that at the end.
   include EPPClient::RGP
 end
