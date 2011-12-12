@@ -72,6 +72,42 @@ class EPPClient::AFNIC < EPPClient::Base
     ret
   end
 
+  # parse legalEntityInfos content.
+  def legalEntityInfos(leI) #:nodoc:
+    ret = {}
+    ret[:legalStatus] = leI.xpath('frnic:legalStatus', EPPClient::SCHEMAS_URL).attr('s').value
+    if (r = leI.xpath("frnic:idStatus", EPPClient::SCHEMAS_URL)).size > 0
+      ret[:idStatus] = {:value => r.text}
+      ret[:idStatus][:when] = r.attr('when').value if r.attr('when')
+      ret[:idStatus][:source] = r.attr('source').value if r.attr('source')
+      end
+    %w(siren VAT trademark DUNS local).each do |val|
+      if (r = leI.xpath("frnic:#{val}", EPPClient::SCHEMAS_URL)).size > 0
+        ret[val.to_sym] = r.text
+      end
+    end
+    if (asso = leI.xpath("frnic:asso", EPPClient::SCHEMAS_URL)).size > 0
+      ret[:asso] = {}
+      if (r = asso.xpath("frnic:waldec", EPPClient::SCHEMAS_URL)).size > 0
+        ret[:asso][:waldec] = r.text
+      else
+        if (decl = asso.xpath('frnic:decl', EPPClient::SCHEMAS_URL)).size > 0
+          ret[:asso][:decl] = Date.parse(decl.text)
+        end
+        publ = asso.xpath('frnic:publ', EPPClient::SCHEMAS_URL)
+        ret[:asso][:publ] = {
+          :date => Date.parse(publ.text),
+          :page => publ.attr('page').value,
+        }
+        if (announce = publ.attr('announce')) && announce.value != '0'
+          ret[:asso][:publ][:announce] = announce.value
+        end
+      end
+    end
+    ret
+  end
+  private :legalEntityInfos
+
   # Extends the base contact info so that the specific afnic check
   # informations are processed, the additionnal informations are :
   #
@@ -162,36 +198,7 @@ class EPPClient::AFNIC < EPPClient::Base
         end
       end
       if (leI = contact.xpath('frnic:legalEntityInfos', EPPClient::SCHEMAS_URL)).size > 0
-        ret[:legalEntityInfos] = {}
-        ret[:legalEntityInfos][:legalStatus] = leI.xpath('frnic:legalStatus', EPPClient::SCHEMAS_URL).attr('s').value
-        if (r = leI.xpath("frnic:idStatus", EPPClient::SCHEMAS_URL)).size > 0
-          ret[:legalEntityInfos][:idStatus] = {:value => r.text}
-          ret[:legalEntityInfos][:idStatus][:when] = r.attr('when').value if r.attr('when')
-          ret[:legalEntityInfos][:idStatus][:source] = r.attr('source').value if r.attr('source')
-        end
-        %w(siren VAT trademark DUNS local).each do |val|
-          if (r = leI.xpath("frnic:#{val}", EPPClient::SCHEMAS_URL)).size > 0
-            ret[:legalEntityInfos][val.to_sym] = r.text
-          end
-        end
-        if (asso = leI.xpath("frnic:asso", EPPClient::SCHEMAS_URL)).size > 0
-          ret[:legalEntityInfos][:asso] = {}
-          if (r = asso.xpath("frnic:waldec", EPPClient::SCHEMAS_URL)).size > 0
-            ret[:legalEntityInfos][:asso][:waldec] = r.text
-          else
-            if (decl = asso.xpath('frnic:decl', EPPClient::SCHEMAS_URL)).size > 0
-              ret[:legalEntityInfos][:asso][:decl] = Date.parse(decl.text)
-            end
-            publ = asso.xpath('frnic:publ', EPPClient::SCHEMAS_URL)
-            ret[:legalEntityInfos][:asso][:publ] = {
-              :date => Date.parse(publ.text),
-              :page => publ.attr('page').value,
-            }
-            if (announce = publ.attr('announce')) && announce.value != '0'
-              ret[:legalEntityInfos][:asso][:publ][:announce] = announce.value
-            end
-          end
-        end
+        ret[:legalEntityInfos] = legalEntityInfos(leI)
       end
       if (obsoleted = contact.xpath('frnic:obsoleted', EPPClient::SCHEMAS_URL)).size > 0
         if obsoleted.text != '0'
