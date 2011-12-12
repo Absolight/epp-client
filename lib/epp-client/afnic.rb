@@ -81,7 +81,9 @@ class EPPClient::AFNIC < EPPClient::Base
   #   informations :
   #   [<tt>:legalStatus</tt>]
   #     should be either +company+, +association+ or +other+.
-  #   [<tt>:idStatus</tt>] indicates the identification process status.
+  #   [<tt>:idStatus</tt>]
+  #     indicates the identification process status. Has optional
+  #     <tt>:when</tt> and <tt>:source</tt> attributes.
   #   [<tt>:siren</tt>] contains the SIREN number of the organisation.
   #   [<tt>:VAT</tt>]
   #     is optional and contains the VAT number of the organisation.
@@ -108,7 +110,9 @@ class EPPClient::AFNIC < EPPClient::Base
   # [<tt>:individualInfos</tt>]
   #   indicating that the contact is a person with the following
   #   informations :
-  #   [<tt>:idStatus</tt>] indicates the identification process status.
+  #   [<tt>:idStatus</tt>]
+  #     indicates the identification process status. Has optional
+  #     <tt>:when</tt> and <tt>:source</tt> attributes.
   #   [<tt>:birthDate</tt>] the date of birth of the contact.
   #   [<tt>:birthCity</tt>] the city of birth of the contact.
   #   [<tt>:birthPc</tt>] the postal code of the city of birth.
@@ -146,7 +150,12 @@ class EPPClient::AFNIC < EPPClient::Base
       if (iI = contact.xpath('frnic:individualInfos', EPPClient::SCHEMAS_URL)).size > 0
         ret[:individualInfos] = {}
         ret[:individualInfos][:birthDate] = Date.parse(iI.xpath('frnic:birthDate', EPPClient::SCHEMAS_URL).text)
-        %w(idStatus birthCity birthPc birthCc).each do |val|
+        if (r = iI.xpath("frnic:idStatus", EPPClient::SCHEMAS_URL)).size > 0
+          ret[:individualInfos][:idStatus] = {:value => r.text}
+          ret[:individualInfos][:idStatus][:when] = r.attr('when').value if r.attr('when')
+          ret[:individualInfos][:idStatus][:source] = r.attr('source').value if r.attr('source')
+        end
+        %w(birthCity birthPc birthCc).each do |val|
           if (r = iI.xpath("frnic:#{val}", EPPClient::SCHEMAS_URL)).size > 0
             ret[:individualInfos][val.to_sym] = r.text
           end
@@ -155,7 +164,12 @@ class EPPClient::AFNIC < EPPClient::Base
       if (leI = contact.xpath('frnic:legalEntityInfos', EPPClient::SCHEMAS_URL)).size > 0
         ret[:legalEntityInfos] = {}
         ret[:legalEntityInfos][:legalStatus] = leI.xpath('frnic:legalStatus', EPPClient::SCHEMAS_URL).attr('s').value
-        %w(idStatus siren VAT trademark DUNS local).each do |val|
+        if (r = leI.xpath("frnic:idStatus", EPPClient::SCHEMAS_URL)).size > 0
+          ret[:legalEntityInfos][:idStatus] = {:value => r.text}
+          ret[:legalEntityInfos][:idStatus][:when] = r.attr('when').value if r.attr('when')
+          ret[:legalEntityInfos][:idStatus][:source] = r.attr('source').value if r.attr('source')
+        end
+        %w(siren VAT trademark DUNS local).each do |val|
           if (r = leI.xpath("frnic:#{val}", EPPClient::SCHEMAS_URL)).size > 0
             ret[:legalEntityInfos][val.to_sym] = r.text
           end
@@ -213,6 +227,7 @@ class EPPClient::AFNIC < EPPClient::Base
             if contact.key?(:legalEntityInfos)
               lEI = contact[:legalEntityInfos]
               xml.legalEntityInfos do
+                xml.idStatus(lEI[:idStatus]) if lEI.key?(:idStatus)
                 xml.legalStatus(:s => lEI[:legalStatus])
                 [:siren, :VAT, :trademark, :DUNS, :local].each do |val|
                   if lEI.key?(val)
@@ -240,6 +255,7 @@ class EPPClient::AFNIC < EPPClient::Base
               if contact.key?(:individualInfos)
                 iI = contact[:individualInfos]
                 xml.individualInfos do
+                  xml.idStatus(iI[:idStatus]) if iI.key?(:idStatus)
                   xml.birthDate(iI[:birthDate])
                   if iI.key?(:birthCity)
                     xml.birthCity(iI[:birthCity])
@@ -276,6 +292,8 @@ class EPPClient::AFNIC < EPPClient::Base
   # [<tt>:legalEntityInfos</tt>]
   #   indicating that the contact is an organisation with the following
   #   informations :
+  #   [<tt>:idStatus</tt>]
+  #     indicates the identification process status.
   #   [<tt>:legalStatus</tt>]
   #     should be either +company+, +association+ or +other+.
   #   [<tt>:siren</tt>] contains the SIREN number of the organisation.
@@ -304,6 +322,8 @@ class EPPClient::AFNIC < EPPClient::Base
   # [<tt>:individualInfos</tt>]
   #   indicating that the contact is a person with the following
   #   informations :
+  #   [<tt>:idStatus</tt>]
+  #     indicates the identification process status.
   #   [<tt>:birthDate</tt>] the date of birth of the contact.
   #   [<tt>:birthCity</tt>] the city of birth of the contact.
   #   [<tt>:birthPc</tt>] the postal code of the city of birth.
@@ -359,35 +379,26 @@ class EPPClient::AFNIC < EPPClient::Base
   def contact_update_xml(args) #:nodoc:
     ret = super
 
-    if args.key?(:add) && ( args[:add].key?(:list) || args[:add].key?(:reachable) ) || args.key?(:rem) && ( args[:rem].key?(:list) || args[:rem].key?(:reachable) )
+    if [:add, :rem].any? {|c| args.key?(c) && [:list, :reachable, :idStatus].any? {|k| args[c].key?(k)}}
       ext = extension do |xml|
         xml.ext( :xmlns => EPPClient::SCHEMAS_URL['frnic']) do
           xml.update do
             xml.contact do
-              if args.key?(:add)
-                xml.add do
-                  if args[:add].key?(:list) && ( args[:add].key?(:list) || args[:add].key?(:reachable) )
-                    xml.list(args[:add][:list])
-                  end
-                  if args[:add].key?(:reachable)
-                    if Hash === (reachable = args[:add][:reachable])
-                      xml.reachable(reachable, 1)
-                    else
-                      raise ArgumentError, "reachable has to be a Hash"
+              [:add, :rem].each do |c|
+                if args.key?(c) && [:list, :reachable, :idStatus].any? {|k| args[c].key?(k)}
+                  xml.__send__(c) do
+                    if args[c].key?(:list)
+                      xml.list(args[c][:list])
                     end
-                  end
-                end
-              end
-              if args.key?(:rem) && ( args[:rem].key?(:list) || args[:rem].key?(:reachable) )
-                xml.rem do
-                  if args[:rem].key?(:list)
-                    xml.list(args[:add][:list])
-                  end
-                  if args[:rem].key?(:reachable)
-                    if Hash === (reachable = args[:rem][:reachable])
-                      xml.reachable(reachable, 1)
-                    else
-                      raise ArgumentError, "reachable has to be a Hash"
+                    if args[c].key?(:idStatus)
+                      xml.idStatus(args[c][:idStatus])
+                    end
+                    if args[c].key?(:reachable)
+                      if Hash === (reachable = args[c][:reachable])
+                        xml.reachable(reachable, 1)
+                      else
+                        raise ArgumentError, "reachable has to be a Hash"
+                      end
                     end
                   end
                 end
@@ -411,6 +422,8 @@ class EPPClient::AFNIC < EPPClient::Base
   #   [<tt>:list</tt>]
   #     with the value of +restrictedPublication+ mean that the element
   #     diffusion should/should not be restricted.
+  #   [<tt>:idStatus</tt>]
+  #     indicates the identification process status.
   #   [<tt>:reachable</tt>]
   #     the contact is reachable through the optional <tt>:media</tt>.
   def contact_update(args)
