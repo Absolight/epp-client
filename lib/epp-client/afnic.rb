@@ -97,7 +97,7 @@ class EPPClient::AFNIC < EPPClient::Base
   #     +waldec+ or a +decl+ and a +publ+ :
   #     [<tt>:waldec</tt>] contains the waldec id of the association.
   #     [<tt>:decl</tt>]
-  #       indicate the date of the association was declared at the
+  #       optionally indicate the date of the association was declared at the
   #       prefecture.
   #     [<tt>:publ</tt>]
   #       contains informations regarding the publication in the "Journal
@@ -165,7 +165,9 @@ class EPPClient::AFNIC < EPPClient::Base
           if (r = asso.xpath("frnic:waldec", EPPClient::SCHEMAS_URL)).size > 0
             ret[:legalEntityInfos][:asso][:waldec] = r.text
           else
-            ret[:legalEntityInfos][:asso][:decl] = Date.parse(asso.xpath('frnic:decl', EPPClient::SCHEMAS_URL).text)
+            if (decl = asso.xpath('frnic:decl', EPPClient::SCHEMAS_URL)).size > 0
+              ret[:legalEntityInfos][:asso][:decl] = Date.parse(decl.text)
+            end
             publ = asso.xpath('frnic:publ', EPPClient::SCHEMAS_URL)
             ret[:legalEntityInfos][:asso][:publ] = {
               :date => Date.parse(publ.text),
@@ -221,7 +223,7 @@ class EPPClient::AFNIC < EPPClient::Base
                     if asso.key?(:waldec)
                       xml.waldec(asso[:waldec])
                     else
-                      xml.decl(asso[:decl])
+                      xml.decl(asso[:decl]) if asso.key?(:decl)
                       xml.publ({:announce => asso[:publ][:announce], :page => asso[:publ][:page]}, asso[:publ][:date])
                     end
                   end
@@ -287,7 +289,7 @@ class EPPClient::AFNIC < EPPClient::Base
   #     +waldec+ or a +decl+ and a +publ+ :
   #     [<tt>:waldec</tt>] contains the waldec id of the association.
   #     [<tt>:decl</tt>]
-  #       indicate the date of the association was declared at the
+  #       optionally indicate the date of the association was declared at the
   #       prefecture.
   #     [<tt>:publ</tt>]
   #       contains informations regarding the publication in the "Journal
