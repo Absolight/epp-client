@@ -104,7 +104,7 @@ class EPPClient::AFNIC < EPPClient::Base
   #       Officiel" :
   #       [<tt>:date</tt>] the date of publication.
   #       [<tt>:page</tt>] the page the announce is on.
-  #       [<tt>:announce</tt>] the announce number on the page.
+  #       [<tt>:announce</tt>] the announce number on the page (optional).
   # [<tt>:individualInfos</tt>]
   #   indicating that the contact is a person with the following
   #   informations :
@@ -171,9 +171,11 @@ class EPPClient::AFNIC < EPPClient::Base
             publ = asso.xpath('frnic:publ', EPPClient::SCHEMAS_URL)
             ret[:legalEntityInfos][:asso][:publ] = {
               :date => Date.parse(publ.text),
-              :announce => publ.attr('announce').value,
               :page => publ.attr('page').value,
             }
+            if (announce = publ.attr('announce')) && announce.value != '0'
+              ret[:legalEntityInfos][:asso][:publ][:announce] = announce.value
+            end
           end
         end
       end
@@ -224,7 +226,9 @@ class EPPClient::AFNIC < EPPClient::Base
                       xml.waldec(asso[:waldec])
                     else
                       xml.decl(asso[:decl]) if asso.key?(:decl)
-                      xml.publ({:announce => asso[:publ][:announce], :page => asso[:publ][:page]}, asso[:publ][:date])
+                      attrs = {:page => asso[:publ][:page]}
+                      attrs[:announce] = asso[:publ][:announce] if asso[:publ].key?(:announce)
+                      xml.publ(attrs, asso[:publ][:date])
                     end
                   end
                 end
@@ -296,7 +300,7 @@ class EPPClient::AFNIC < EPPClient::Base
   #       Officiel" :
   #       [<tt>:date</tt>] the date of publication.
   #       [<tt>:page</tt>] the page the announce is on.
-  #       [<tt>:announce</tt>] the announce number on the page.
+  #       [<tt>:announce</tt>] the announce number on the page (optional).
   # [<tt>:individualInfos</tt>]
   #   indicating that the contact is a person with the following
   #   informations :
