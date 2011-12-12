@@ -77,9 +77,9 @@ class EPPClient::Base
 
     attrs.each do |k,v|
       begin
-	self.send("#{k}=", v)
+        self.send("#{k}=", v)
       rescue NoMethodError
-	raise ArgumentError, "there is no #{k} argument"
+        raise ArgumentError, "there is no #{k} argument"
       end
     end
 
