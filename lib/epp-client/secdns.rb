@@ -77,7 +77,66 @@ module EPPClient::SecDNS
     ret
   end
 
+  # Extends the base domain create so that the specific secDNS create
+  # informations can be sent, the additionnal informations are :
+  #
+  # either:
+  # [<tt>:keyData</tt>]
+  #   containing an array of keyData objects as described in the domain_info function.
+  # [<tt>:dsData</tt>]
+  #   containing an array of dsData objects as described in the domain_info function.
+  #
+  # Optionnaly :
+  # [<tt>:maxSigLife</tt>]
+  #   as described in the domain_info function.
+  def domain_create(domain)
+    super # placeholder so that I can add some doc
+  end
+
+  def domain_create_xml(domain) #:nodoc:
+    ret = super
+
+    if domain.key?(:maxSigLife) || domain.key?(:dsData) || domain.key?(:keyData)
+      ext = extension do |xml|
+        xml.create( :xmlns => EPPClient::SCHEMAS_URL['secDNS']) do
+          if domain.key?(:maxSigLife)
+            xml.maxSigLife(domain[:maxSigLife])
+          end
+          if domain.key?(:dsData)
+            domain[:dsData].each do |ds|
+              make_ds_data(xml, ds)
+            end
+          elsif domain.key?(:keyData)
+            domain[:keyData].each do |key|
+              make_key_data(xml, key)
+            end
+          end
+        end
+      end
+      return insert_extension(ret, ext)
+    else
+      return ret
+    end
+  end
+
   private
+  def make_key_data(xml, key)
+    xml.keyData do
+      xml.flags key[:flags]
+      xml.protocol key[:protocol]
+      xml.alg key[:alg]
+      xml.pubKey key[:pubKey]
+    end
+  end
+  def make_ds_data(xml, ds)
+    xml.dsData do
+      xml.keyTag ds[:keyTag]
+      xml.alg ds[:alg]
+      xml.digestType ds[:digestType]
+      xml.digest ds[:digest]
+      make_key_data(xml, ds[:keyData]) if ds.key?(:keyData)
+    end
+  end
   def parse_key_data(xml)
     {
       :flags => xml.xpath("secDNS:flags", EPPClient::SCHEMAS_URL).text.to_i,
