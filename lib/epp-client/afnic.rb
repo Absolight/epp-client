@@ -1,5 +1,6 @@
 require 'epp-client/base'
 require 'epp-client/rgp'
+require 'epp-client/secdns'
 
 class EPPClient::AFNIC < EPPClient::Base
   SCHEMAS_AFNIC = %w[
@@ -371,10 +372,11 @@ class EPPClient::AFNIC < EPPClient::Base
     ret
   end
 
-  # Make sure there's no <tt>:ns</tt> records, AFNIC's servers sends quite
-  # a strange error when there is.
+  # Make sure there's no <tt>:ns</tt>, <tt>:dsData</tt> or <tt>:keyData</tt>
+  # records, AFNIC's servers sends quite a strange error when there is.
   def domain_create(args)
     raise ArgumentError, "You can't create a domain with ns records, you must do an update afterwards" if args.key?(:ns)
+    raise ArgumentError, "You can't create a domain with ds or key records, you must do an update afterwards" if args.key?(:dsData) || args.key?(:keyData)
     super
   end
 
@@ -497,4 +499,5 @@ class EPPClient::AFNIC < EPPClient::Base
 
   # keep that at the end.
   include EPPClient::RGP
+  include EPPClient::SecDNS
 end
