@@ -119,6 +119,86 @@ module EPPClient::SecDNS
     end
   end
 
+  # Extends the base domain update so that secDNS informations can be sent, the
+  # additionnal informations are contained in an <tt>:secDNS</tt> object :
+  #
+  # [:rem]
+  #   To remove keys or ds from the delegation, with possible attributes one of :
+  #
+  #   [<tt>:all</tt>]
+  #     used to remove all DS and key data with a value of boolean true.  A
+  #     value of boolean false will do nothing.  Removing all DS information
+  #     can remove the ability of the parent to secure the delegation to the
+  #     child zone.
+  #   [<tt>:dsData</tt>]
+  #     an array of dsData elements described in the domain_info function.
+  #   [<tt>:keyData</tt>]
+  #     an array of keyData elements as described in the domain_info function.
+  #
+  # [:add]
+  #   To add keys or DS from the delegation, with possible attributes one of :
+  #
+  #   [<tt>:dsData</tt>]
+  #     an array of dsData elements described in the domain_info function.
+  #   [<tt>:keyData</tt>]
+  #     an array of keyData elements as described in the domain_info function.
+  # [:chg]
+  #   contains security information to be changed, one of :
+  #
+  #   [:maxSigLife]
+  #     optional, as described in the domain_info function.
+  def domain_update(args)
+    super # placeholder so that I can add some doc
+  end
+
+  def domain_update_xml(domain)
+    ret = super
+
+    if domain.key?(:secDNS)
+      sd = domain[:secDNS]
+      ext = extension do |xml|
+        xml.update(sd[:urgent] == true ? {:urgent => true}: {}, {:xmlns => EPPClient::SCHEMAS_URL['secDNS']}) do
+          if sd.key?(:rem)
+            xml.rem do
+              if sd[:rem].key?(:all) && sd[:rem][:all] == true
+                xml.all true
+              elsif sd[:rem].key?(:dsData)
+                sd[:rem][:dsData].each do |ds|
+                  make_ds_data(xml, ds)
+                end
+              elsif sd[:rem].key?(:keyData)
+                sd[:rem][:keyData].each do |key|
+                  make_key_data(xml, key)
+                end
+              end
+            end
+          end
+          if sd.key?(:add)
+            xml.add do
+              if sd[:add].key?(:dsData)
+                sd[:add][:dsData].each do |ds|
+                  make_ds_data(xml, ds)
+                end
+              elsif sd[:add].key?(:keyData)
+                sd[:add][:keyData].each do |key|
+                  make_key_data(xml, key)
+                end
+              end
+            end
+          end
+          if sd.key?(:chg) && sd[:chg].key?(:maxSigLife)
+            xml.chg do
+              xml.maxSigLife sd[:chg][:maxSigLife]
+            end
+          end
+        end
+      end
+      return insert_extension(ret, ext)
+    else
+      return ret
+    end
+  end
+
   private
   def make_key_data(xml, key)
     xml.keyData do
