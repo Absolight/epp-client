@@ -1,5 +1,6 @@
 require 'epp-client/base'
 require 'epp-client/rgp'
+require 'epp-client/secdns'
 
 class EPPClient::AFNIC < EPPClient::Base
   SCHEMAS_AFNIC = %w[
@@ -497,4 +498,5 @@ class EPPClient::AFNIC < EPPClient::Base
 
   # keep that at the end.
   include EPPClient::RGP
+  include EPPClient::SecDNS
 end

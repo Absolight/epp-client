@@ -18,7 +18,6 @@ class EPPClient::Base
   ]
   SCHEMAS_EXT_IETF = %w[
     rgp-1.0
-    secDNS-1.0
   ]
 
   EPPClient::SCHEMAS_URL = SCHEMAS.inject({}) do |a,s|
