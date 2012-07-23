@@ -15,8 +15,8 @@ module EPPClient
       @extensions << EPPClient::SCHEMAS_URL['secDNS-1.1']
     end
 
-    # Extends the base domain info so that the specific secDNS elements
-    # can be added.
+    # Extends the EPPClient::Domain#domain_info so that the specific secDNS
+    # elements can be added.
     #
     # either:
     # [<tt>:keyData</tt>]
@@ -78,8 +78,8 @@ module EPPClient
       ret
     end
 
-    # Extends the base domain create so that the specific secDNS create
-    # informations can be sent, the additionnal informations are :
+    # Extends the EPPClient::Domain#domain_create so that the specific secDNS
+    # create informations can be sent, the additionnal informations are :
     #
     # either:
     # [<tt>:keyData</tt>]
@@ -120,8 +120,9 @@ module EPPClient
       end
     end
 
-    # Extends the base domain update so that secDNS informations can be sent, the
-    # additionnal informations are contained in an <tt>:secDNS</tt> object :
+    # Extends the EPPClient::Domain#domain_update so that secDNS informations
+    # can be sent, the additionnal informations are contained in an
+    # <tt>:secDNS</tt> object :
     #
     # [:rem]
     #   To remove keys or ds from the delegation, with possible attributes one of :
