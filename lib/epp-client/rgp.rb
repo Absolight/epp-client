@@ -5,99 +5,101 @@
 #
 # Has to be included after the initialize, domain_info and domain_update
 # definitions.
-module EPPClient::RGP
-  def self.included(base) # :nodoc:
-    base.class_eval do
-      alias_method :initialize_without_rgp, :initialize
-      alias_method :initialize, :initialize_with_rgp
-      alias_method :domain_info_process_without_rgp, :domain_info_process
-      alias_method :domain_info_process, :domain_info_process_with_rgp
-    end
-  end
-
-  def initialize_with_rgp(args) #:nodoc:
-    initialize_without_rgp(args)
-    @extensions << EPPClient::SCHEMAS_URL['rgp']
-  end
-
-  def domain_info_process_with_rgp(xml) #:nodoc:
-    ret = domain_info_process_without_rgp(xml)
-    if (rgp_status = xml.xpath('epp:extension/rgp:infData/rgp:rgpStatus', EPPClient::SCHEMAS_URL)).size > 0
-      ret[:rgpStatus] = rgp_status.map {|s| s.attr('s')}
-    end
-    ret
-  end
-
-  def domain_restore_xml(args) #:nodoc:
-    command(lambda do |xml|
-      xml.update do
-        xml.update('xmlns' => EPPClient::SCHEMAS_URL['domain-1.0']) do
-          xml.name args[:name]
-        end
+module EPPClient
+  module RGP
+    def self.included(base) # :nodoc:
+      base.class_eval do
+	alias_method :initialize_without_rgp, :initialize
+	alias_method :initialize, :initialize_with_rgp
+	alias_method :domain_info_process_without_rgp, :domain_info_process
+	alias_method :domain_info_process, :domain_info_process_with_rgp
       end
-    end, lambda do |xml|
-      xml.update('xmlns' => EPPClient::SCHEMAS_URL['rgp-1.0']) do
-        if args.key?(:report)
-          xml.restore(:op => 'report') do
-            [:preData, :postData, :delTime, :resTime, :resReason].each do |v|
-              xml.__send__(v, args[:report][v])
-            end
-            args[:report][:statements].each do |s|
-              xml.statement s
-            end
-            if args[:report].key?(:other)
-              xml.other args[:report][:other]
-            end
-          end
-        else
-          xml.restore(:op => 'request')
-        end
+    end
+
+    def initialize_with_rgp(args) #:nodoc:
+      initialize_without_rgp(args)
+      @extensions << EPPClient::SCHEMAS_URL['rgp']
+    end
+
+    def domain_info_process_with_rgp(xml) #:nodoc:
+      ret = domain_info_process_without_rgp(xml)
+      if (rgp_status = xml.xpath('epp:extension/rgp:infData/rgp:rgpStatus', EPPClient::SCHEMAS_URL)).size > 0
+	ret[:rgpStatus] = rgp_status.map {|s| s.attr('s')}
       end
-    end)
-  end
+      ret
+    end
 
-  # Restores a domain.
-  #
-  # takes a hash as arguments, with the following keys :
-  # [<tt>:name</tt>]
-  #   the fully qualified name of the domain object to be updated.
-  # [<tt>:report</tt>]
-  #   the optional report with the following fields :
-  #   [<tt>:preData</tt>]
-  #     a copy of the registration data that existed for the domain name prior
-  #     to the domain name being deleted.
-  #   [<tt>:postData</tt>]
-  #     a copy of the registration data that exists for the domain name at the
-  #     time the restore report is submitted.
-  #   [<tt>:delTime</tt>]
-  #     the date and time when the domain name delete request was sent to the
-  #     server.
-  #   [<tt>:resTime</tt>]
-  #     the date and time when the original <rgp:restore> command was sent to
-  #     the server.
-  #   [<tt>:resReason</tt>]
-  #     a brief explanation of the reason for restoring the domain name.
-  #   [<tt>:statements</tt>]
-  #     an array of two statements :
-  #     1. a text statement that the client has not restored the domain name in
-  #        order to assume the rights to use or sell the domain name for itself
-  #        or for any third party.  Supporting information related to this
-  #        statement MAY be supplied in the <tt>:other</tt> element described
-  #        below.
-  #     2. a text statement that the information in the restore report is
-  #        factual to the best of the client's knowledge.
-  #   [<tt>:other</tt>]
-  #     an optional element that contains any information needed to support the
-  #     statements provided by the client.
-  #
-  # Returns an array of rgpStatus.
-  def domain_restore(args)
-    response = send_request(domain_restore_xml(args))
+    def domain_restore_xml(args) #:nodoc:
+      command(lambda do |xml|
+	xml.update do
+	  xml.update('xmlns' => EPPClient::SCHEMAS_URL['domain-1.0']) do
+	    xml.name args[:name]
+	  end
+	end
+      end, lambda do |xml|
+	xml.update('xmlns' => EPPClient::SCHEMAS_URL['rgp-1.0']) do
+	  if args.key?(:report)
+	    xml.restore(:op => 'report') do
+	      [:preData, :postData, :delTime, :resTime, :resReason].each do |v|
+		xml.__send__(v, args[:report][v])
+	      end
+	      args[:report][:statements].each do |s|
+		xml.statement s
+	      end
+	      if args[:report].key?(:other)
+		xml.other args[:report][:other]
+	      end
+	    end
+	  else
+	    xml.restore(:op => 'request')
+	  end
+	end
+      end)
+    end
 
-    get_result(:xml => response, :callback => :domain_restore_process)
-  end
+    # Restores a domain.
+    #
+    # takes a hash as arguments, with the following keys :
+    # [<tt>:name</tt>]
+    #   the fully qualified name of the domain object to be updated.
+    # [<tt>:report</tt>]
+    #   the optional report with the following fields :
+    #   [<tt>:preData</tt>]
+    #     a copy of the registration data that existed for the domain name prior
+    #     to the domain name being deleted.
+    #   [<tt>:postData</tt>]
+    #     a copy of the registration data that exists for the domain name at the
+    #     time the restore report is submitted.
+    #   [<tt>:delTime</tt>]
+    #     the date and time when the domain name delete request was sent to the
+    #     server.
+    #   [<tt>:resTime</tt>]
+    #     the date and time when the original <rgp:restore> command was sent to
+    #     the server.
+    #   [<tt>:resReason</tt>]
+    #     a brief explanation of the reason for restoring the domain name.
+    #   [<tt>:statements</tt>]
+    #     an array of two statements :
+    #     1. a text statement that the client has not restored the domain name in
+    #        order to assume the rights to use or sell the domain name for itself
+    #        or for any third party.  Supporting information related to this
+    #        statement MAY be supplied in the <tt>:other</tt> element described
+    #        below.
+    #     2. a text statement that the information in the restore report is
+    #        factual to the best of the client's knowledge.
+    #   [<tt>:other</tt>]
+    #     an optional element that contains any information needed to support the
+    #     statements provided by the client.
+    #
+    # Returns an array of rgpStatus.
+    def domain_restore(args)
+      response = send_request(domain_restore_xml(args))
 
-  def domain_restore_process(xml) #:nodoc:
-    xml.xpath('epp:extension/rgp:upData/rgp:rgpStatus', EPPClient::SCHEMAS_URL).map {|s| s.attr('s')}
+      get_result(:xml => response, :callback => :domain_restore_process)
+    end
+
+    def domain_restore_process(xml) #:nodoc:
+      xml.xpath('epp:extension/rgp:upData/rgp:rgpStatus', EPPClient::SCHEMAS_URL).map {|s| s.attr('s')}
+    end
   end
 end
