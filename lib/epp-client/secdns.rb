@@ -152,7 +152,7 @@ module EPPClient
       super # placeholder so that I can add some doc
     end
 
-    def domain_update_xml(domain)
+    def domain_update_xml(domain) #:nodoc:
       ret = super
 
       if domain.key?(:secDNS)
