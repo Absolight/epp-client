@@ -1,4 +1,9 @@
-require 'epp-client'
+require 'openssl'
+require 'socket'
+require 'nokogiri'
+require 'builder'
+require 'date'
+require "epp-client/version"
 require 'epp-client/xml'
 require 'epp-client/session'
 require 'epp-client/connection'
