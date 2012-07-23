@@ -32,8 +32,8 @@ module EPPClient
       @extensions << EPPClient::SCHEMAS_URL['frnic']
     end
 
-    # Extends the base domain check so that the specific afnic check
-    # informations are processed, the additionnal informations are :
+    # Extends the EPPClient::Domain#domain_check so that the specific AFNIC
+    # check informations are processed, the additionnal informations are :
     #
     # [<tt>:reserved</tt>] the domain is a reserved name.
     # [<tt>:rsvReason</tt>] the optional reason why the domain is reserved.
@@ -60,8 +60,8 @@ module EPPClient
       return ret
     end
 
-    # Extends the base domain info so that the specific afnic <tt>:status</tt>
-    # can be added.
+    # Extends the EPPClient::Domain#domain_info so that the specific AFNIC
+    # <tt>:status</tt> can be added.
     def domain_info(domain)
       super # placeholder so that I can add some doc
     end
@@ -110,8 +110,8 @@ module EPPClient
     end
     private :legalEntityInfos
 
-    # Extends the base contact info so that the specific afnic check
-    # informations are processed, the additionnal informations are :
+    # Extends the EPPClient::Contact#contact_info so that the specific AFNIC
+    # check informations are processed, the additionnal informations are :
     #
     # either :
     # [<tt>:legalEntityInfos</tt>]
@@ -294,8 +294,8 @@ module EPPClient
       insert_extension(ret, ext)
     end
 
-    # Extends the base contact create so that the specific afnic create
-    # informations can be sent, the additionnal informations are :
+    # Extends the EPPClient::Contact#contact_create so that the specific AFNIC
+    # create informations can be sent, the additionnal informations are :
     #
     # either :
     # [<tt>:legalEntityInfos</tt>]
@@ -373,8 +373,9 @@ module EPPClient
       ret
     end
 
-    # Make sure there's no <tt>:ns</tt>, <tt>:dsData</tt> or <tt>:keyData</tt>
-    # records, AFNIC's servers sends quite a strange error when there is.
+    # Extends the EPPClient::Domain#domain_create to make sure there's no
+    # <tt>:ns</tt>, <tt>:dsData</tt> or <tt>:keyData</tt> records, AFNIC's
+    # servers sends quite a strange error when there is.
     def domain_create(args)
       raise ArgumentError, "You can't create a domain with ns records, you must do an update afterwards" if args.key?(:ns)
       raise ArgumentError, "You can't create a domain with ds or key records, you must do an update afterwards" if args.key?(:dsData) || args.key?(:keyData)
@@ -424,8 +425,8 @@ module EPPClient
       end
     end
 
-    # Extends the base contact update so that the specific afnic update
-    # informations can be sent, the additionnal informations are :
+    # Extends the EPPClient::Contact#contact_update so that the specific AFNIC
+    # update informations can be sent, the additionnal informations are :
     #
     # [<tt>:add</tt>/<tt>:rem</tt>]
     #   adds or removes the following datas :
@@ -440,8 +441,8 @@ module EPPClient
       super # placeholder so that I can add some doc
     end
 
-    # Extends the base domain update so that afnic's weirdnesses can be taken
-    # into account.
+    # Extends the EPPClient::Domain#domain_update so that AFNIC's weirdnesses
+    # can be taken into account.
     #
     # AFNIC does not support ns/hostObj, only ns/hostAttr/Host*, so, take care
     # of this here.
@@ -467,8 +468,8 @@ module EPPClient
       super
     end
 
-    # Extends the base poll req to be able to parse quallification response
-    # extension.
+    # Extends the EPPClient::Poll#poll_req to be able to parse quallification
+    # response extension.
     def poll_req
       super # placeholder so that I can add some doc
     end

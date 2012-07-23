@@ -19,7 +19,7 @@ module EPPClient
       greeting_process(get_frame)
     end
 
-    def greeting_process(xml)
+    def greeting_process(xml) #:nodoc:
       @srv_version = xml.xpath('epp:epp/epp:greeting/epp:svcMenu/epp:version', EPPClient::SCHEMAS_URL).map {|n| n.text}
       @srv_lang = xml.xpath('epp:epp/epp:greeting/epp:svcMenu/epp:lang', EPPClient::SCHEMAS_URL).map {|n| n.text}
       @srv_ns = xml.xpath('epp:epp/epp:greeting/epp:svcMenu/epp:objURI', EPPClient::SCHEMAS_URL).map {|n| n.text}

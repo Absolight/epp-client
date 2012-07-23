@@ -45,8 +45,9 @@ module EPPClient
       @extensions << EPPClient::SCHEMAS_URL['sr']
     end
 
-    # Extends the base contact info so that the specific smallregistry's
-    # informations are processed, the additionnal informations are :
+    # Extends the EPPClient::Contact#contact_info so that the specific
+    # smallregistry's informations are processed, the additionnal informations
+    # are :
     #
     # one of :
     # [<tt>:org</tt>]
@@ -79,8 +80,8 @@ module EPPClient
       ret
     end
 
-    # Extends the base contact create so that the specific smallregistry's
-    # information are sent, the additionnal informations are :
+    # Extends the EPPClient::Contact#contact_create so that the specific
+    # smallregistry's information are sent, the additionnal informations are :
     #
     # one of :
     # [<tt>:org</tt>]
@@ -151,8 +152,8 @@ module EPPClient
       end
     end
 
-    # Extends the base contact update so that the specific afnic update
-    # informations can be sent, the additionnal informations are :
+    # Extends the EPPClient::Contact#contact_update so that the specific afnic
+    # update informations can be sent, the additionnal informations are :
     #
     # [<tt>:chg</tt>]
     #   changes one of :
