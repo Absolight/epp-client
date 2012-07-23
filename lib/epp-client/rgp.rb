@@ -7,22 +7,13 @@
 # definitions.
 module EPPClient
   module RGP
-    def self.included(base) # :nodoc:
-      base.class_eval do
-	alias_method :initialize_without_rgp, :initialize
-	alias_method :initialize, :initialize_with_rgp
-	alias_method :domain_info_process_without_rgp, :domain_info_process
-	alias_method :domain_info_process, :domain_info_process_with_rgp
-      end
-    end
-
-    def initialize_with_rgp(args) #:nodoc:
-      initialize_without_rgp(args)
+    def initialize(args) #:nodoc:
+      super
       @extensions << EPPClient::SCHEMAS_URL['rgp']
     end
 
-    def domain_info_process_with_rgp(xml) #:nodoc:
-      ret = domain_info_process_without_rgp(xml)
+    def domain_info_process(xml) #:nodoc:
+      ret = super(xml)
       if (rgp_status = xml.xpath('epp:extension/rgp:infData/rgp:rgpStatus', EPPClient::SCHEMAS_URL)).size > 0
 	ret[:rgpStatus] = rgp_status.map {|s| s.attr('s')}
       end
