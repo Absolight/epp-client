@@ -1,11 +1,11 @@
-# RFC3915[http://tools.ietf.org/html/rfc3915]
-#
-# Domain Registry Grace Period Mapping for the
-# Extensible Provisioning Protocol (EPP)
-#
-# Has to be included after the initialize, domain_info and domain_update
-# definitions.
 module EPPClient
+  # RFC3915[http://tools.ietf.org/html/rfc3915]
+  #
+  # Domain Registry Grace Period Mapping for the
+  # Extensible Provisioning Protocol (EPP)
+  #
+  # Has to be included after the initialize, domain_info and domain_update
+  # definitions.
   module RGP
     def initialize(args) #:nodoc:
       super
