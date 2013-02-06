@@ -32,5 +32,5 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency "bundler", ">= 1.0.0"
   gem.add_dependency('nokogiri', '~> 1.4')
   gem.add_dependency('builder',  '>= 2.1.2')
-  gem.add_dependency('epp-client-base',  "~> #{EPPClient::VERSION}")
+  gem.add_dependency('epp-client-base',  "#{EPPClient::VERSION}")
 end
