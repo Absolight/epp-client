@@ -69,6 +69,7 @@ module EPPClient
     def domain_info_process(xml) #:nodoc:
       ret = super
       if (frnic_status = xml.xpath('epp:extension/frnic:ext/frnic:resData/frnic:infData/frnic:domain/frnic:status', EPPClient::SCHEMAS_URL)).size > 0
+	ret[:status] ||= [] # The status is optional, there may be none at this point.
 	ret[:status] += frnic_status.map {|s| s.attr('s')}
       end
       ret
