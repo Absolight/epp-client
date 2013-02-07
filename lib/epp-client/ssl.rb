@@ -1,12 +1,5 @@
 module EPPClient
   module SSL
-    def self.included(base) # :nodoc:
-      base.class_eval do
-	alias_method :open_connection_without_ssl, :open_connection
-	alias_method :open_connection, :open_connection_with_ssl
-      end
-    end
-
     attr_reader :ssl_cert, :ssl_key
 
     def ssl_key=(key) #:nodoc:
@@ -37,10 +30,10 @@ module EPPClient
       end
     end
 
-    def open_connection_with_ssl # :nodoc:
+    def open_connection # :nodoc:
       @context.cert ||= ssl_cert if ssl_cert.is_a?(OpenSSL::X509::Certificate)
       @context.key ||= ssl_key if ssl_key.is_a?(OpenSSL::PKey::RSA)
-      open_connection_without_ssl
+      super
     end
   end
 end

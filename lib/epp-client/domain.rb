@@ -173,7 +173,7 @@ module EPPClient
       return ret
     end
 
-    def domain_nss_xml(xml, nss)
+    def domain_nss_xml(xml, nss) #:nodoc:
       xml.ns do
 	if nss.first.is_a?(Hash)
 	  nss.each do |ns|
@@ -199,7 +199,7 @@ module EPPClient
       end
     end
 
-    def domain_contacts_xml(xml, args)
+    def domain_contacts_xml(xml, args) #:nodoc:
       args.each do |type,contacts|
 	contacts.each do |c|
 	  xml.contact({:type => type}, c)

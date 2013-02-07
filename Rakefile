@@ -8,19 +8,23 @@ MY_GEMS = Dir['*.gemspec'].map {|g| g.sub(/.*-(.*)\.gemspec/, '\1')}
 
 MY_GEMS.each do |g|
   namespace g do
-    Bundler::GemHelper.new(Dir.pwd, "epp-client-#{g}").install
+    bgh = Bundler::GemHelper.new(Dir.pwd, "epp-client-#{g}")
+    bgh.install
+    task :push do
+      sh "gem push #{File.join(Dir.pwd, 'pkg', "epp-client-#{g}-#{bgh.__send__(:version)}.gem")}"
+    end
   end
 end
 
 namespace :all do
   task :build   => MY_GEMS.map { |f| "#{f}:build"   }
   task :install => MY_GEMS.map { |f| "#{f}:install" }
-  task :release => MY_GEMS.map { |f| "#{f}:release" }
+  task :push    => MY_GEMS.map { |f| "#{f}:push"    }
 end
 
 task :build   => 'all:build'
 task :install => 'all:install'
-task :release => 'all:release'
+task :push => 'all:push'
 
 desc "Generate documentation for the Rails framework"
 Rake::RDocTask.new do |rdoc|
