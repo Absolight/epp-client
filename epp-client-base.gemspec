@@ -4,7 +4,6 @@ require File.expand_path('../lib/epp-client/version', __FILE__)
 Gem::Specification.new do |gem|
   gem.name          = 'epp-client-base'
   gem.version       = EPPClient::VERSION
-  gem.date          = '2010-05-14'
   gem.authors       = ['Mathieu Arnold']
   gem.email         = ['m@absolight.fr']
   gem.description   = 'An extensible EPP client library.'
