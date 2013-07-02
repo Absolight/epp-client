@@ -62,7 +62,7 @@ module EPPClient
     #   [<tt>:birthPlace</tt>] the person's birth place.
     def contact_info(xml)
       super # placeholder so that I can add some doc
-    end 
+    end
 
     def contact_info_process(xml) #:nodoc:
       ret = super

@@ -22,7 +22,7 @@ module EPPClient
     # [<tt>:test</tt>] sets the server to be the test server.
     def initialize(args)
       if args.delete(:test) == true
-	args[:server] ||= 'epp.test.nic.fr'
+	args[:server] ||= 'epp.sandbox.nic.fr'
       else
 	args[:server] ||= 'epp.nic.fr'
       end
@@ -83,7 +83,7 @@ module EPPClient
 	ret[:idStatus] = {:value => r.text}
 	ret[:idStatus][:when] = r.attr('when').value if r.attr('when')
 	ret[:idStatus][:source] = r.attr('source').value if r.attr('source')
-	end
+      end
       %w(siren VAT trademark DUNS local).each do |val|
 	if (r = leI.xpath("frnic:#{val}", EPPClient::SCHEMAS_URL)).size > 0
 	  ret[val.to_sym] = r.text
@@ -206,7 +206,9 @@ module EPPClient
 	if (obsoleted = contact.xpath('frnic:obsoleted', EPPClient::SCHEMAS_URL)).size > 0
 	  if obsoleted.text != '0'
 	    ret[:obsoleted] = {}
-	    ret[:obsoleted][:when] = DateTime.parse(v_when.value) if v_when = obsoleted.attr('when')
+	    if v_when = obsoleted.attr('when')
+	      ret[:obsoleted][:when] = DateTime.parse(v_when.value)
+	    end
 	  end
 	end
 	if (reachable = contact.xpath('frnic:reachable', EPPClient::SCHEMAS_URL)).size > 0
@@ -475,26 +477,49 @@ module EPPClient
       super # placeholder so that I can add some doc
     end
 
-    def poll_req_process(xml) #:nodoc:
-      ret = super(xml)
-      if (quaData = xml.xpath('epp:extension/frnic:resData/frnic:quaData', EPPClient::SCHEMAS_URL)).size > 0
-	if (contact = xml.xpath('frnic:contact', EPPClient::SCHEMAS_URL)).size > 0
-	  cret = {:id => contact.xpath('frnic:id', EPPClient::SCHEMAS_URL).text}
-	  qP = contact.xpath('frnic:qualificationProcess', EPPClient::SCHEMAS_URL)
-	  cret[:qualificationProcess][:s] = qP.attr('s').value
-	  cret[:qualificationProcess][:lang] = qP.attr('lang').value if qP.attr('lang')
-	  if (leI = contact.xpath('frnic:legalEntityInfos', EPPClient::SCHEMAS_URL)).size > 0
-	    ret[:legalEntityInfos] = legalEntityInfos(leI)
-	  end
-	  reach = contact.xpath('frnic:reachability', EPPClient::SCHEMAS_URL)
-	  cret[:reachability] = {:reStatus => reach.xpath('frnic:reStatus', EPPClient::SCHEMAS_URL).text}
-	  if (voice = reach.xpath('frnic:voice', EPPClient::SCHEMAS_URL)).size > 0
-	    cret[:reachability][:voice] = voice.text
-	  end
-	  if (email = reach.xpath('frnic:email', EPPClient::SCHEMAS_URL)).size > 0
-	    cret[:reachability][:email] = email.text
-	  end
-	  ret[:quaData] = {:contact => cret}
+    EPPClient::Poll::PARSERS['frnic:ext/frnic:resData/frnic:quaData/frnic:contact'] = :contact_afnic_qualification
+
+    def contact_afnic_qualification(xml) #:nodoc:
+      contact = xml.xpath('epp:extension/frnic:ext/frnic:resData/frnic:quaData/frnic:contact', EPPClient::SCHEMAS_URL)
+      ret = {:id => contact.xpath('frnic:id', EPPClient::SCHEMAS_URL).text}
+      qP = contact.xpath('frnic:qualificationProcess', EPPClient::SCHEMAS_URL)
+      ret[:qualificationProcess] = {:s => qP.attr('s').value}
+      ret[:qualificationProcess][:lang] = qP.attr('lang').value if qP.attr('lang')
+      if (leI = contact.xpath('frnic:legalEntityInfos', EPPClient::SCHEMAS_URL)).size > 0
+	ret[:legalEntityInfos] = legalEntityInfos(leI)
+      end
+      reach = contact.xpath('frnic:reachability', EPPClient::SCHEMAS_URL)
+      ret[:reachability] = {:reStatus => reach.xpath('frnic:reStatus', EPPClient::SCHEMAS_URL).text}
+      if (voice = reach.xpath('frnic:voice', EPPClient::SCHEMAS_URL)).size > 0
+	ret[:reachability][:voice] = voice.text
+      end
+      if (email = reach.xpath('frnic:email', EPPClient::SCHEMAS_URL)).size > 0
+	ret[:reachability][:email] = email.text
+      end
+      ret
+    end
+
+    EPPClient::Poll::PARSERS['frnic:ext/frnic:resData/frnic:trdData/frnic:domain'] = :domain_afnic_trade_response
+
+    def domain_afnic_trade_response(xml) #:nodoc:
+      dom = xml.xpath('epp:extension/frnic:ext/frnic:resData/frnic:trdData/frnic:domain', EPPClient::SCHEMAS_URL)
+      ret = {
+	:name     => dom.xpath('frnic:name', EPPClient::SCHEMAS_URL).text,
+	:trStatus => dom.xpath('frnic:trStatus', EPPClient::SCHEMAS_URL).text,
+	:reID     => dom.xpath('frnic:reID', EPPClient::SCHEMAS_URL).text,
+	:reDate   => DateTime.parse(dom.xpath('frnic:reDate', EPPClient::SCHEMAS_URL).text),
+	:acID     => dom.xpath('frnic:acID', EPPClient::SCHEMAS_URL).text,
+      }
+
+      # FIXME: there are discrepencies between the 1.2 xmlschema, the documentation and the reality, I'm trying to stick to reality here.
+      %w(reHldID acHldID).each do |f|
+	if (field = dom.xpath("frnic:#{f}", EPPClient::SCHEMAS_URL)).size > 0
+	  ret[f.to_sym] = field.text
+	end
+      end
+      %w(rhDate ahDate).each do |f|
+	if (field = dom.xpath("frnic:#{f}", EPPClient::SCHEMAS_URL)).size > 0
+	  ret[f.to_sym] = DateTime.parse(field.text)
 	end
       end
       ret
