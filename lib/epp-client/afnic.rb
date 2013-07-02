@@ -502,6 +502,32 @@ module EPPClient
       ret
     end
 
+    EPPClient::Poll::PARSERS['frnic:ext/frnic:resData/frnic:trdData/frnic:domain'] = :domain_afnic_trade_response
+
+    def domain_afnic_trade_response(xml) #:nodoc:
+      dom = xml.xpath('epp:extension/frnic:ext/frnic:resData/frnic:trdData/frnic:domain', EPPClient::SCHEMAS_URL)
+      ret = {
+	:name     => dom.xpath('frnic:name', EPPClient::SCHEMAS_URL).text,
+	:trStatus => dom.xpath('frnic:trStatus', EPPClient::SCHEMAS_URL).text,
+	:reID     => dom.xpath('frnic:reID', EPPClient::SCHEMAS_URL).text,
+	:reDate   => DateTime.parse(dom.xpath('frnic:reDate', EPPClient::SCHEMAS_URL).text),
+	:acID     => dom.xpath('frnic:acID', EPPClient::SCHEMAS_URL).text,
+      }
+
+      # FIXME: there are discrepencies between the 1.2 xmlschema, the documentation and the reality, I'm trying to stick to reality here.
+      %w(reHldID acHldID).each do |f|
+	if (field = dom.xpath("frnic:#{f}", EPPClient::SCHEMAS_URL)).size > 0
+	  ret[f.to_sym] = field.text
+	end
+      end
+      %w(rhDate ahDate).each do |f|
+	if (field = dom.xpath("frnic:#{f}", EPPClient::SCHEMAS_URL)).size > 0
+	  ret[f.to_sym] = DateTime.parse(field.text)
+	end
+      end
+      ret
+    end
+
     # keep that at the end.
     include EPPClient::RGP
     include EPPClient::SecDNS
