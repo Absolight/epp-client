@@ -22,7 +22,7 @@ module EPPClient
     # [<tt>:test</tt>] sets the server to be the test server.
     def initialize(args)
       if args.delete(:test) == true
-	args[:server] ||= 'epp.test.nic.fr'
+	args[:server] ||= 'epp.sandbox.nic.fr'
       else
 	args[:server] ||= 'epp.nic.fr'
       end
