@@ -1,6 +1,7 @@
 module EPPClient
   module Domain
     EPPClient::Poll::PARSERS['domain:panData'] = :domain_pending_action_process
+    EPPClient::Poll::PARSERS['domain:trnData'] = :domain_transfer_response
 
     def domain_check_xml(*domains) # :nodoc:
       command do |xml|
@@ -389,6 +390,22 @@ module EPPClient
 	:paTRID => get_trid(dom.xpath('domain:paTRID', EPPClient::SCHEMAS_URL)),
 	:paDate => DateTime.parse(dom.xpath('domain:paDate', EPPClient::SCHEMAS_URL).text),
       }
+    end
+
+    def domain_transfer_response(xml) #:nodoc:
+      dom = xml.xpath('epp:resData/domain:trnData', EPPClient::SCHEMAS_URL)
+      ret = {
+	:name => dom.xpath('domain:name', EPPClient::SCHEMAS_URL).text,
+	:trStatus => dom.xpath('domain:trStatus', EPPClient::SCHEMAS_URL).text,
+	:reID => dom.xpath('domain:reID', EPPClient::SCHEMAS_URL).text,
+	:reDate => DateTime.parse(dom.xpath('domain:reDate', EPPClient::SCHEMAS_URL).text),
+	:acID => dom.xpath('domain:acID', EPPClient::SCHEMAS_URL).text,
+	:acDate => DateTime.parse(dom.xpath('domain:acDate', EPPClient::SCHEMAS_URL).text)
+      }
+      if (exDate = dom.xpath('domain:exDate', EPPClient::SCHEMAS_URL)).size > 0
+	ret[:exDate] = DateTime.parse(exDate)
+      end
+      ret
     end
   end
 end
