@@ -83,7 +83,7 @@ module EPPClient
 	ret[:idStatus] = {:value => r.text}
 	ret[:idStatus][:when] = r.attr('when').value if r.attr('when')
 	ret[:idStatus][:source] = r.attr('source').value if r.attr('source')
-	end
+      end
       %w(siren VAT trademark DUNS local).each do |val|
 	if (r = leI.xpath("frnic:#{val}", EPPClient::SCHEMAS_URL)).size > 0
 	  ret[val.to_sym] = r.text
