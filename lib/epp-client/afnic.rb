@@ -477,27 +477,24 @@ module EPPClient
       super # placeholder so that I can add some doc
     end
 
-    def poll_req_process(xml) #:nodoc:
-      ret = super(xml)
-      if (quaData = xml.xpath('epp:extension/frnic:resData/frnic:quaData', EPPClient::SCHEMAS_URL)).size > 0
-	if (contact = xml.xpath('frnic:contact', EPPClient::SCHEMAS_URL)).size > 0
-	  cret = {:id => contact.xpath('frnic:id', EPPClient::SCHEMAS_URL).text}
-	  qP = contact.xpath('frnic:qualificationProcess', EPPClient::SCHEMAS_URL)
-	  cret[:qualificationProcess][:s] = qP.attr('s').value
-	  cret[:qualificationProcess][:lang] = qP.attr('lang').value if qP.attr('lang')
-	  if (leI = contact.xpath('frnic:legalEntityInfos', EPPClient::SCHEMAS_URL)).size > 0
-	    ret[:legalEntityInfos] = legalEntityInfos(leI)
-	  end
-	  reach = contact.xpath('frnic:reachability', EPPClient::SCHEMAS_URL)
-	  cret[:reachability] = {:reStatus => reach.xpath('frnic:reStatus', EPPClient::SCHEMAS_URL).text}
-	  if (voice = reach.xpath('frnic:voice', EPPClient::SCHEMAS_URL)).size > 0
-	    cret[:reachability][:voice] = voice.text
-	  end
-	  if (email = reach.xpath('frnic:email', EPPClient::SCHEMAS_URL)).size > 0
-	    cret[:reachability][:email] = email.text
-	  end
-	  ret[:quaData] = {:contact => cret}
-	end
+    EPPClient::Poll::PARSERS['frnic:ext/frnic:resData/frnic:quaData/frnic:contact'] = :contact_afnic_qualification
+
+    def contact_afnic_qualification(xml) #:nodoc:
+      contact = xml.xpath('epp:extension/frnic:ext/frnic:resData/frnic:quaData/frnic:contact', EPPClient::SCHEMAS_URL)
+      ret = {:id => contact.xpath('frnic:id', EPPClient::SCHEMAS_URL).text}
+      qP = contact.xpath('frnic:qualificationProcess', EPPClient::SCHEMAS_URL)
+      ret[:qualificationProcess] = {:s => qP.attr('s').value}
+      ret[:qualificationProcess][:lang] = qP.attr('lang').value if qP.attr('lang')
+      if (leI = contact.xpath('frnic:legalEntityInfos', EPPClient::SCHEMAS_URL)).size > 0
+	ret[:legalEntityInfos] = legalEntityInfos(leI)
+      end
+      reach = contact.xpath('frnic:reachability', EPPClient::SCHEMAS_URL)
+      ret[:reachability] = {:reStatus => reach.xpath('frnic:reStatus', EPPClient::SCHEMAS_URL).text}
+      if (voice = reach.xpath('frnic:voice', EPPClient::SCHEMAS_URL)).size > 0
+	ret[:reachability][:voice] = voice.text
+      end
+      if (email = reach.xpath('frnic:email', EPPClient::SCHEMAS_URL)).size > 0
+	ret[:reachability][:email] = email.text
       end
       ret
     end
