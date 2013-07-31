@@ -1,4 +1,5 @@
 require 'epp-client/base'
+require 'epp-client/secdns'
 
 module EPPClient
   class SmallRegistry < Base
@@ -171,5 +172,8 @@ module EPPClient
     def contact_update(args)
       super # placeholder so that I can add some doc
     end
+
+    # keep that at the end.
+    include EPPClient::SecDNS
   end
 end
