@@ -70,7 +70,9 @@ module EPPClient
     # <tt>:roid</tt> the contact the authInfo is about.
     #
     # Returned is a hash mapping as closely as possible the result expected
-    # from the command as per Section 3.1.2 of RFC 5731 :
+    # from the command as per Section
+    # {3.1.2}[https://tools.ietf.org/html/rfc5731#section-3.1.2] of {RFC
+    # 5731}[https://tools.ietf.org/html/rfc5731] :
     # [<tt>:name</tt>] The fully qualified name of the domain object.
     # [<tt>:roid</tt>]
     #    The Repository Object IDentifier assigned to the domain object when
@@ -242,7 +244,7 @@ module EPPClient
     #
     # [<tt>:name</tt>] the domain name
     # [<tt>:period</tt>]
-    #   an optionnal hash containing the period for withch the domain is
+    #   an optionnal hash containing the period for witch the domain is
     #   registered with the following keys :
     #   [<tt>:unit</tt>] the unit of time, either "m"onth or "y"ear.
     #   [<tt>:number</tt>] the number of unit of time.
@@ -406,6 +408,76 @@ module EPPClient
 	ret[:exDate] = DateTime.parse(exDate)
       end
       ret
+    end
+
+    def domain_transfer_xml(args) # :nodoc:
+      command do |xml|
+	xml.transfer('op' => args[:op]) do
+	  xml.transfer('xmlns' => EPPClient::SCHEMAS_URL['domain-1.0']) do
+	    xml.name(args[:name])
+	    if args.key?(:period)
+	      xml.period('unit' => args[:period][:unit]) do
+		args[:period][:number]
+	      end
+	    end
+	    if args.key?(:authInfo)
+	      xml.authInfo do
+		if args.key?(:roid)
+		  xml.pw({:roid => args[:roid]}, args[:authInfo])
+		else
+		  xml.pw(args[:authInfo])
+		end
+	      end
+	    end
+	  end
+	end
+      end
+    end
+
+    # Transfers a domain
+    #
+    # Takes a hash with :
+    #
+    # [<tt>:name</tt>] The domain name
+    # [<tt>:op</tt>] An operation that can either be "query" or "request".
+    # [<tt>:authInfo</tt>]
+    #   The authentication information and possibly <tt>:roid</tt> the contact
+    #   the authInfo is about.  The <tt>:authInfo</tt> information is optional
+    #   when the operation type is "query" and mandatory when it is "request".
+    # [<tt>:period</tt>]
+    #   An optionnal hash containing the period for witch the domain is
+    #   registered with the following keys :
+    #   [<tt>:unit</tt>] the unit of time, either "m"onth or "y"ear.
+    #   [<tt>:number</tt>] the number of unit of time.
+    #
+    # Returned is a hash mapping as closely as possible the result expected
+    # from the command as per Section
+    # {3.1.3}[https://tools.ietf.org/html/rfc5731#section-3.1.3] and
+    # {3.2.4}[https://tools.ietf.org/html/rfc5731#section-3.2.4] of {RFC
+    # 5731}[https://tools.ietf.org/html/rfc5731] :
+    # [<tt>:name</tt>] The fully qualified name of the domain object.
+    # [<tt>:trStatus</tt>] The state of the most recent transfer request.
+    # [<tt>:reID</tt>]
+    #   The identifier of the client that requested the object transfer.
+    # [<tt>:reDate</tt>] The date and time that the transfer was requested.
+    # [<tt>:acID</tt>]
+    #   The identifier of the client that SHOULD act upon a PENDING transfer
+    #   request.  For all other status types, the value identifies the client
+    #   that took the indicated action.
+    # [<tt>:acDate</tt>]
+    #   The date and time of a required or completed response.  For a PENDING
+    #   request, the value identifies the date and time by which a response is
+    #   required before an automated response action will be taken by the
+    #   server.  For all other status types, the value identifies the date and
+    #   time when the request was completed.
+    #
+    # [<tt>:exDate</tt>]
+    #   Optionnaly, the end of the domain object's validity period if the
+    #   <transfer> command caused or causes a change in the validity period.
+    def domain_transfer(args)
+      response = send_request(domain_transfer_xml(args))
+
+      get_result(:xml => response, :callback => :domain_transfer_response)
     end
   end
 end
