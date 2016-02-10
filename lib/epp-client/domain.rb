@@ -70,7 +70,9 @@ module EPPClient
     # <tt>:roid</tt> the contact the authInfo is about.
     #
     # Returned is a hash mapping as closely as possible the result expected
-    # from the command as per Section 3.1.2 of RFC 5731 :
+    # from the command as per Section
+    # {3.1.2}[https://tools.ietf.org/html/rfc5731#section-3.1.2] of {RFC
+    # 5731}[https://tools.ietf.org/html/rfc5731] :
     # [<tt>:name</tt>] The fully qualified name of the domain object.
     # [<tt>:roid</tt>]
     #    The Repository Object IDentifier assigned to the domain object when
@@ -242,7 +244,7 @@ module EPPClient
     #
     # [<tt>:name</tt>] the domain name
     # [<tt>:period</tt>]
-    #   an optionnal hash containing the period for withch the domain is
+    #   an optionnal hash containing the period for witch the domain is
     #   registered with the following keys :
     #   [<tt>:unit</tt>] the unit of time, either "m"onth or "y"ear.
     #   [<tt>:number</tt>] the number of unit of time.
