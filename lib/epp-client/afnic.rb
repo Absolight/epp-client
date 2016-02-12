@@ -233,7 +233,7 @@ module EPPClient
       ret = super
 
       ext = extension do |xml|
-        xml.ext( :xmlns => EPPClient::SCHEMAS_URL['frnic']) do
+        xml.ext(:xmlns => EPPClient::SCHEMAS_URL['frnic']) do
           xml.create do
             xml.contact do
               if contact.key?(:legalEntityInfos)
@@ -385,7 +385,7 @@ module EPPClient
 
       if [:add, :rem].any? { |c| args.key?(c) && [:list, :reachable, :idStatus].any? { |k| args[c].key?(k) } }
         ext = extension do |xml|
-          xml.ext( :xmlns => EPPClient::SCHEMAS_URL['frnic']) do
+          xml.ext(:xmlns => EPPClient::SCHEMAS_URL['frnic']) do
             xml.update do
               xml.contact do
                 [:add, :rem].each do |c|

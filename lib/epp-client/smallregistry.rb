@@ -102,7 +102,7 @@ module EPPClient
       ret = super
 
       ext = extension do |xml|
-        xml.ext( :xmlns => EPPClient::SCHEMAS_URL['sr']) do
+        xml.ext(:xmlns => EPPClient::SCHEMAS_URL['sr']) do
           xml.create do
             xml.contact do
               if contact.key?(:org)
@@ -128,7 +128,7 @@ module EPPClient
 
       if args.key?(:chg) && (args[:chg].key?(:org) || args[:chg].key?(:person))
         ext = extension do |xml|
-          xml.ext( :xmlns => EPPClient::SCHEMAS_URL['sr']) do
+          xml.ext(:xmlns => EPPClient::SCHEMAS_URL['sr']) do
             xml.update do
               xml.contact do
                 if args[:chg].key?(:org)

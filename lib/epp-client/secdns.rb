@@ -99,7 +99,7 @@ module EPPClient
 
       if domain.key?(:maxSigLife) || domain.key?(:dsData) || domain.key?(:keyData)
         ext = extension do |xml|
-          xml.create( :xmlns => EPPClient::SCHEMAS_URL['secDNS']) do
+          xml.create(:xmlns => EPPClient::SCHEMAS_URL['secDNS']) do
             xml.maxSigLife(domain[:maxSigLife]) if domain.key?(:maxSigLife)
             if domain.key?(:dsData)
               domain[:dsData].each do |ds|
