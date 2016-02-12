@@ -1,4 +1,7 @@
 module EPPClient
+  # This module handles all the contact interactions.
+  #
+  # See RFC 5733 for more informations.
   module Contact
     EPPClient::Poll::PARSERS['contact:infData'] = :contact_info_process
 

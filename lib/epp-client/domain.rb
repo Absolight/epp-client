@@ -1,4 +1,7 @@
 module EPPClient
+  # This module handles all the Domain interactions.!
+  #
+  # See RFC 5731 for more informations
   module Domain
     EPPClient::Poll::PARSERS['domain:panData'] = :domain_pending_action_process
     EPPClient::Poll::PARSERS['domain:trnData'] = :domain_transfer_response

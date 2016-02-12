@@ -1,4 +1,5 @@
 module EPPClient
+  # This implements the DNSSEC bits.
   module SecDNS
     SCHEMAS_SECDNS = %w(
       secDNS-1.1

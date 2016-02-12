@@ -1,4 +1,5 @@
 module EPPClient
+  # This module handles the SSL strangeness that happens with EPP.
   module SSL
     attr_reader :ssl_cert, :ssl_key
 

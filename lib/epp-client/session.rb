@@ -1,4 +1,5 @@
 module EPPClient
+  # This handles the basic session, login, logout, and hello.
   module Session
     # Sends an hello epp command.
     def hello

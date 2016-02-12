@@ -1,4 +1,5 @@
 module EPPClient
+  # This handles all the XML I/O
   module XML
     attr_reader :sent_xml, :recv_xml, :msgQ_count, :msgQ_id, :trID
 

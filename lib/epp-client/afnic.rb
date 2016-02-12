@@ -3,6 +3,9 @@ require 'epp-client/rgp'
 require 'epp-client/secdns'
 
 module EPPClient
+  # This handles the AFNIC specificities.
+  #
+  # See http://www.afnic.fr/doc/interface/epp
   class AFNIC < Base
     SCHEMAS_AFNIC = %w(
       frnic-1.2

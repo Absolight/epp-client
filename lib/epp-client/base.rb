@@ -15,6 +15,10 @@ require 'epp-client/domain'
 require 'epp-client/contact'
 
 module EPPClient
+  # This is the base class.
+  #
+  # It can be used directly to talk to EPP servers that have no specific
+  # requirements.
   class Base
     SCHEMAS = %w(
       epp-1.0

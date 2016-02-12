@@ -1,4 +1,5 @@
 module EPPClient
+  # This handles all the basic I/O for the connection.
   module Connection
     attr_reader :sent_frame, :recv_frame, :srv_version, :srv_lang, :srv_ns, :srv_ext
 

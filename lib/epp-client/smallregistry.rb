@@ -2,6 +2,10 @@ require 'epp-client/base'
 require 'epp-client/secdns'
 
 module EPPClient
+  # This handles the Smallregistry specificites.
+  #
+  # See
+  # https://www.smallregistry.net/faqs/quelles-sont-les-specificites-du-serveur-epp
   class SmallRegistry < Base
     SCHEMAS_SR = %w(
       sr-1.0

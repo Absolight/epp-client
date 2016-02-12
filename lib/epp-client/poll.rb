@@ -1,4 +1,5 @@
 module EPPClient
+  # This implements the poll EPP commands.
   module Poll
     def poll_req_xml #:nodoc:
       command do |xml|
