@@ -8,12 +8,12 @@ Gem::Specification.new do |gem|
   gem.email         = ['m@absolight.fr']
   gem.description   = 'SecDNS EPP client library.'
   gem.summary       = 'SecDNS EPP client library'
-  gem.homepage       = "https://github.com/Absolight/epp-client"
+  gem.homepage      = "https://github.com/Absolight/epp-client"
 
   gem.required_ruby_version = '>= 1.8.7'
   gem.required_rubygems_version = ">= 1.3.6"
 
-  gem.files         = [
+  gem.files = [
     'ChangeLog',
     'Gemfile',
     'MIT-LICENSE',
