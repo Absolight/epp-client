@@ -47,7 +47,7 @@ module EPPClient
       ret = super
       xml.xpath('epp:extension/frnic:ext/frnic:resData/frnic:chkData/frnic:domain/frnic:cd', EPPClient::SCHEMAS_URL).each do |dom|
         name = dom.xpath('frnic:name', EPPClient::SCHEMAS_URL)
-        hash = ret.select {|d| d[:name] == name.text}.first
+        hash = ret.find {|d| d[:name] == name.text}
         hash[:reserved] = name.attr('reserved').value == "1"
         unless (reason = dom.xpath('frnic:rsvReason', EPPClient::SCHEMAS_URL).text).empty?
           hash[:rsvReason] = reason
