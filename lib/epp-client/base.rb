@@ -15,7 +15,6 @@ require 'epp-client/contact'
 
 module EPPClient
   class Base
-
     SCHEMAS = %w[
       epp-1.0
       domain-1.0

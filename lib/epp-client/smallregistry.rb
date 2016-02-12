@@ -3,7 +3,6 @@ require 'epp-client/secdns'
 
 module EPPClient
   class SmallRegistry < Base
-
     SCHEMAS_SR = %w[
       sr-1.0
     ]
