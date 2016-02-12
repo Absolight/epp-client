@@ -79,13 +79,13 @@ module EPPClient
           when Symbol
             return send(cb, xml.xpath('epp:epp/epp:response', EPPClient::SCHEMAS_URL))
           else
-            raise ArgumentError, "Invalid callback type"
+            fail ArgumentError, "Invalid callback type"
           end
         else
           return true
         end
       else
-        raise EPPClient::EPPErrorResponse.new(:xml => xml, :code => code, :message => res.xpath('epp:msg', EPPClient::SCHEMAS_URL).text)
+        fail EPPClient::EPPErrorResponse.new(:xml => xml, :code => code, :message => res.xpath('epp:msg', EPPClient::SCHEMAS_URL).text)
       end
     end
 

@@ -10,7 +10,7 @@ module EPPClient
         key = File.read(key) unless key =~ /-----BEGIN RSA PRIVATE KEY-----/
         @ssl_key = OpenSSL::PKey::RSA.new(key)
       else
-        raise ArgumentError, "Must either be an OpenSSL::PKey::RSA object, a filename or a key"
+        fail ArgumentError, "Must either be an OpenSSL::PKey::RSA object, a filename or a key"
       end
     end
 
@@ -22,7 +22,7 @@ module EPPClient
         cert = File.read(cert) unless cert =~ /-----BEGIN CERTIFICATE-----/
         @ssl_cert = OpenSSL::X509::Certificate.new(cert)
       else
-        raise ArgumentError, "Must either be an OpenSSL::X509::Certificate object, a filename or a certificate"
+        fail ArgumentError, "Must either be an OpenSSL::X509::Certificate object, a filename or a certificate"
       end
     end
 

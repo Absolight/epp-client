@@ -276,7 +276,7 @@ module EPPClient
                 if Hash === (reachable = contact[:reachable])
                   xml.reachable(reachable, 1)
                 else
-                  raise ArgumentError, "reachable has to be a Hash"
+                  fail ArgumentError, "reachable has to be a Hash"
                 end
               end
             end
@@ -370,14 +370,14 @@ module EPPClient
     # <tt>:ns</tt>, <tt>:dsData</tt> or <tt>:keyData</tt> records, AFNIC's
     # servers sends quite a strange error when there is.
     def domain_create(args)
-      raise ArgumentError, "You can't create a domain with ns records, you must do an update afterwards" if args.key?(:ns)
-      raise ArgumentError, "You can't create a domain with ds or key records, you must do an update afterwards" if args.key?(:dsData) || args.key?(:keyData)
+      fail ArgumentError, "You can't create a domain with ns records, you must do an update afterwards" if args.key?(:ns)
+      fail ArgumentError, "You can't create a domain with ds or key records, you must do an update afterwards" if args.key?(:dsData) || args.key?(:keyData)
       super
     end
 
     # Raises an exception, as contacts are deleted with a garbage collector.
     def contact_delete(_args)
-      raise NotImplementedError, "Contacts are deleted with a garbage collector"
+      fail NotImplementedError, "Contacts are deleted with a garbage collector"
     end
 
     def contact_update_xml(args) #:nodoc:
@@ -397,7 +397,7 @@ module EPPClient
                       if Hash === (reachable = args[c][:reachable])
                         xml.reachable(reachable, 1)
                       else
-                        raise ArgumentError, "reachable has to be a Hash"
+                        fail ArgumentError, "reachable has to be a Hash"
                       end
                     end
                   end
@@ -440,13 +440,13 @@ module EPPClient
     # * update status & authInfo
     def domain_update(args)
       if args.key?(:chg) && args[:chg].key?(:registrant)
-        raise ArgumentError, "You need to do a trade or recover operation to change the registrant"
+        fail ArgumentError, "You need to do a trade or recover operation to change the registrant"
       end
       has_contacts = args.key?(:add) && args[:add].key?(:contacts) || args.key?(:add) && args[:add].key?(:contacts)
       has_ns = args.key?(:add) && args[:add].key?(:ns) || args.key?(:add) && args[:add].key?(:ns)
       has_other = args.key?(:add) && args[:add].key?(:status) || args.key?(:add) && args[:add].key?(:status) || args.key?(:chg) && args[:chg].key?(:authInfo)
       if [has_contacts, has_ns, has_other].count {|v| v} > 1
-        raise ArgumentError, "You can't update all that at one time"
+        fail ArgumentError, "You can't update all that at one time"
       end
       [:add, :rem].each do |ar|
         if args.key?(ar) && args[ar].key?(:ns) && String === args[ar][:ns].first

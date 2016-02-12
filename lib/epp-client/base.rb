@@ -76,7 +76,7 @@ module EPPClient
     # [<tt>:ssl_key</tt>] The file containing the key of the certificate.
     def initialize(attrs)
       unless attrs.key?(:server) && attrs.key?(:client_id) && attrs.key?(:password)
-        raise ArgumentError, "server, client_id and password are required"
+        fail ArgumentError, "server, client_id and password are required"
       end
 
       attrs.each do |k,v|
