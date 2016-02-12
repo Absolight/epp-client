@@ -21,11 +21,11 @@ module EPPClient
     # ==== Optional Attributes
     # [<tt>:test</tt>] sets the server to be the test server.
     def initialize(args)
-      if args.delete(:test) == true
-        args[:server] ||= 'epp.sandbox.nic.fr'
-      else
-        args[:server] ||= 'epp.nic.fr'
-      end
+      args[:server] ||= if args.delete(:test) == true
+                          'epp.sandbox.nic.fr'
+                        else
+                          'epp.nic.fr'
+                        end
       @services = EPPClient::SCHEMAS_URL.values_at('domain', 'contact')
       args[:port] ||= 700
       super(args)
