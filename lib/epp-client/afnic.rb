@@ -206,7 +206,7 @@ module EPPClient
 	if (obsoleted = contact.xpath('frnic:obsoleted', EPPClient::SCHEMAS_URL)).size > 0
 	  if obsoleted.text != '0'
 	    ret[:obsoleted] = {}
-	    if v_when = obsoleted.attr('when')
+	    if (v_when = obsoleted.attr('when'))
 	      ret[:obsoleted][:when] = DateTime.parse(v_when.value)
 	    end
 	  end
@@ -214,13 +214,13 @@ module EPPClient
 	if (reachable = contact.xpath('frnic:reachable', EPPClient::SCHEMAS_URL)).size > 0
 	  if reachable.text != '0'
 	    ret[:reachable] = {}
-	    if v_when = reachable.attr('when')
+	    if (v_when = reachable.attr('when'))
 	      ret[:reachable][:when] = DateTime.parse(v_when.value)
 	    end
-	    if media = reachable.attr('media')
+	    if (media = reachable.attr('media'))
 	      ret[:reachable][:media] = media.value
 	    end
-	    if source = reachable.attr('source')
+	    if (source = reachable.attr('source'))
 	      ret[:reachable][:source] = source.value
 	    end
 	  end
