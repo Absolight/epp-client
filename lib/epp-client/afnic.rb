@@ -8,7 +8,7 @@ module EPPClient
       frnic-1.2
     )
 
-    EPPClient::SCHEMAS_URL.merge!(SCHEMAS_AFNIC.inject({}) do |a,s|
+    EPPClient::SCHEMAS_URL.merge!(SCHEMAS_AFNIC.inject({}) do |a, s|
       a[s.sub(/-1\.2$/, '')] = "http://www.afnic.fr/xml/epp/#{s}" if s =~ /-1\.2$/
       a[s] = "http://www.afnic.fr/xml/epp/#{s}"
       a

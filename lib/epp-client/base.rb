@@ -25,11 +25,11 @@ module EPPClient
       rgp-1.0
     )
 
-    EPPClient::SCHEMAS_URL = SCHEMAS.inject({}) do |a,s|
+    EPPClient::SCHEMAS_URL = SCHEMAS.inject({}) do |a, s|
       a[s.sub(/-1\.0$/, '')] = "urn:ietf:params:xml:ns:#{s}" if s =~ /-1\.0$/
       a[s] = "urn:ietf:params:xml:ns:#{s}"
       a
-    end.merge!(SCHEMAS_EXT_IETF.inject({}) do |a,s|
+    end.merge!(SCHEMAS_EXT_IETF.inject({}) do |a, s|
       a[s.sub(/-1\.0$/, '')] = "urn:ietf:params:xml:ns:#{s}" if s =~ /-1\.0$/
       a[s] = "urn:ietf:params:xml:ns:#{s}"
       a
@@ -79,7 +79,7 @@ module EPPClient
         fail ArgumentError, "server, client_id and password are required"
       end
 
-      attrs.each do |k,v|
+      attrs.each do |k, v|
         begin
           send("#{k}=", v)
         rescue NoMethodError

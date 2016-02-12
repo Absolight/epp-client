@@ -192,7 +192,7 @@ module EPPClient
             else
               xml.id('invalid')
             end
-            contact[:postalInfo].each do |type,infos|
+            contact[:postalInfo].each do |type, infos|
               xml.postalInfo :type => type do
                 xml.name(infos[:name])
                 xml.org(infos[:org]) if infos.key?(:org)
@@ -328,7 +328,7 @@ module EPPClient
               contact = args[:chg]
               xml.chg do
                 if contact.key?(:postalInfo)
-                  contact[:postalInfo].each do |type,infos|
+                  contact[:postalInfo].each do |type, infos|
                     xml.postalInfo :type => type do
                       xml.name(infos[:name])
                       xml.org(infos[:org]) if infos.key?(:org)

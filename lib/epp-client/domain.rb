@@ -132,7 +132,7 @@ module EPPClient
         ret[:registrant] = registrant.text
       end
       if (contact = dom.xpath('domain:contact', EPPClient::SCHEMAS_URL)).size > 0
-        ret[:contacts] = contact.inject({}) do |a,c|
+        ret[:contacts] = contact.inject({}) do |a, c|
           s = c.attr('type').to_sym
           a[s] ||= []
           a[s] << c.text
@@ -201,7 +201,7 @@ module EPPClient
     end
 
     def domain_contacts_xml(xml, args) #:nodoc:
-      args.each do |type,contacts|
+      args.each do |type, contacts|
         contacts.each do |c|
           xml.contact({:type => type}, c)
         end
@@ -313,7 +313,7 @@ module EPPClient
                   domain_contacts_xml(xml, args[ar][:contacts])
                 end
                 if args[ar].key?(:status)
-                  args[ar][:status].each do |st,text|
+                  args[ar][:status].each do |st, text|
                     if text.nil?
                       xml.status(:s => st)
                     else

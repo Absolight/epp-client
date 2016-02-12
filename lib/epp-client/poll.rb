@@ -38,7 +38,7 @@ module EPPClient
       if (obj = xml.xpath('epp:resData', EPPClient::SCHEMAS_URL)).size > 0 ||
          (obj = xml.xpath('epp:extension', EPPClient::SCHEMAS_URL)).size > 0
         ret[:obj_xml] = obj.to_s
-        PARSERS.each do |xpath,parser|
+        PARSERS.each do |xpath, parser|
           next unless obj.xpath(xpath, EPPClient::SCHEMAS_URL).size > 0
           ret[:obj] = case parser
                       when Symbol

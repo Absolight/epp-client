@@ -4,7 +4,7 @@ module EPPClient
       secDNS-1.1
     )
 
-    EPPClient::SCHEMAS_URL.merge!(SCHEMAS_SECDNS.inject({}) do |a,s|
+    EPPClient::SCHEMAS_URL.merge!(SCHEMAS_SECDNS.inject({}) do |a, s|
       a[s.sub(/-1\.1$/, '')] = "urn:ietf:params:xml:ns:#{s}" if s =~ /-1\.1$/
       a[s] = "urn:ietf:params:xml:ns:#{s}"
       a
