@@ -3,6 +3,7 @@ require 'socket'
 require 'nokogiri'
 require 'builder'
 require 'date'
+require 'English'
 require 'epp-client/version'
 require 'epp-client/xml'
 require 'epp-client/session'
@@ -92,7 +93,7 @@ module EPPClient
       @services ||= EPPClient::SCHEMAS_URL.values_at('domain', 'contact', 'host')
       @extensions ||= []
       @version ||= '1.0'
-      @clTRID ||= "test-#{$$}-#{rand(1000)}"
+      @clTRID ||= "test-#{$PROCESS_ID}-#{rand(1000)}"
       @clTRID_index = 0
 
       @context ||= OpenSSL::SSL::SSLContext.new
