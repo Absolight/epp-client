@@ -202,6 +202,7 @@ module EPPClient
     end
 
     private
+
     def make_key_data(xml, key)
       xml.keyData do
         xml.flags key[:flags]
