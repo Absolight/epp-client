@@ -51,7 +51,7 @@ module EPPClient
             if args.key?(:authInfo)
               xml.authInfo do
                 if args.key?(:roid)
-                  xml.pw({:roid => args[:roid]}, args[:authInfo])
+                  xml.pw({ :roid => args[:roid] }, args[:authInfo])
                 else
                   xml.pw(args[:authInfo])
                 end
@@ -113,7 +113,7 @@ module EPPClient
     # [<tt>:authInfo</tt>]
     #   authorization information associated with the domain object.
     def domain_info(args)
-      args = {:name => args} if String === args
+      args = { :name => args } if String === args
       response = send_request(domain_info_xml(args))
 
       get_result(:xml => response, :callback => :domain_info_process)
@@ -182,12 +182,12 @@ module EPPClient
               xml.hostName ns[:hostName]
               if ns.key?(:hostAddrv4)
                 ns[:hostAddrv4].each do |v4|
-                  xml.hostAddr({:ip => :v4}, v4)
+                  xml.hostAddr({ :ip => :v4 }, v4)
                 end
               end
               if ns.key?(:hostAddrv6)
                 ns[:hostAddrv6].each do |v6|
-                  xml.hostAddr({:ip => :v6}, v6)
+                  xml.hostAddr({ :ip => :v6 }, v6)
                 end
               end
             end
@@ -203,7 +203,7 @@ module EPPClient
     def domain_contacts_xml(xml, args) #:nodoc:
       args.each do |type, contacts|
         contacts.each do |c|
-          xml.contact({:type => type}, c)
+          xml.contact({ :type => type }, c)
         end
       end
     end
@@ -215,7 +215,7 @@ module EPPClient
             xml.name args[:name]
 
             if args.key?(:period)
-              xml.period({:unit => args[:period][:unit]}, args[:period][:number])
+              xml.period({ :unit => args[:period][:unit] }, args[:period][:number])
             end
 
             domain_nss_xml(xml, args[:ns]) if args.key?(:ns)
@@ -317,7 +317,7 @@ module EPPClient
                     if text.nil?
                       xml.status(:s => st)
                     else
-                      xml.status({:s => st}, text)
+                      xml.status({ :s => st }, text)
                     end
                   end
                 end
@@ -415,7 +415,7 @@ module EPPClient
             if args.key?(:authInfo)
               xml.authInfo do
                 if args.key?(:roid)
-                  xml.pw({:roid => args[:roid]}, args[:authInfo])
+                  xml.pw({ :roid => args[:roid] }, args[:authInfo])
                 else
                   xml.pw(args[:authInfo])
                 end

@@ -80,7 +80,7 @@ module EPPClient
       ret = {}
       ret[:legalStatus] = leI.xpath('frnic:legalStatus', EPPClient::SCHEMAS_URL).attr('s').value
       if (r = leI.xpath("frnic:idStatus", EPPClient::SCHEMAS_URL)).size > 0
-        ret[:idStatus] = {:value => r.text}
+        ret[:idStatus] = { :value => r.text }
         ret[:idStatus][:when] = r.attr('when').value if r.attr('when')
         ret[:idStatus][:source] = r.attr('source').value if r.attr('source')
       end
@@ -190,7 +190,7 @@ module EPPClient
           ret[:individualInfos] = {}
           ret[:individualInfos][:birthDate] = Date.parse(iI.xpath('frnic:birthDate', EPPClient::SCHEMAS_URL).text)
           if (r = iI.xpath("frnic:idStatus", EPPClient::SCHEMAS_URL)).size > 0
-            ret[:individualInfos][:idStatus] = {:value => r.text}
+            ret[:individualInfos][:idStatus] = { :value => r.text }
             ret[:individualInfos][:idStatus][:when] = r.attr('when').value if r.attr('when')
             ret[:individualInfos][:idStatus][:source] = r.attr('source').value if r.attr('source')
           end
@@ -251,7 +251,7 @@ module EPPClient
                         xml.waldec(asso[:waldec])
                       else
                         xml.decl(asso[:decl]) if asso.key?(:decl)
-                        attrs = {:page => asso[:publ][:page]}
+                        attrs = { :page => asso[:publ][:page] }
                         attrs[:announce] = asso[:publ][:announce] if asso[:publ].key?(:announce)
                         xml.publ(attrs, asso[:publ][:date])
                       end
@@ -450,7 +450,7 @@ module EPPClient
       end
       [:add, :rem].each do |ar|
         if args.key?(ar) && args[ar].key?(:ns) && String === args[ar][:ns].first
-          args[ar][:ns] = args[ar][:ns].map { |ns| {:hostName => ns} }
+          args[ar][:ns] = args[ar][:ns].map { |ns| { :hostName => ns } }
         end
       end
       super
@@ -466,15 +466,15 @@ module EPPClient
 
     def contact_afnic_qualification(xml) #:nodoc:
       contact = xml.xpath('epp:extension/frnic:ext/frnic:resData/frnic:quaData/frnic:contact', EPPClient::SCHEMAS_URL)
-      ret = {:id => contact.xpath('frnic:id', EPPClient::SCHEMAS_URL).text}
+      ret = { :id => contact.xpath('frnic:id', EPPClient::SCHEMAS_URL).text }
       qP = contact.xpath('frnic:qualificationProcess', EPPClient::SCHEMAS_URL)
-      ret[:qualificationProcess] = {:s => qP.attr('s').value}
+      ret[:qualificationProcess] = { :s => qP.attr('s').value }
       ret[:qualificationProcess][:lang] = qP.attr('lang').value if qP.attr('lang')
       if (leI = contact.xpath('frnic:legalEntityInfos', EPPClient::SCHEMAS_URL)).size > 0
         ret[:legalEntityInfos] = legalEntityInfos(leI)
       end
       reach = contact.xpath('frnic:reachability', EPPClient::SCHEMAS_URL)
-      ret[:reachability] = {:reStatus => reach.xpath('frnic:reStatus', EPPClient::SCHEMAS_URL).text}
+      ret[:reachability] = { :reStatus => reach.xpath('frnic:reStatus', EPPClient::SCHEMAS_URL).text }
       if (voice = reach.xpath('frnic:voice', EPPClient::SCHEMAS_URL)).size > 0
         ret[:reachability][:voice] = voice.text
       end
