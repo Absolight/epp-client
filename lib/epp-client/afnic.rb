@@ -386,7 +386,7 @@ module EPPClient
     end
 
     # Raises an exception, as contacts are deleted with a garbage collector.
-    def contact_delete(args)
+    def contact_delete(_args)
       raise NotImplementedError, "Contacts are deleted with a garbage collector"
     end
 

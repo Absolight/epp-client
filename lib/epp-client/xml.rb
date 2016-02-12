@@ -114,7 +114,7 @@ module EPPClient
     #     end, lambda do |xml|
     #       xml.extension
     #     end)
-    def command(*args, &block)
+    def command(*args, &_block)
       builder do |xml|
         xml.command do
           if block_given?
