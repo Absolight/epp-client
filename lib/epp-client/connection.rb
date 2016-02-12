@@ -16,7 +16,7 @@ module EPPClient
       @socket.connect
 
       # Get the initial greeting frame
-      greeting_process(get_frame)
+      greeting_process(one_frame)
     end
 
     def greeting_process(xml) #:nodoc:
@@ -48,7 +48,7 @@ module EPPClient
     # Sends a frame and returns the server's answer
     def send_request(xml)
       send_frame(xml)
-      get_frame
+      one_frame
     end
 
     # sends a frame
@@ -59,7 +59,7 @@ module EPPClient
     end
 
     # gets a frame from the socket and returns the parsed response.
-    def get_frame
+    def one_frame
       size = @socket.read(4)
       fail SocketError, @socket.eof? ? 'Connection closed by remote server' : 'Error reading frame from remote server' if size.nil?
       size = size.unpack('N')[0]
