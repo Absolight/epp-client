@@ -282,6 +282,7 @@ module EPPClient
         :crDate => DateTime.parse(dom.xpath('domain:crDate', EPPClient::SCHEMAS_URL).text),
         :upDate => DateTime.parse(dom.xpath('domain:crDate', EPPClient::SCHEMAS_URL).text),
       }
+      ret
     end
 
     def domain_delete_xml(domain) #:nodoc:
@@ -392,6 +393,7 @@ module EPPClient
         :paTRID => get_trid(dom.xpath('domain:paTRID', EPPClient::SCHEMAS_URL)),
         :paDate => DateTime.parse(dom.xpath('domain:paDate', EPPClient::SCHEMAS_URL).text),
       }
+      ret
     end
 
     def domain_transfer_response(xml) #:nodoc:
