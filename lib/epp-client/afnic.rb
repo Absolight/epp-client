@@ -242,9 +242,7 @@ module EPPClient
                   xml.idStatus(lEI[:idStatus]) if lEI.key?(:idStatus)
                   xml.legalStatus(:s => lEI[:legalStatus])
                   [:siren, :VAT, :trademark, :DUNS, :local].each do |val|
-                    if lEI.key?(val)
-                      xml.__send__(val, lEI[val])
-                    end
+                    xml.__send__(val, lEI[val]) if lEI.key?(val)
                   end
                   if lEI.key?(:asso)
                     asso = lEI[:asso]
@@ -261,26 +259,18 @@ module EPPClient
                   end
                 end
               else
-                if contact.key?(:list)
-                  xml.list(contact[:list])
-                end
+                xml.list(contact[:list]) if contact.key?(:list)
                 if contact.key?(:individualInfos)
                   iI = contact[:individualInfos]
                   xml.individualInfos do
                     xml.idStatus(iI[:idStatus]) if iI.key?(:idStatus)
                     xml.birthDate(iI[:birthDate])
-                    if iI.key?(:birthCity)
-                      xml.birthCity(iI[:birthCity])
-                    end
-                    if iI.key?(:birthPc)
-                      xml.birthPc(iI[:birthPc])
-                    end
+                    xml.birthCity(iI[:birthCity]) if iI.key?(:birthCity)
+                    xml.birthPc(iI[:birthPc]) if iI.key?(:birthPc)
                     xml.birthCc(iI[:birthCc])
                   end
                 end
-                if contact.key?(:firstName)
-                  xml.firstName(contact[:firstName])
-                end
+                xml.firstName(contact[:firstName]) if contact.key?(:firstName)
               end
               if contact.key?(:reachable)
                 if Hash === (reachable = contact[:reachable])
@@ -401,9 +391,7 @@ module EPPClient
                 [:add, :rem].each do |c|
                   if args.key?(c) && [:list, :reachable, :idStatus].any? {|k| args[c].key?(k)}
                     xml.__send__(c) do
-                      if args[c].key?(:list)
-                        xml.list(args[c][:list])
-                      end
+                      xml.list(args[c][:list]) if args[c].key?(:list)
                       if args[c].key?(:idStatus)
                         xml.idStatus(args[c][:idStatus])
                       end

@@ -37,9 +37,7 @@ module EPPClient
               args[:report][:statements].each do |s|
                 xml.statement s
               end
-              if args[:report].key?(:other)
-                xml.other args[:report][:other]
-              end
+              xml.other args[:report][:other] if args[:report].key?(:other)
             end
           else
             xml.restore(:op => 'request')

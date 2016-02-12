@@ -113,9 +113,7 @@ module EPPClient
     # [<tt>:authInfo</tt>]
     #   authorization information associated with the domain object.
     def domain_info(args)
-      if String === args
-        args = {:name => args}
-      end
+      args = {:name => args} if String === args
       response = send_request(domain_info_xml(args))
 
       get_result(:xml => response, :callback => :domain_info_process)
@@ -220,15 +218,11 @@ module EPPClient
               xml.period({:unit => args[:period][:unit]}, args[:period][:number])
             end
 
-            if args.key?(:ns)
-              domain_nss_xml(xml, args[:ns])
-            end
+            domain_nss_xml(xml, args[:ns]) if args.key?(:ns)
 
             xml.registrant args[:registrant] if args.key?(:registrant)
 
-            if args.key?(:contacts)
-              domain_contacts_xml(xml, args[:contacts])
-            end
+            domain_contacts_xml(xml, args[:contacts]) if args.key?(:contacts)
 
             xml.authInfo do
               xml.pw args[:authInfo]
@@ -314,9 +308,7 @@ module EPPClient
             [:add, :rem].each do |ar|
               if args.key?(ar) && (args[ar].key?(:ns) || args[ar].key?(:contacts) || args[ar].key?(:status))
                 xml.__send__(ar) do
-                  if args[ar].key?(:ns)
-                    domain_nss_xml(xml, args[ar][:ns])
-                  end
+                  domain_nss_xml(xml, args[ar][:ns]) if args[ar].key?(:ns)
                   if args[ar].key?(:contacts)
                     domain_contacts_xml(xml, args[ar][:contacts])
                   end
