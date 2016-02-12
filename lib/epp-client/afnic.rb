@@ -389,18 +389,15 @@ module EPPClient
             xml.update do
               xml.contact do
                 [:add, :rem].each do |c|
-                  if args.key?(c) && [:list, :reachable, :idStatus].any? {|k| args[c].key?(k)}
-                    xml.__send__(c) do
-                      xml.list(args[c][:list]) if args[c].key?(:list)
-                      if args[c].key?(:idStatus)
-                        xml.idStatus(args[c][:idStatus])
-                      end
-                      if args[c].key?(:reachable)
-                        if Hash === (reachable = args[c][:reachable])
-                          xml.reachable(reachable, 1)
-                        else
-                          raise ArgumentError, "reachable has to be a Hash"
-                        end
+                  next unless args.key?(c) && [:list, :reachable, :idStatus].any? {|k| args[c].key?(k)}
+                  xml.__send__(c) do
+                    xml.list(args[c][:list]) if args[c].key?(:list)
+                    xml.idStatus(args[c][:idStatus]) if args[c].key?(:idStatus)
+                    if args[c].key?(:reachable)
+                      if Hash === (reachable = args[c][:reachable])
+                        xml.reachable(reachable, 1)
+                      else
+                        raise ArgumentError, "reachable has to be a Hash"
                       end
                     end
                   end

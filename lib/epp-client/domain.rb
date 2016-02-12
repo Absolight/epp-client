@@ -306,19 +306,18 @@ module EPPClient
           xml.update('xmlns' => EPPClient::SCHEMAS_URL['domain-1.0']) do
             xml.name args[:name]
             [:add, :rem].each do |ar|
-              if args.key?(ar) && (args[ar].key?(:ns) || args[ar].key?(:contacts) || args[ar].key?(:status))
-                xml.__send__(ar) do
-                  domain_nss_xml(xml, args[ar][:ns]) if args[ar].key?(:ns)
-                  if args[ar].key?(:contacts)
-                    domain_contacts_xml(xml, args[ar][:contacts])
-                  end
-                  if args[ar].key?(:status)
-                    args[ar][:status].each do |st,text|
-                      if text.nil?
-                        xml.status(:s => st)
-                      else
-                        xml.status({:s => st}, text)
-                      end
+              next unless args.key?(ar) && (args[ar].key?(:ns) || args[ar].key?(:contacts) || args[ar].key?(:status))
+              xml.__send__(ar) do
+                domain_nss_xml(xml, args[ar][:ns]) if args[ar].key?(:ns)
+                if args[ar].key?(:contacts)
+                  domain_contacts_xml(xml, args[ar][:contacts])
+                end
+                if args[ar].key?(:status)
+                  args[ar][:status].each do |st,text|
+                    if text.nil?
+                      xml.status(:s => st)
+                    else
+                      xml.status({:s => st}, text)
                     end
                   end
                 end
