@@ -232,7 +232,7 @@ module EPPClient
 	:keyTag => xml.xpath("secDNS:keyTag", EPPClient::SCHEMAS_URL).text.to_i,
 	:alg => xml.xpath("secDNS:alg", EPPClient::SCHEMAS_URL).text.to_i,
 	:digestType => xml.xpath("secDNS:digestType", EPPClient::SCHEMAS_URL).text.to_i,
-	:digest => xml.xpath("secDNS:digest", EPPClient::SCHEMAS_URL).text
+	:digest => xml.xpath("secDNS:digest", EPPClient::SCHEMAS_URL).text,
       }
       if (keyData = xml.xpath('secDNS:keyData', EPPClient::SCHEMAS_URL)).size > 0
 	ret[:keyData] = parse_key_data(keyData)

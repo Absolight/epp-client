@@ -402,7 +402,7 @@ module EPPClient
 	:reID => dom.xpath('domain:reID', EPPClient::SCHEMAS_URL).text,
 	:reDate => DateTime.parse(dom.xpath('domain:reDate', EPPClient::SCHEMAS_URL).text),
 	:acID => dom.xpath('domain:acID', EPPClient::SCHEMAS_URL).text,
-	:acDate => DateTime.parse(dom.xpath('domain:acDate', EPPClient::SCHEMAS_URL).text)
+	:acDate => DateTime.parse(dom.xpath('domain:acDate', EPPClient::SCHEMAS_URL).text),
       }
       if (exDate = dom.xpath('domain:exDate', EPPClient::SCHEMAS_URL)).size > 0
 	ret[:exDate] = DateTime.parse(exDate)
