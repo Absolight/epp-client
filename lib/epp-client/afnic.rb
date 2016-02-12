@@ -4,9 +4,9 @@ require 'epp-client/secdns'
 
 module EPPClient
   class AFNIC < Base
-    SCHEMAS_AFNIC = %w[
+    SCHEMAS_AFNIC = %w(
       frnic-1.2
-    ]
+    )
 
     EPPClient::SCHEMAS_URL.merge!(SCHEMAS_AFNIC.inject({}) do |a,s|
       a[s.sub(/-1\.2$/, '')] = "http://www.afnic.fr/xml/epp/#{s}" if s =~ /-1\.2$/

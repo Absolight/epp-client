@@ -3,9 +3,9 @@ require 'epp-client/secdns'
 
 module EPPClient
   class SmallRegistry < Base
-    SCHEMAS_SR = %w[
+    SCHEMAS_SR = %w(
       sr-1.0
-    ]
+    )
 
     EPPClient::SCHEMAS_URL.merge!(SCHEMAS_SR.inject({}) do |a,s|
       a[s.sub(/-1\.0$/, '')] = "https://www.smallregistry.net/schemas/#{s}.xsd" if s =~ /-1\.0$/

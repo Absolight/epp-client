@@ -15,15 +15,15 @@ require 'epp-client/contact'
 
 module EPPClient
   class Base
-    SCHEMAS = %w[
+    SCHEMAS = %w(
       epp-1.0
       domain-1.0
       host-1.0
       contact-1.0
-    ]
-    SCHEMAS_EXT_IETF = %w[
+    )
+    SCHEMAS_EXT_IETF = %w(
       rgp-1.0
-    ]
+    )
 
     EPPClient::SCHEMAS_URL = SCHEMAS.inject({}) do |a,s|
       a[s.sub(/-1\.0$/, '')] = "urn:ietf:params:xml:ns:#{s}" if s =~ /-1\.0$/
