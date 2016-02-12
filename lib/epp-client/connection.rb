@@ -53,7 +53,7 @@ module EPPClient
     # sends a frame
     def send_frame(xml)
       @sent_frame = xml
-      @socket.write([xml.size + 4].pack("N") + xml)
+      @socket.write([xml.size + 4].pack('N') + xml)
       sent_frame_to_xml
     end
 
@@ -62,9 +62,9 @@ module EPPClient
       size = @socket.read(4)
       if size.nil?
         if @socket.eof?
-          fail SocketError, "Connection closed by remote server"
+          fail SocketError, 'Connection closed by remote server'
         else
-          fail SocketError, "Error reading frame from remote server"
+          fail SocketError, 'Error reading frame from remote server'
         end
       else
         size = size.unpack('N')[0]

@@ -28,10 +28,10 @@ module EPPClient
 
     def poll_req_process(xml) #:nodoc:
       ret = {}
-      if (date = xml.xpath("epp:msgQ/epp:qDate", EPPClient::SCHEMAS_URL)).size > 0
+      if (date = xml.xpath('epp:msgQ/epp:qDate', EPPClient::SCHEMAS_URL)).size > 0
         ret[:qDate] = DateTime.parse(date.text)
       end
-      if (msg = xml.xpath("epp:msgQ/epp:msg", EPPClient::SCHEMAS_URL)).size > 0
+      if (msg = xml.xpath('epp:msgQ/epp:msg', EPPClient::SCHEMAS_URL)).size > 0
         ret[:msg] = msg.text
         ret[:msg_xml] = msg.to_s
       end

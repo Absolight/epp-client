@@ -8,10 +8,10 @@ Gem::Specification.new do |gem|
   gem.email         = ['m@absolight.fr']
   gem.description   = 'RGP EPP client library.'
   gem.summary       = 'RGP EPP client library'
-  gem.homepage      = "https://github.com/Absolight/epp-client"
+  gem.homepage      = 'https://github.com/Absolight/epp-client'
 
   gem.required_ruby_version = '>= 1.8.7'
-  gem.required_rubygems_version = ">= 1.3.6"
+  gem.required_rubygems_version = '>= 1.3.6'
 
   gem.files = [
     'ChangeLog',
@@ -28,7 +28,7 @@ Gem::Specification.new do |gem|
   gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   gem.require_paths = ['lib']
 
-  gem.add_development_dependency "bundler", ">= 1.0.0"
+  gem.add_development_dependency 'bundler', '>= 1.0.0'
   gem.add_dependency('nokogiri', '~> 1.4')
   gem.add_dependency('builder',  '>= 2.1.2')
 end

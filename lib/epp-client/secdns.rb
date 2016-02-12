@@ -222,19 +222,19 @@ module EPPClient
 
     def parse_key_data(xml)
       {
-        :flags => xml.xpath("secDNS:flags", EPPClient::SCHEMAS_URL).text.to_i,
-        :protocol => xml.xpath("secDNS:protocol", EPPClient::SCHEMAS_URL).text.to_i,
-        :alg => xml.xpath("secDNS:alg", EPPClient::SCHEMAS_URL).text.to_i,
-        :pubKey => xml.xpath("secDNS:pubKey", EPPClient::SCHEMAS_URL).text,
+        :flags => xml.xpath('secDNS:flags', EPPClient::SCHEMAS_URL).text.to_i,
+        :protocol => xml.xpath('secDNS:protocol', EPPClient::SCHEMAS_URL).text.to_i,
+        :alg => xml.xpath('secDNS:alg', EPPClient::SCHEMAS_URL).text.to_i,
+        :pubKey => xml.xpath('secDNS:pubKey', EPPClient::SCHEMAS_URL).text,
       }
     end
 
     def parse_ds_data(xml)
       ret = {
-        :keyTag => xml.xpath("secDNS:keyTag", EPPClient::SCHEMAS_URL).text.to_i,
-        :alg => xml.xpath("secDNS:alg", EPPClient::SCHEMAS_URL).text.to_i,
-        :digestType => xml.xpath("secDNS:digestType", EPPClient::SCHEMAS_URL).text.to_i,
-        :digest => xml.xpath("secDNS:digest", EPPClient::SCHEMAS_URL).text,
+        :keyTag => xml.xpath('secDNS:keyTag', EPPClient::SCHEMAS_URL).text.to_i,
+        :alg => xml.xpath('secDNS:alg', EPPClient::SCHEMAS_URL).text.to_i,
+        :digestType => xml.xpath('secDNS:digestType', EPPClient::SCHEMAS_URL).text.to_i,
+        :digest => xml.xpath('secDNS:digest', EPPClient::SCHEMAS_URL).text,
       }
       if (keyData = xml.xpath('secDNS:keyData', EPPClient::SCHEMAS_URL)).size > 0
         ret[:keyData] = parse_key_data(keyData)

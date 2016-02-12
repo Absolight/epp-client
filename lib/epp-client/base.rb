@@ -3,7 +3,7 @@ require 'socket'
 require 'nokogiri'
 require 'builder'
 require 'date'
-require "epp-client/version"
+require 'epp-client/version'
 require 'epp-client/xml'
 require 'epp-client/session'
 require 'epp-client/connection'
@@ -76,7 +76,7 @@ module EPPClient
     # [<tt>:ssl_key</tt>] The file containing the key of the certificate.
     def initialize(attrs)
       unless attrs.key?(:server) && attrs.key?(:client_id) && attrs.key?(:password)
-        fail ArgumentError, "server, client_id and password are required"
+        fail ArgumentError, 'server, client_id and password are required'
       end
 
       attrs.each do |k, v|
@@ -88,10 +88,10 @@ module EPPClient
       end
 
       @port ||= 700
-      @lang ||= "en"
+      @lang ||= 'en'
       @services ||= EPPClient::SCHEMAS_URL.values_at('domain', 'contact', 'host')
       @extensions ||= []
-      @version ||= "1.0"
+      @version ||= '1.0'
       @clTRID ||= "test-#{$$}-#{rand(1000)}"
       @clTRID_index = 0
 

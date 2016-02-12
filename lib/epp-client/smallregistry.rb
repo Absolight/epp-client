@@ -31,7 +31,7 @@ module EPPClient
     # See EPPClient for other attributes.
     def initialize(attrs)
       unless attrs.key?(:client_id) && attrs.key?(:password) && attrs.key?(:ssl_cert) && attrs.key?(:ssl_key)
-        fail ArgumentError, "client_id, password, ssl_cert and ssl_key are required"
+        fail ArgumentError, 'client_id, password, ssl_cert and ssl_key are required'
       end
       if attrs.delete(:test) == true
         attrs[:server] ||= 'epp.test.smallregistry.net'

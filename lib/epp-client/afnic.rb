@@ -48,11 +48,11 @@ module EPPClient
       xml.xpath('epp:extension/frnic:ext/frnic:resData/frnic:chkData/frnic:domain/frnic:cd', EPPClient::SCHEMAS_URL).each do |dom|
         name = dom.xpath('frnic:name', EPPClient::SCHEMAS_URL)
         hash = ret.find { |d| d[:name] == name.text }
-        hash[:reserved] = name.attr('reserved').value == "1"
+        hash[:reserved] = name.attr('reserved').value == '1'
         unless (reason = dom.xpath('frnic:rsvReason', EPPClient::SCHEMAS_URL).text).empty?
           hash[:rsvReason] = reason
         end
-        hash[:forbidden] = name.attr('forbidden').value == "1"
+        hash[:forbidden] = name.attr('forbidden').value == '1'
         unless (reason = dom.xpath('frnic:fbdReason', EPPClient::SCHEMAS_URL).text).empty?
           hash[:fbdReason] = reason
         end
@@ -79,7 +79,7 @@ module EPPClient
     def legalEntityInfos(leI) #:nodoc:
       ret = {}
       ret[:legalStatus] = leI.xpath('frnic:legalStatus', EPPClient::SCHEMAS_URL).attr('s').value
-      if (r = leI.xpath("frnic:idStatus", EPPClient::SCHEMAS_URL)).size > 0
+      if (r = leI.xpath('frnic:idStatus', EPPClient::SCHEMAS_URL)).size > 0
         ret[:idStatus] = { :value => r.text }
         ret[:idStatus][:when] = r.attr('when').value if r.attr('when')
         ret[:idStatus][:source] = r.attr('source').value if r.attr('source')
@@ -89,9 +89,9 @@ module EPPClient
           ret[val.to_sym] = r.text
         end
       end
-      if (asso = leI.xpath("frnic:asso", EPPClient::SCHEMAS_URL)).size > 0
+      if (asso = leI.xpath('frnic:asso', EPPClient::SCHEMAS_URL)).size > 0
         ret[:asso] = {}
-        if (r = asso.xpath("frnic:waldec", EPPClient::SCHEMAS_URL)).size > 0
+        if (r = asso.xpath('frnic:waldec', EPPClient::SCHEMAS_URL)).size > 0
           ret[:asso][:waldec] = r.text
         else
           if (decl = asso.xpath('frnic:decl', EPPClient::SCHEMAS_URL)).size > 0
@@ -189,7 +189,7 @@ module EPPClient
         if (iI = contact.xpath('frnic:individualInfos', EPPClient::SCHEMAS_URL)).size > 0
           ret[:individualInfos] = {}
           ret[:individualInfos][:birthDate] = Date.parse(iI.xpath('frnic:birthDate', EPPClient::SCHEMAS_URL).text)
-          if (r = iI.xpath("frnic:idStatus", EPPClient::SCHEMAS_URL)).size > 0
+          if (r = iI.xpath('frnic:idStatus', EPPClient::SCHEMAS_URL)).size > 0
             ret[:individualInfos][:idStatus] = { :value => r.text }
             ret[:individualInfos][:idStatus][:when] = r.attr('when').value if r.attr('when')
             ret[:individualInfos][:idStatus][:source] = r.attr('source').value if r.attr('source')
@@ -276,7 +276,7 @@ module EPPClient
                 if Hash === (reachable = contact[:reachable])
                   xml.reachable(reachable, 1)
                 else
-                  fail ArgumentError, "reachable has to be a Hash"
+                  fail ArgumentError, 'reachable has to be a Hash'
                 end
               end
             end
@@ -377,7 +377,7 @@ module EPPClient
 
     # Raises an exception, as contacts are deleted with a garbage collector.
     def contact_delete(_args)
-      fail NotImplementedError, "Contacts are deleted with a garbage collector"
+      fail NotImplementedError, 'Contacts are deleted with a garbage collector'
     end
 
     def contact_update_xml(args) #:nodoc:
@@ -397,7 +397,7 @@ module EPPClient
                       if Hash === (reachable = args[c][:reachable])
                         xml.reachable(reachable, 1)
                       else
-                        fail ArgumentError, "reachable has to be a Hash"
+                        fail ArgumentError, 'reachable has to be a Hash'
                       end
                     end
                   end
@@ -440,7 +440,7 @@ module EPPClient
     # * update status & authInfo
     def domain_update(args)
       if args.key?(:chg) && args[:chg].key?(:registrant)
-        fail ArgumentError, "You need to do a trade or recover operation to change the registrant"
+        fail ArgumentError, 'You need to do a trade or recover operation to change the registrant'
       end
       has_contacts = args.key?(:add) && args[:add].key?(:contacts) || args.key?(:add) && args[:add].key?(:contacts)
       has_ns = args.key?(:add) && args[:add].key?(:ns) || args.key?(:add) && args[:add].key?(:ns)

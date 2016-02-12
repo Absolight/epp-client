@@ -2,7 +2,7 @@
 require 'rake'
 require 'rdoc/task'
 require 'rubygems/package_task'
-require "bundler/gem_helper"
+require 'bundler/gem_helper'
 
 MY_GEMS = Dir['*.gemspec'].map { |g| g.sub(/.*-(.*)\.gemspec/, '\1') }
 
@@ -26,10 +26,10 @@ task :build   => 'all:build'
 task :install => 'all:install'
 task :push => 'all:push'
 
-desc "Generate documentation for the Rails framework"
+desc 'Generate documentation for the Rails framework'
 Rake::RDocTask.new do |rdoc|
   rdoc.rdoc_dir = 'doc/rdoc'
-  rdoc.title    = "Documentation"
+  rdoc.title    = 'Documentation'
 
   rdoc.options << '--line-numbers' << '--inline-source'
   rdoc.options << '--charset' << 'utf-8'
