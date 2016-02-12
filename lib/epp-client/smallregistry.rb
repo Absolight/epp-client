@@ -126,30 +126,28 @@ module EPPClient
     def contact_update_xml(args) #:nodoc:
       ret = super
 
-      if args.key?(:chg) && (args[:chg].key?(:org) || args[:chg].key?(:person))
-        ext = extension do |xml|
-          xml.ext(:xmlns => EPPClient::SCHEMAS_URL['sr']) do
-            xml.update do
-              xml.contact do
-                if args[:chg].key?(:org)
-                  xml.org do
-                    xml.companySerial(args[:chg][:org][:companySerial])
-                  end
-                elsif args[:chg].key?(:person)
-                  xml.person do
-                    xml.birthDate(args[:chg][:person][:birthDate])
-                    xml.birthPlace(args[:chg][:person][:birthPlace])
-                  end
+      return ret unless args.key?(:chg) && (args[:chg].key?(:org) || args[:chg].key?(:person))
+
+      ext = extension do |xml|
+        xml.ext(:xmlns => EPPClient::SCHEMAS_URL['sr']) do
+          xml.update do
+            xml.contact do
+              if args[:chg].key?(:org)
+                xml.org do
+                  xml.companySerial(args[:chg][:org][:companySerial])
+                end
+              elsif args[:chg].key?(:person)
+                xml.person do
+                  xml.birthDate(args[:chg][:person][:birthDate])
+                  xml.birthPlace(args[:chg][:person][:birthPlace])
                 end
               end
             end
           end
         end
-
-        return insert_extension(ret, ext)
-      else
-        return ret
       end
+
+      insert_extension(ret, ext)
     end
 
     # Extends the EPPClient::Contact#contact_update so that the specific afnic

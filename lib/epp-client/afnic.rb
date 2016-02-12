@@ -273,11 +273,11 @@ module EPPClient
                 xml.firstName(contact[:firstName]) if contact.key?(:firstName)
               end
               if contact.key?(:reachable)
-                if Hash === (reachable = contact[:reachable])
-                  xml.reachable(reachable, 1)
-                else
-                  fail ArgumentError, 'reachable has to be a Hash'
-                end
+                reachable = contact[:reachable]
+
+                fail ArgumentError, 'reachable has to be a Hash' unless Hash === reachable
+
+                xml.reachable(reachable, 1)
               end
             end
           end
@@ -383,34 +383,32 @@ module EPPClient
     def contact_update_xml(args) #:nodoc:
       ret = super
 
-      if [:add, :rem].any? { |c| args.key?(c) && [:list, :reachable, :idStatus].any? { |k| args[c].key?(k) } }
-        ext = extension do |xml|
-          xml.ext(:xmlns => EPPClient::SCHEMAS_URL['frnic']) do
-            xml.update do
-              xml.contact do
-                [:add, :rem].each do |c|
-                  next unless args.key?(c) && [:list, :reachable, :idStatus].any? { |k| args[c].key?(k) }
-                  xml.__send__(c) do
-                    xml.list(args[c][:list]) if args[c].key?(:list)
-                    xml.idStatus(args[c][:idStatus]) if args[c].key?(:idStatus)
-                    if args[c].key?(:reachable)
-                      if Hash === (reachable = args[c][:reachable])
-                        xml.reachable(reachable, 1)
-                      else
-                        fail ArgumentError, 'reachable has to be a Hash'
-                      end
-                    end
+      return ret unless [:add, :rem].any? { |c| args.key?(c) && [:list, :reachable, :idStatus].any? { |k| args[c].key?(k) } }
+
+      ext = extension do |xml|
+        xml.ext(:xmlns => EPPClient::SCHEMAS_URL['frnic']) do
+          xml.update do
+            xml.contact do
+              [:add, :rem].each do |c|
+                next unless args.key?(c) && [:list, :reachable, :idStatus].any? { |k| args[c].key?(k) }
+                xml.__send__(c) do
+                  xml.list(args[c][:list]) if args[c].key?(:list)
+                  xml.idStatus(args[c][:idStatus]) if args[c].key?(:idStatus)
+                  if args[c].key?(:reachable)
+                    reachable = args[c][:reachable]
+
+                    fail ArgumentError, 'reachable has to be a Hash' unless Hash === reachable
+
+                    xml.reachable(reachable, 1)
                   end
                 end
               end
             end
           end
         end
-
-        return insert_extension(ret, ext)
-      else
-        return ret
       end
+
+      insert_extension(ret, ext)
     end
 
     # Extends the EPPClient::Contact#contact_update so that the specific AFNIC

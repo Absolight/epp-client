@@ -97,25 +97,24 @@ module EPPClient
     def domain_create_xml(domain) #:nodoc:
       ret = super
 
-      if domain.key?(:maxSigLife) || domain.key?(:dsData) || domain.key?(:keyData)
-        ext = extension do |xml|
-          xml.create(:xmlns => EPPClient::SCHEMAS_URL['secDNS']) do
-            xml.maxSigLife(domain[:maxSigLife]) if domain.key?(:maxSigLife)
-            if domain.key?(:dsData)
-              domain[:dsData].each do |ds|
-                make_ds_data(xml, ds)
-              end
-            elsif domain.key?(:keyData)
-              domain[:keyData].each do |key|
-                make_key_data(xml, key)
-              end
+      return ret unless domain.key?(:maxSigLife) || domain.key?(:dsData) || domain.key?(:keyData)
+
+      ext = extension do |xml|
+        xml.create(:xmlns => EPPClient::SCHEMAS_URL['secDNS']) do
+          xml.maxSigLife(domain[:maxSigLife]) if domain.key?(:maxSigLife)
+          if domain.key?(:dsData)
+            domain[:dsData].each do |ds|
+              make_ds_data(xml, ds)
+            end
+          elsif domain.key?(:keyData)
+            domain[:keyData].each do |key|
+              make_key_data(xml, key)
             end
           end
         end
-        return insert_extension(ret, ext)
-      else
-        return ret
       end
+
+      insert_extension(ret, ext)
     end
 
     # Extends the EPPClient::Domain#domain_update so that secDNS informations
@@ -154,49 +153,49 @@ module EPPClient
     def domain_update_xml(domain) #:nodoc:
       ret = super
 
-      if domain.key?(:secDNS)
-        sd = domain[:secDNS]
-        ext = extension do |xml|
-          xml.update(sd[:urgent] == true ? { :urgent => true } : {}, { :xmlns => EPPClient::SCHEMAS_URL['secDNS'] }) do
-            if sd.key?(:rem)
-              xml.rem do
-                if sd[:rem].key?(:all) && sd[:rem][:all] == true
-                  xml.all true
-                elsif sd[:rem].key?(:dsData)
-                  sd[:rem][:dsData].each do |ds|
-                    make_ds_data(xml, ds)
-                  end
-                elsif sd[:rem].key?(:keyData)
-                  sd[:rem][:keyData].each do |key|
-                    make_key_data(xml, key)
-                  end
+      return ret unless domain.key?(:secDNS)
+
+      sd = domain[:secDNS]
+
+      ext = extension do |xml|
+        xml.update(sd[:urgent] == true ? { :urgent => true } : {}, { :xmlns => EPPClient::SCHEMAS_URL['secDNS'] }) do
+          if sd.key?(:rem)
+            xml.rem do
+              if sd[:rem].key?(:all) && sd[:rem][:all] == true
+                xml.all true
+              elsif sd[:rem].key?(:dsData)
+                sd[:rem][:dsData].each do |ds|
+                  make_ds_data(xml, ds)
                 end
-              end
-            end
-            if sd.key?(:add)
-              xml.add do
-                if sd[:add].key?(:dsData)
-                  sd[:add][:dsData].each do |ds|
-                    make_ds_data(xml, ds)
-                  end
-                elsif sd[:add].key?(:keyData)
-                  sd[:add][:keyData].each do |key|
-                    make_key_data(xml, key)
-                  end
+              elsif sd[:rem].key?(:keyData)
+                sd[:rem][:keyData].each do |key|
+                  make_key_data(xml, key)
                 end
-              end
-            end
-            if sd.key?(:chg) && sd[:chg].key?(:maxSigLife)
-              xml.chg do
-                xml.maxSigLife sd[:chg][:maxSigLife]
               end
             end
           end
+          if sd.key?(:add)
+            xml.add do
+              if sd[:add].key?(:dsData)
+                sd[:add][:dsData].each do |ds|
+                  make_ds_data(xml, ds)
+                end
+              elsif sd[:add].key?(:keyData)
+                sd[:add][:keyData].each do |key|
+                  make_key_data(xml, key)
+                end
+              end
+            end
+          end
+          if sd.key?(:chg) && sd[:chg].key?(:maxSigLife)
+            xml.chg do
+              xml.maxSigLife sd[:chg][:maxSigLife]
+            end
+          end
         end
-        return insert_extension(ret, ext)
-      else
-        return ret
       end
+
+      insert_extension(ret, ext)
     end
 
     private

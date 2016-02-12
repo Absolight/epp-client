@@ -73,19 +73,16 @@ module EPPClient
 
       res = xml.xpath('epp:epp/epp:response/epp:result', EPPClient::SCHEMAS_URL)
       code = res.attribute('code').value.to_i
-      if args[:range].include?(code)
-        if args.key?(:callback)
-          case cb = args[:callback]
-          when Symbol
-            return send(cb, xml.xpath('epp:epp/epp:response', EPPClient::SCHEMAS_URL))
-          else
-            fail ArgumentError, 'Invalid callback type'
-          end
-        else
-          return true
-        end
+
+      fail EPPClient::EPPErrorResponse.new(:xml => xml, :code => code, :message => res.xpath('epp:msg', EPPClient::SCHEMAS_URL).text) unless args[:range].include?(code)
+
+      return true unless args.key?(:callback)
+
+      case cb = args[:callback]
+      when Symbol
+        return send(cb, xml.xpath('epp:epp/epp:response', EPPClient::SCHEMAS_URL))
       else
-        fail EPPClient::EPPErrorResponse.new(:xml => xml, :code => code, :message => res.xpath('epp:msg', EPPClient::SCHEMAS_URL).text)
+        fail ArgumentError, 'Invalid callback type'
       end
     end
 

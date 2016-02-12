@@ -60,17 +60,10 @@ module EPPClient
     # gets a frame from the socket and returns the parsed response.
     def get_frame
       size = @socket.read(4)
-      if size.nil?
-        if @socket.eof?
-          fail SocketError, 'Connection closed by remote server'
-        else
-          fail SocketError, 'Error reading frame from remote server'
-        end
-      else
-        size = size.unpack('N')[0]
-        @recv_frame = @socket.read(size - 4)
-        recv_frame_to_xml
-      end
+      fail SocketError, @socket.eof? ? 'Connection closed by remote server' : 'Error reading frame from remote server' if size.nil?
+      size = size.unpack('N')[0]
+      @recv_frame = @socket.read(size - 4)
+      recv_frame_to_xml
     end
   end
 end
