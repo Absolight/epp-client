@@ -81,7 +81,7 @@ module EPPClient
 
       attrs.each do |k,v|
         begin
-          self.send("#{k}=", v)
+          send("#{k}=", v)
         rescue NoMethodError
           raise ArgumentError, "there is no #{k} argument"
         end
