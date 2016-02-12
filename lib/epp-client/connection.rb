@@ -32,17 +32,17 @@ module EPPClient
 
     # Gracefully close the connection
     def close_connection
-      if defined?(@socket) and @socket.is_a?(OpenSSL::SSL::SSLSocket)
+      if defined?(@socket) && @socket.is_a?(OpenSSL::SSL::SSLSocket)
         @socket.close
         @socket = nil
       end
 
-      if defined?(@tcpserver) and @tcpserver.is_a?(TCPSocket)
+      if defined?(@tcpserver) && @tcpserver.is_a?(TCPSocket)
         @tcpserver.close
         @tcpserver = nil
       end
 
-      return true if @tcpserver.nil? and @socket.nil?
+      return true if @tcpserver.nil? && @socket.nil?
     end
 
     # Sends a frame and returns the server's answer
