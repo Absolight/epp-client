@@ -460,7 +460,7 @@ module EPPClient
       has_contacts = args.key?(:add) && args[:add].key?(:contacts) || args.key?(:add) && args[:add].key?(:contacts)
       has_ns = args.key?(:add) && args[:add].key?(:ns) || args.key?(:add) && args[:add].key?(:ns)
       has_other = args.key?(:add) && args[:add].key?(:status) || args.key?(:add) && args[:add].key?(:status) || args.key?(:chg) && args[:chg].key?(:authInfo)
-      if [has_contacts, has_ns, has_other].select {|v| v}.size > 1
+      if [has_contacts, has_ns, has_other].count {|v| v} > 1
         raise ArgumentError, "You can't update all that at one time"
       end
       [:add, :rem].each do |ar|
