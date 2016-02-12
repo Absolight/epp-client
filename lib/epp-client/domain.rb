@@ -384,7 +384,6 @@ module EPPClient
       get_result(response)
     end
 
-
     def domain_pending_action_process(xml) #:nodoc:
       dom = xml.xpath('epp:resData/domain:panData', EPPClient::SCHEMAS_URL)
       ret = {
