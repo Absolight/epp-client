@@ -116,7 +116,7 @@ module EPPClient
     # [<tt>:authInfo</tt>]
     #   authorization information associated with the domain object.
     def domain_info(args)
-      args = { :name => args } if String === args
+      args = { :name => args } if args.is_a?(String)
       response = send_request(domain_info_xml(args))
 
       get_result(:xml => response, :callback => :domain_info_process)

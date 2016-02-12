@@ -278,7 +278,7 @@ module EPPClient
               if contact.key?(:reachable)
                 reachable = contact[:reachable]
 
-                fail ArgumentError, 'reachable has to be a Hash' unless Hash === reachable
+                fail ArgumentError, 'reachable has to be a Hash' unless reachable.is_a?(Hash)
 
                 xml.reachable(reachable, 1)
               end
@@ -400,7 +400,7 @@ module EPPClient
                   if args[c].key?(:reachable)
                     reachable = args[c][:reachable]
 
-                    fail ArgumentError, 'reachable has to be a Hash' unless Hash === reachable
+                    fail ArgumentError, 'reachable has to be a Hash' unless reachable.is_a?(Hash)
 
                     xml.reachable(reachable, 1)
                   end
@@ -450,7 +450,7 @@ module EPPClient
         fail ArgumentError, "You can't update all that at one time"
       end
       [:add, :rem].each do |ar|
-        if args.key?(ar) && args[ar].key?(:ns) && String === args[ar][:ns].first
+        if args.key?(ar) && args[ar].key?(:ns) && args[ar][:ns].first.is_a?(String)
           args[ar][:ns] = args[ar][:ns].map { |ns| { :hostName => ns } }
         end
       end
