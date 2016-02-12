@@ -15,36 +15,36 @@ module EPPClient
     def domain_info_process(xml) #:nodoc:
       ret = super(xml)
       if (rgp_status = xml.xpath('epp:extension/rgp:infData/rgp:rgpStatus', EPPClient::SCHEMAS_URL)).size > 0
-	ret[:rgpStatus] = rgp_status.map {|s| s.attr('s')}
+        ret[:rgpStatus] = rgp_status.map {|s| s.attr('s')}
       end
       ret
     end
 
     def domain_restore_xml(args) #:nodoc:
       command(lambda do |xml|
-	xml.update do
-	  xml.update('xmlns' => EPPClient::SCHEMAS_URL['domain-1.0']) do
-	    xml.name args[:name]
-	  end
-	end
+        xml.update do
+          xml.update('xmlns' => EPPClient::SCHEMAS_URL['domain-1.0']) do
+            xml.name args[:name]
+          end
+        end
       end, lambda do |xml|
-	xml.update('xmlns' => EPPClient::SCHEMAS_URL['rgp-1.0']) do
-	  if args.key?(:report)
-	    xml.restore(:op => 'report') do
-	      [:preData, :postData, :delTime, :resTime, :resReason].each do |v|
-		xml.__send__(v, args[:report][v])
-	      end
-	      args[:report][:statements].each do |s|
-		xml.statement s
-	      end
-	      if args[:report].key?(:other)
-		xml.other args[:report][:other]
-	      end
-	    end
-	  else
-	    xml.restore(:op => 'request')
-	  end
-	end
+        xml.update('xmlns' => EPPClient::SCHEMAS_URL['rgp-1.0']) do
+          if args.key?(:report)
+            xml.restore(:op => 'report') do
+              [:preData, :postData, :delTime, :resTime, :resReason].each do |v|
+                xml.__send__(v, args[:report][v])
+              end
+              args[:report][:statements].each do |s|
+                xml.statement s
+              end
+              if args[:report].key?(:other)
+                xml.other args[:report][:other]
+              end
+            end
+          else
+            xml.restore(:op => 'request')
+          end
+        end
       end)
     end
 

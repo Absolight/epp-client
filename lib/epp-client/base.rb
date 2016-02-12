@@ -77,15 +77,15 @@ module EPPClient
     # [<tt>:ssl_key</tt>] The file containing the key of the certificate.
     def initialize(attrs)
       unless attrs.key?(:server) && attrs.key?(:client_id) && attrs.key?(:password)
-	raise ArgumentError, "server, client_id and password are required"
+        raise ArgumentError, "server, client_id and password are required"
       end
 
       attrs.each do |k,v|
-	begin
-	  self.send("#{k}=", v)
-	rescue NoMethodError
-	  raise ArgumentError, "there is no #{k} argument"
-	end
+        begin
+          self.send("#{k}=", v)
+        rescue NoMethodError
+          raise ArgumentError, "there is no #{k} argument"
+        end
       end
 
       @port ||= 700

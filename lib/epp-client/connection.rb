@@ -24,7 +24,7 @@ module EPPClient
       @srv_lang = xml.xpath('epp:epp/epp:greeting/epp:svcMenu/epp:lang', EPPClient::SCHEMAS_URL).map {|n| n.text}
       @srv_ns = xml.xpath('epp:epp/epp:greeting/epp:svcMenu/epp:objURI', EPPClient::SCHEMAS_URL).map {|n| n.text}
       if (ext = xml.xpath('epp:epp/epp:greeting/epp:svcMenu/epp:svcExtension/epp:extURI', EPPClient::SCHEMAS_URL)).size > 0
-	@srv_ext = ext.map {|n| n.text}
+        @srv_ext = ext.map {|n| n.text}
       end
 
       return xml
@@ -33,13 +33,13 @@ module EPPClient
     # Gracefully close the connection
     def close_connection
       if defined?(@socket) and @socket.is_a?(OpenSSL::SSL::SSLSocket)
-	@socket.close
-	@socket = nil
+        @socket.close
+        @socket = nil
       end
 
       if defined?(@tcpserver) and @tcpserver.is_a?(TCPSocket)
-	@tcpserver.close
-	@tcpserver = nil
+        @tcpserver.close
+        @tcpserver = nil
       end
 
       return true if @tcpserver.nil? and @socket.nil?
@@ -63,15 +63,15 @@ module EPPClient
     def get_frame
       size = @socket.read(4)
       if size.nil?
-	if @socket.eof?
-	  raise SocketError, "Connection closed by remote server"
-	else
-	  raise SocketError, "Error reading frame from remote server"
-	end
+        if @socket.eof?
+          raise SocketError, "Connection closed by remote server"
+        else
+          raise SocketError, "Error reading frame from remote server"
+        end
       else
-	size = size.unpack('N')[0]
-	@recv_frame = @socket.read(size - 4)
-	recv_frame_to_xml
+        size = size.unpack('N')[0]
+        @recv_frame = @socket.read(size - 4)
+        recv_frame_to_xml
       end
     end
   end

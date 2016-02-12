@@ -32,14 +32,14 @@ module EPPClient
     # See EPPClient for other attributes.
     def initialize(attrs)
       unless attrs.key?(:client_id) && attrs.key?(:password) && attrs.key?(:ssl_cert) && attrs.key?(:ssl_key)
-	raise ArgumentError, "client_id, password, ssl_cert and ssl_key are required"
+        raise ArgumentError, "client_id, password, ssl_cert and ssl_key are required"
       end
       if attrs.delete(:test) == true
-	attrs[:server] ||= 'epp.test.smallregistry.net'
-	attrs[:port] ||= 2700
+        attrs[:server] ||= 'epp.test.smallregistry.net'
+        attrs[:port] ||= 2700
       else
-	attrs[:server] ||= 'epp.smallregistry.net'
-	attrs[:port] ||= 700
+        attrs[:server] ||= 'epp.smallregistry.net'
+        attrs[:port] ||= 700
       end
       @services = EPPClient::SCHEMAS_URL.values_at('domain', 'contact')
       super(attrs)
@@ -68,15 +68,15 @@ module EPPClient
     def contact_info_process(xml) #:nodoc:
       ret = super
       if (contact = xml.xpath('epp:extension/sr:ext/sr:infData/sr:contact', EPPClient::SCHEMAS_URL)).size > 0
-	if (person = contact.xpath('sr:person', EPPClient::SCHEMAS_URL)).size > 0
-	  ret[:person] = {
-	    :birthDate => Date.parse(person.xpath('sr:birthDate', EPPClient::SCHEMAS_URL).text),
-	    :birthPlace => person.xpath('sr:birthPlace', EPPClient::SCHEMAS_URL).text,
-	  }
-	end
-	if (org = contact.xpath('sr:org', EPPClient::SCHEMAS_URL)).size > 0
-	  ret[:org] = { :companySerial => org.xpath('sr:companySerial', EPPClient::SCHEMAS_URL).text }
-	end
+        if (person = contact.xpath('sr:person', EPPClient::SCHEMAS_URL)).size > 0
+          ret[:person] = {
+            :birthDate => Date.parse(person.xpath('sr:birthDate', EPPClient::SCHEMAS_URL).text),
+            :birthPlace => person.xpath('sr:birthPlace', EPPClient::SCHEMAS_URL).text,
+          }
+        end
+        if (org = contact.xpath('sr:org', EPPClient::SCHEMAS_URL)).size > 0
+          ret[:org] = { :companySerial => org.xpath('sr:companySerial', EPPClient::SCHEMAS_URL).text }
+        end
       end
       ret
     end
@@ -103,22 +103,22 @@ module EPPClient
       ret = super
 
       ext = extension do |xml|
-	xml.ext( :xmlns => EPPClient::SCHEMAS_URL['sr']) do
-	  xml.create do
-	    xml.contact do
-	      if contact.key?(:org)
-		xml.org do
-		  xml.companySerial(contact[:org][:companySerial])
-		end
-	      elsif contact.key?(:person)
-		xml.person do
-		  xml.birthDate(contact[:person][:birthDate])
-		  xml.birthPlace(contact[:person][:birthPlace])
-		end
-	      end
-	    end
-	  end
-	end
+        xml.ext( :xmlns => EPPClient::SCHEMAS_URL['sr']) do
+          xml.create do
+            xml.contact do
+              if contact.key?(:org)
+                xml.org do
+                  xml.companySerial(contact[:org][:companySerial])
+                end
+              elsif contact.key?(:person)
+                xml.person do
+                  xml.birthDate(contact[:person][:birthDate])
+                  xml.birthPlace(contact[:person][:birthPlace])
+                end
+              end
+            end
+          end
+        end
       end
 
       insert_extension(ret, ext)
@@ -128,28 +128,28 @@ module EPPClient
       ret = super
 
       if args.key?(:chg) && (args[:chg].key?(:org) || args[:chg].key?(:person))
-	ext = extension do |xml|
-	  xml.ext( :xmlns => EPPClient::SCHEMAS_URL['sr']) do
-	    xml.update do
-	      xml.contact do
-		if args[:chg].key?(:org)
-		  xml.org do
-		    xml.companySerial(args[:chg][:org][:companySerial])
-		  end
-		elsif args[:chg].key?(:person)
-		  xml.person do
-		    xml.birthDate(args[:chg][:person][:birthDate])
-		    xml.birthPlace(args[:chg][:person][:birthPlace])
-		  end
-		end
-	      end
-	    end
-	  end
-	end
+        ext = extension do |xml|
+          xml.ext( :xmlns => EPPClient::SCHEMAS_URL['sr']) do
+            xml.update do
+              xml.contact do
+                if args[:chg].key?(:org)
+                  xml.org do
+                    xml.companySerial(args[:chg][:org][:companySerial])
+                  end
+                elsif args[:chg].key?(:person)
+                  xml.person do
+                    xml.birthDate(args[:chg][:person][:birthDate])
+                    xml.birthPlace(args[:chg][:person][:birthPlace])
+                  end
+                end
+              end
+            end
+          end
+        end
 
-	return insert_extension(ret, ext)
+        return insert_extension(ret, ext)
       else
-	return ret
+        return ret
       end
     end
 

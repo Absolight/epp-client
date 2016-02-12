@@ -4,33 +4,33 @@ module EPPClient
     # Sends an hello epp command.
     def hello
       send_request(command do |xml|
-	xml.hello
+        xml.hello
       end)
     end
 
     def login_xml(new_pw = nil) #:nodoc:
       command do |xml|
-	xml.login do
-	  xml.clID(@client_id)
-	  xml.pw(@password)
-	  xml.newPW(new_pw) unless new_pw.nil?
-	  xml.options do
-	    xml.version(@version)
-	    xml.lang(@lang)
-	  end
-	  xml.svcs do
-	    services.each do |s|
-	      xml.objURI(s)
-	    end
-	    unless extensions.empty?
-	      xml.svcExtension do
-		extensions.each do |e|
-		  xml.extURI(e)
-		end
-	      end
-	    end
-	  end
-	end
+        xml.login do
+          xml.clID(@client_id)
+          xml.pw(@password)
+          xml.newPW(new_pw) unless new_pw.nil?
+          xml.options do
+            xml.version(@version)
+            xml.lang(@lang)
+          end
+          xml.svcs do
+            services.each do |s|
+              xml.objURI(s)
+            end
+            unless extensions.empty?
+              xml.svcExtension do
+                extensions.each do |e|
+                  xml.extURI(e)
+                end
+              end
+            end
+          end
+        end
       end
     end
     private :login_xml
@@ -47,7 +47,7 @@ module EPPClient
     # connection.
     def logout
       response = send_request(command do |xml|
-	xml.logout
+        xml.logout
       end)
 
       get_result(response)
