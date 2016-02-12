@@ -210,6 +210,7 @@ module EPPClient
         xml.pubKey key[:pubKey]
       end
     end
+
     def make_ds_data(xml, ds)
       xml.dsData do
         xml.keyTag ds[:keyTag]
@@ -219,6 +220,7 @@ module EPPClient
         make_key_data(xml, ds[:keyData]) if ds.key?(:keyData)
       end
     end
+
     def parse_key_data(xml)
       {
         :flags => xml.xpath("secDNS:flags", EPPClient::SCHEMAS_URL).text.to_i,
@@ -227,6 +229,7 @@ module EPPClient
         :pubKey => xml.xpath("secDNS:pubKey", EPPClient::SCHEMAS_URL).text,
       }
     end
+
     def parse_ds_data(xml)
       ret = {
         :keyTag => xml.xpath("secDNS:keyTag", EPPClient::SCHEMAS_URL).text.to_i,
