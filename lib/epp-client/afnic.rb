@@ -47,7 +47,7 @@ module EPPClient
       ret = super
       xml.xpath('epp:extension/frnic:ext/frnic:resData/frnic:chkData/frnic:domain/frnic:cd', EPPClient::SCHEMAS_URL).each do |dom|
         name = dom.xpath('frnic:name', EPPClient::SCHEMAS_URL)
-        hash = ret.find {|d| d[:name] == name.text}
+        hash = ret.find { |d| d[:name] == name.text }
         hash[:reserved] = name.attr('reserved').value == "1"
         unless (reason = dom.xpath('frnic:rsvReason', EPPClient::SCHEMAS_URL).text).empty?
           hash[:rsvReason] = reason
@@ -70,7 +70,7 @@ module EPPClient
       ret = super
       if (frnic_status = xml.xpath('epp:extension/frnic:ext/frnic:resData/frnic:infData/frnic:domain/frnic:status', EPPClient::SCHEMAS_URL)).size > 0
         ret[:status] ||= [] # The status is optional, there may be none at this point.
-        ret[:status] += frnic_status.map {|s| s.attr('s')}
+        ret[:status] += frnic_status.map { |s| s.attr('s') }
       end
       ret
     end
@@ -181,7 +181,7 @@ module EPPClient
       ret = super
       if (contact = xml.xpath('epp:extension/frnic:ext/frnic:resData/frnic:infData/frnic:contact', EPPClient::SCHEMAS_URL)).size > 0
         if (list = contact.xpath('frnic:list', EPPClient::SCHEMAS_URL)).size > 0
-          ret[:list] = list.map {|l| l.text}
+          ret[:list] = list.map { |l| l.text }
         end
         if (firstName = contact.xpath('frnic:firstName', EPPClient::SCHEMAS_URL)).size > 0
           ret[:firstName] = firstName.text
@@ -383,13 +383,13 @@ module EPPClient
     def contact_update_xml(args) #:nodoc:
       ret = super
 
-      if [:add, :rem].any? {|c| args.key?(c) && [:list, :reachable, :idStatus].any? {|k| args[c].key?(k)}}
+      if [:add, :rem].any? { |c| args.key?(c) && [:list, :reachable, :idStatus].any? { |k| args[c].key?(k) } }
         ext = extension do |xml|
           xml.ext( :xmlns => EPPClient::SCHEMAS_URL['frnic']) do
             xml.update do
               xml.contact do
                 [:add, :rem].each do |c|
-                  next unless args.key?(c) && [:list, :reachable, :idStatus].any? {|k| args[c].key?(k)}
+                  next unless args.key?(c) && [:list, :reachable, :idStatus].any? { |k| args[c].key?(k) }
                   xml.__send__(c) do
                     xml.list(args[c][:list]) if args[c].key?(:list)
                     xml.idStatus(args[c][:idStatus]) if args[c].key?(:idStatus)
@@ -445,12 +445,12 @@ module EPPClient
       has_contacts = args.key?(:add) && args[:add].key?(:contacts) || args.key?(:add) && args[:add].key?(:contacts)
       has_ns = args.key?(:add) && args[:add].key?(:ns) || args.key?(:add) && args[:add].key?(:ns)
       has_other = args.key?(:add) && args[:add].key?(:status) || args.key?(:add) && args[:add].key?(:status) || args.key?(:chg) && args[:chg].key?(:authInfo)
-      if [has_contacts, has_ns, has_other].count {|v| v} > 1
+      if [has_contacts, has_ns, has_other].count { |v| v } > 1
         fail ArgumentError, "You can't update all that at one time"
       end
       [:add, :rem].each do |ar|
         if args.key?(ar) && args[ar].key?(:ns) && String === args[ar][:ns].first
-          args[ar][:ns] = args[ar][:ns].map {|ns| {:hostName => ns}}
+          args[ar][:ns] = args[ar][:ns].map { |ns| {:hostName => ns} }
         end
       end
       super

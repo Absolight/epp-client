@@ -131,7 +131,7 @@ module EPPClient
         :roid => contact.xpath('contact:roid', EPPClient::SCHEMAS_URL).text,
       }
       if (status = contact.xpath('contact:status', EPPClient::SCHEMAS_URL)).size > 0
-        ret[:status] = status.map {|s| s.attr('s')}
+        ret[:status] = status.map { |s| s.attr('s') }
       end
 
       if (postalInfo = contact.xpath('contact:postalInfo', EPPClient::SCHEMAS_URL)).size > 0
@@ -143,7 +143,7 @@ module EPPClient
           end
           addr = p.xpath('contact:addr', EPPClient::SCHEMAS_URL)
 
-          acc[type][:addr][:street] = addr.xpath('contact:street', EPPClient::SCHEMAS_URL).map {|s| s.text}
+          acc[type][:addr][:street] = addr.xpath('contact:street', EPPClient::SCHEMAS_URL).map { |s| s.text }
           %w(city cc).each do |val|
             acc[type][:addr][val.to_sym] = addr.xpath("contact:#{val}", EPPClient::SCHEMAS_URL).text
           end

@@ -15,7 +15,7 @@ module EPPClient
     def domain_info_process(xml) #:nodoc:
       ret = super(xml)
       if (rgp_status = xml.xpath('epp:extension/rgp:infData/rgp:rgpStatus', EPPClient::SCHEMAS_URL)).size > 0
-        ret[:rgpStatus] = rgp_status.map {|s| s.attr('s')}
+        ret[:rgpStatus] = rgp_status.map { |s| s.attr('s') }
       end
       ret
     end
@@ -88,7 +88,7 @@ module EPPClient
     end
 
     def domain_restore_process(xml) #:nodoc:
-      xml.xpath('epp:extension/rgp:upData/rgp:rgpStatus', EPPClient::SCHEMAS_URL).map {|s| s.attr('s')}
+      xml.xpath('epp:extension/rgp:upData/rgp:rgpStatus', EPPClient::SCHEMAS_URL).map { |s| s.attr('s') }
     end
   end
 end

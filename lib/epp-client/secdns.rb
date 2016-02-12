@@ -74,7 +74,7 @@ module EPPClient
         parse_key_data(s)
       end
 
-      ret[:secDNS] = ret_secdns unless ret_secdns.values.count {|v| v.nil?} == 0
+      ret[:secDNS] = ret_secdns unless ret_secdns.values.count { |v| v.nil? } == 0
       ret
     end
 

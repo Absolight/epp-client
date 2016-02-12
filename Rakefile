@@ -4,7 +4,7 @@ require 'rdoc/task'
 require 'rubygems/package_task'
 require "bundler/gem_helper"
 
-MY_GEMS = Dir['*.gemspec'].map {|g| g.sub(/.*-(.*)\.gemspec/, '\1')}
+MY_GEMS = Dir['*.gemspec'].map { |g| g.sub(/.*-(.*)\.gemspec/, '\1') }
 
 MY_GEMS.each do |g|
   namespace g do
