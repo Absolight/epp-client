@@ -171,7 +171,7 @@ module EPPClient
       if (authInfo = dom.xpath('domain:authInfo', EPPClient::SCHEMAS_URL)).size > 0
         ret[:authInfo] = authInfo.xpath('domain:pw', EPPClient::SCHEMAS_URL).text
       end
-      return ret
+      ret
     end
 
     def domain_nss_xml(xml, nss) #:nodoc:

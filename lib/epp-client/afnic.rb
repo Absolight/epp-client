@@ -57,7 +57,7 @@ module EPPClient
           hash[:fbdReason] = reason
         end
       end
-      return ret
+      ret
     end
 
     # Extends the EPPClient::Domain#domain_info so that the specific AFNIC

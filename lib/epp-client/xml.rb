@@ -14,13 +14,13 @@ module EPPClient
     def recv_frame_to_xml #:nodoc:
       @recv_xml = parse_xml(@recv_frame)
       puts @recv_xml.to_s.gsub(/^/, '<< ') if debug
-      return @recv_xml
+      @recv_xml
     end
 
     def sent_frame_to_xml #:nodoc:
       @send_xml = parse_xml(@sent_frame)
       puts @send_xml.to_s.gsub(/^/, '>> ') if debug
-      return @send_xml
+      @send_xml
     end
 
     def raw_builder(opts = {}) #:nodoc:

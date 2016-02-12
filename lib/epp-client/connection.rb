@@ -26,7 +26,7 @@ module EPPClient
         @srv_ext = ext.map {|n| n.text}
       end
 
-      return xml
+      xml
     end
 
     # Gracefully close the connection
@@ -55,7 +55,6 @@ module EPPClient
       @sent_frame = xml
       @socket.write([xml.size + 4].pack("N") + xml)
       sent_frame_to_xml
-      return
     end
 
     # gets a frame from the socket and returns the parsed response.
