@@ -143,7 +143,7 @@ module EPPClient
           end
           addr = p.xpath('contact:addr', EPPClient::SCHEMAS_URL)
 
-          acc[type][:addr][:street] = addr.xpath('contact:street', EPPClient::SCHEMAS_URL).map { |s| s.text }
+          acc[type][:addr][:street] = addr.xpath('contact:street', EPPClient::SCHEMAS_URL).map(&:text)
           %w(city cc).each do |val|
             acc[type][:addr][val.to_sym] = addr.xpath("contact:#{val}", EPPClient::SCHEMAS_URL).text
           end

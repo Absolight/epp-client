@@ -181,7 +181,7 @@ module EPPClient
       ret = super
       if (contact = xml.xpath('epp:extension/frnic:ext/frnic:resData/frnic:infData/frnic:contact', EPPClient::SCHEMAS_URL)).size > 0
         if (list = contact.xpath('frnic:list', EPPClient::SCHEMAS_URL)).size > 0
-          ret[:list] = list.map { |l| l.text }
+          ret[:list] = list.map(&:text)
         end
         if (firstName = contact.xpath('frnic:firstName', EPPClient::SCHEMAS_URL)).size > 0
           ret[:firstName] = firstName.text

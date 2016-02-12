@@ -2,9 +2,7 @@ module EPPClient
   module Session
     # Sends an hello epp command.
     def hello
-      send_request(command do |xml|
-        xml.hello
-      end)
+      send_request(command(&:hello))
     end
 
     def login_xml(new_pw = nil) #:nodoc:
@@ -45,9 +43,7 @@ module EPPClient
     # Performs the logout command, after it, the server terminates the
     # connection.
     def logout
-      response = send_request(command do |xml|
-        xml.logout
-      end)
+      response = send_request(command(&:logout))
 
       get_result(response)
     end

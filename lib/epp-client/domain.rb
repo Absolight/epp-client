@@ -141,22 +141,22 @@ module EPPClient
       end
       if (ns = dom.xpath('domain:ns', EPPClient::SCHEMAS_URL)).size > 0
         if (hostObj = ns.xpath('domain:hostObj', EPPClient::SCHEMAS_URL)).size > 0
-          ret[:ns] = hostObj.map { |h| h.text }
+          ret[:ns] = hostObj.map(&:text)
         elsif (hostAttr = ns.xpath('domain:hostAttr', EPPClient::SCHEMAS_URL)).size > 0
           ret[:ns] = hostAttr.map do |h|
             r = { :hostName => h.xpath('domain:hostName', EPPClient::SCHEMAS_URL).text }
             if (v4 = h.xpath('domain:hostAddr[@ip="v4"]', EPPClient::SCHEMAS_URL)).size > 0
-              r[:hostAddrv4] = v4.map { |v| v.text }
+              r[:hostAddrv4] = v4.map(&:text)
             end
             if (v6 = h.xpath('domain:hostAddr[@ip="v6"]', EPPClient::SCHEMAS_URL)).size > 0
-              r[:hostAddrv6] = v6.map { |v| v.text }
+              r[:hostAddrv6] = v6.map(&:text)
             end
             r
           end
         end
       end
       if (host = dom.xpath('domain:host', EPPClient::SCHEMAS_URL)).size > 0
-        ret[:host] = host.map { |h| h.text }
+        ret[:host] = host.map(&:text)
       end
       %w(clID upID).each do |val|
         if (r = dom.xpath("domain:#{val}", EPPClient::SCHEMAS_URL)).size > 0
