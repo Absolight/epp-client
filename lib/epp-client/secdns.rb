@@ -157,7 +157,7 @@ module EPPClient
       if domain.key?(:secDNS)
         sd = domain[:secDNS]
         ext = extension do |xml|
-          xml.update(sd[:urgent] == true ? {:urgent => true}: {}, {:xmlns => EPPClient::SCHEMAS_URL['secDNS']}) do
+          xml.update(sd[:urgent] == true ? {:urgent => true} : {}, {:xmlns => EPPClient::SCHEMAS_URL['secDNS']}) do
             if sd.key?(:rem)
               xml.rem do
                 if sd[:rem].key?(:all) && sd[:rem][:all] == true

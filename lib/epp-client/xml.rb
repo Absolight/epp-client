@@ -31,7 +31,7 @@ module EPPClient
     # creates a Builder::XmlMarkup object, mostly only used by +command+
     def builder(opts = {})
       raw_builder(opts) do |xml|
-        xml.instruct! :xml, :version =>"1.0", :encoding => "UTF-8"
+        xml.instruct! :xml, :version => "1.0", :encoding => "UTF-8"
         xml.epp('xmlns' => EPPClient::SCHEMAS_URL['epp'], 'xmlns:epp' => EPPClient::SCHEMAS_URL['epp']) do
           yield xml
         end
