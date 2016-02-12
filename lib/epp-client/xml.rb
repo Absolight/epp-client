@@ -1,6 +1,5 @@
 module EPPClient
   module XML
-
     attr_reader :sent_xml, :recv_xml, :msgQ_count, :msgQ_id, :trID
 
     # Parses a frame and returns a Nokogiri::XML::Document.

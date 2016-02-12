@@ -1,6 +1,5 @@
 module EPPClient
   module Connection
-
     attr_reader :sent_frame, :recv_frame, :srv_version, :srv_lang, :srv_ns, :srv_ext
 
     # Establishes the connection to the server, if successful, will return the

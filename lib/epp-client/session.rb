@@ -1,6 +1,5 @@
 module EPPClient
   module Session
-
     # Sends an hello epp command.
     def hello
       send_request(command do |xml|

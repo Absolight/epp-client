@@ -243,6 +243,5 @@ module EPPClient
       end
       ret
     end
-
   end
 end
