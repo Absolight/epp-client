@@ -117,9 +117,8 @@ module EPPClient
     # [<tt>:disclose</tt>]
     #   an optional array that identifies elements that require exceptional
     #   server-operator handling to allow or restrict disclosure to third
-    #   parties. See
-    #   section 2.9[http://tools.ietf.org/html/rfc5733#section-2.9] of RFC 5733
-    #   for details.
+    #   parties. See {section 2.9 of RFC
+    #   5733}[http://tools.ietf.org/html/rfc5733#section-2.9] for details.
     def contact_info(args)
       args = { :id => args } if args.is_a?(String)
       response = send_request(contact_info_xml(args))
@@ -265,9 +264,8 @@ module EPPClient
     # [<tt>:disclose</tt>]
     #   an optional array that identifies elements that require exceptional
     #   server-operator handling to allow or restrict disclosure to third
-    #   parties. See
-    #   section 2.9[http://tools.ietf.org/html/rfc5733#section-2.9] of RFC 5733
-    #   for details.
+    #   parties. See {section 2.9 of RFC
+    #   5733}[http://tools.ietf.org/html/rfc5733#section-2.9] for details.
     #
     # Returns a hash with the following keys :
     #
