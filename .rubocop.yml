@@ -1,0 +1,25 @@
+inherit_from: .rubocop_todo.yml
+
+Metrics/LineLength:
+  Max: 220
+
+Style/HashSyntax:
+  EnforcedStyle: hash_rockets
+
+Style/TrailingCommaInLiteral:
+  EnforcedStyleForMultiline: comma
+
+Style/MutableConstant:
+  Exclude:
+    - 'lib/epp-client/base.rb'
+    - 'lib/epp-client/poll.rb'
+
+Style/EachWithObject:
+  Exclude:
+    - 'lib/epp-client/afnic.rb'
+    - 'lib/epp-client/base.rb'
+    - 'lib/epp-client/contact.rb'
+    - 'lib/epp-client/domain.rb'
+    - 'lib/epp-client/secdns.rb'
+    - 'lib/epp-client/smallregistry.rb'
+
