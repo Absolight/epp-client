@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<schema targetNamespace="http://www.afnic.fr/xml/epp/frnic-1.1"
-        xmlns:frnic="http://www.afnic.fr/xml/epp/frnic-1.1"
+<schema targetNamespace="http://www.afnic.fr/xml/epp/frnic-1.4"
+        xmlns:frnic="http://www.afnic.fr/xml/epp/frnic-1.4"
         xmlns:eppcom="urn:ietf:params:xml:ns:eppcom-1.0"
         xmlns:epp="urn:ietf:params:xml:ns:epp-1.0"
         xmlns:domain="urn:ietf:params:xml:ns:domain-1.0"
@@ -12,7 +12,7 @@
   <annotation>
     <documentation>
       Extensible Provisioning Protocol v1.0
-      AFNIC specific extensions v1.1
+      AFNIC specific extensions v1.4
     </documentation>
   </annotation>
 
@@ -73,7 +73,7 @@
   -->
   <complexType name="createType">
     <choice>
-      <element name="contact" type="frnic:contactCreateInfoType"/>
+      <element name="contact" type="frnic:contactCreateType"/>
     </choice>
   </complexType>
 
@@ -95,6 +95,8 @@
       <element name="recData" type="frnic:resRecDataType"/>
       <element name="chkData" type="frnic:resChkDataType"/>
       <element name="infData" type="frnic:resInfDataType"/>
+      <element name="idtData" type="frnic:resIdtDataType"/>
+      <element name="quaData" type="frnic:resQuaDataType"/>
     </choice>
   </complexType>
 
@@ -111,12 +113,9 @@
   <complexType name="domainTrdType">
     <sequence>
       <element name="name"       type="eppcom:labelType"/>
-      <sequence minOccurs="0">
-        <element name="registrant" type="eppcom:clIDType"/>
-        <element name="contact"    type="domain:contactType" minOccurs="2" maxOccurs="4"/>
-      </sequence>
+      <element name="registrant" type="eppcom:clIDType" minOccurs="0"/>
+      <element name="authInfo"   type="domain:authInfoType"/>
     </sequence>
-    <attribute name="keepDS" type="boolean" use="required"/>
   </complexType>
 
   <complexType name="recType">
@@ -149,7 +148,22 @@
   <!--
   AFNIC create contact command extensions details
   -->
-  <complexType name="contactCreateInfoType">
+  <complexType name="contactCreateType">
+    <sequence>
+      <choice>
+        <sequence>
+          <element name="list"            type="token" minOccurs="0"/>
+          <element name="individualInfos" type="frnic:contactCreateInfoIIDType" minOccurs="0"/>
+          <element name="firstName"       type="contact:postalLineType"/>
+        </sequence>
+        <element name="firstName"         type="contact:postalLineType"/>
+        <element name="legalEntityInfos"  type="frnic:contactCreateInfoLIDType"/>
+      </choice>
+      <element name="reachable"           type="frnic:contactReachableType" minOccurs="0"/>
+    </sequence>
+  </complexType>
+
+  <complexType name="contactInfoType">
     <sequence>
       <choice>
         <sequence>
@@ -160,17 +174,23 @@
         <element name="firstName"         type="contact:postalLineType"/>
         <element name="legalEntityInfos"  type="frnic:contactCreateInfoLIDType"/>
       </choice>
-      <element name="obsoleted"           type="frnic:contactObsoletedType" minOccurs="0"/>
+      <element name="obsoleted"           type="frnic:contactObsoletedType"/>
+      <element name="reachable"           type="frnic:contactReachableType" minOccurs="0"/>
     </sequence>
   </complexType>
 
   <complexType name="contactCreateInfoIIDType">
     <sequence>
       <element name="idStatus"  type="frnic:identificationStatusType" minOccurs="0"/>
-      <element name="birthDate" type="date"/>
-      <element name="birthCity" type="contact:postalLineType" minOccurs="0"/>
-      <element name="birthPc"   type="contact:pcType" minOccurs="0"/>
-      <element name="birthCc"   type="contact:ccType"/>
+      <choice>
+        <sequence/>
+        <sequence>
+          <element name="birthDate" type="date"/>
+          <element name="birthCity" type="contact:postalLineType" minOccurs="0"/>
+          <element name="birthPc"   type="contact:pcType" minOccurs="0"/>
+          <element name="birthCc"   type="contact:ccType"/>
+        </sequence>
+      </choice>
     </sequence>
   </complexType>
 
@@ -182,6 +202,8 @@
       <element name="VAT"         type="token" minOccurs="0"/>
       <element name="trademark"   type="token" minOccurs="0"/>
       <element name="asso"        type="frnic:assoType" minOccurs="0"/>
+      <element name="DUNS"        type="token" minOccurs="0"/>
+      <element name="local"       type="token" minOccurs="0"/>
     </sequence>
   </complexType>
 
@@ -229,6 +251,16 @@
     </simpleContent>
   </complexType>
 
+  <complexType name="contactReachableType">
+    <simpleContent>
+      <extension base="boolean">
+        <attribute name="when" type="dateTime"/>
+        <attribute name="media" type="frnic:reachabilityMediaType" use="required"/>
+        <attribute name="source" type="frnic:qualificationSourceAttributeType"/>
+      </extension>
+    </simpleContent>
+  </complexType>
+
   <!--
   AFNIC update contact command extensions details
   -->
@@ -241,7 +273,9 @@
 
   <complexType name="contactAddRemType">
     <sequence>
-      <element name="list" type="token" minOccurs="1"/>
+      <element name="list"      type="token" minOccurs="0"/>
+      <element name="idStatus"  type="frnic:identificationStatusType" minOccurs="0"/>
+      <element name="reachable" type="frnic:contactReachableType" minOccurs="0"/>
     </sequence>
   </complexType>
 
@@ -326,7 +360,7 @@
   <complexType name="resInfDataType">
     <choice>
       <element name="domain"  type="frnic:resInfDomDataType"/>
-      <element name="contact" type="frnic:contactCreateInfoType"/>
+      <element name="contact" type="frnic:contactInfoType"/>
     </choice>
   </complexType>
 
@@ -351,6 +385,62 @@
       <enumeration value="serverRecoverProhibited"/>
     </restriction>
   </simpleType>
+
+  <!--
+  AFNIC identification response extensions details
+  -->
+  <complexType name="resIdtDataType">
+    <choice>
+      <element name="domain"  type="frnic:resIdtDomDataType"/>
+      <element name="contact" type="frnic:resIdtCntDataType"/>
+    </choice>
+  </complexType>
+                                                                                                                     
+  <complexType name="resIdtDomDataType">
+    <sequence>
+      <element name="name"       type="eppcom:labelType"/>
+      <element name="status"     type="domain:statusType" maxOccurs="2"/>
+      <element name="registrant" type="eppcom:clIDType"/>
+    </sequence>
+  </complexType>
+                                                                                                                     
+  <complexType name="resIdtCntDataType">
+    <sequence>
+      <element name="id"                    type="eppcom:clIDType"/>
+      <element name="identificationProcess" type="frnic:identificationProcessType"/>
+      <element name="legalEntityInfos"      type="frnic:contactCreateInfoLIDType"/>
+      <element name="idtReason"             type="frnic:idtReasonType" minOccurs="0" maxOccurs="unbounded"/>
+    </sequence>
+  </complexType>
+
+  <!--
+  AFNIC quallification response extensions details
+  -->
+  <complexType name="resQuaDataType">
+    <choice>
+      <element name="contact" type="frnic:resQuaCntDataType"/>
+    </choice>
+  </complexType>
+
+  <complexType name="resQuaCntDataType">
+    <sequence>
+      <element name="id"                    type="eppcom:clIDType"/>
+      <element name="qualificationProcess"  type="frnic:qualificationProcessType"/>
+      <choice>
+        <element name="individualInfos"       type="frnic:contactCreateInfoIIDType" minOccurs="0"/>
+        <element name="legalEntityInfos"      type="frnic:contactCreateInfoLIDType" minOccurs="0"/>
+      </choice>
+      <element name="reachability"          type="frnic:contactReachabilityType"/>
+    </sequence>
+  </complexType>
+
+  <complexType name="contactReachabilityType">
+    <sequence>
+      <element name="reStatus"              type="frnic:reachabilityStatusType"/>
+      <element name="voice"                 type="contact:e164Type" minOccurs="0"/>
+      <element name="email"                 type="eppcom:minTokenType" minOccurs="0"/>
+    </sequence>
+  </complexType>
 
   <!--
   AFNIC Trade command "op" attribute values
@@ -390,7 +480,7 @@
   <!--
   AFNIC Identification process status identifiers.
   -->
-  <simpleType name="identificationStatusType">
+  <simpleType name="identificationStatusListType">
     <restriction base="token">
       <enumeration value="no"/>
       <enumeration value="pending"/>
@@ -400,6 +490,90 @@
       <enumeration value="deprecated"/>
       <enumeration value="control"/>
       <enumeration value="delayed"/>
+    </restriction>
+  </simpleType>
+
+  <complexType name="identificationStatusType">
+    <simpleContent>
+      <extension base="frnic:identificationStatusListType">
+        <attribute name="when" type="dateTime"/>
+        <attribute name="source" type="frnic:qualificationSourceAttributeType"/>
+      </extension>
+    </simpleContent>
+  </complexType>
+
+  <complexType name="idtReasonType">
+    <simpleContent>
+      <extension base="frnic:idtReasonBaseType">
+        <attribute name="lang" type="language"/>
+      </extension>
+    </simpleContent>
+  </complexType>
+                                                                                                                     
+  <simpleType name="idtReasonBaseType">
+    <restriction base="token">
+      <minLength value="1"/>
+      <maxLength value="128"/>
+    </restriction>
+  </simpleType>
+                                                                                                                     
+  <complexType name="identificationProcessType">
+    <simpleContent>
+      <extension base="normalizedString">
+        <attribute name="s" type="frnic:identificationProcessValueType" use="required"/>
+        <attribute name="lang" type="language" default="en"/>
+      </extension>
+    </simpleContent>
+  </complexType>
+                                                                                                                     
+  <simpleType name="identificationProcessValueType">
+    <restriction base="token">
+      <enumeration value="start"/>
+      <enumeration value="pending"/>
+      <enumeration value="finished"/>
+    </restriction>
+  </simpleType>
+
+  <!--
+  AFNIC Qualification process status identifiers.
+  -->
+  <simpleType name="reachabilityStatusType">
+    <restriction base="token">
+      <enumeration value="no"/>
+      <enumeration value="pending"/>
+      <enumeration value="ok"/>
+      <enumeration value="ko"/>
+    </restriction>
+  </simpleType>
+
+  <simpleType name="reachabilityMediaType">
+    <restriction base="token">
+      <enumeration value="voice"/>
+      <enumeration value="email"/>
+    </restriction>
+  </simpleType>
+
+  <simpleType name="qualificationSourceAttributeType">
+    <restriction base="token">
+      <enumeration value="registry"/>
+      <enumeration value="registrar"/>
+    </restriction>
+  </simpleType>
+
+  <complexType name="qualificationProcessType">
+    <simpleContent>
+      <extension base="normalizedString">
+        <attribute name="s" type="frnic:qualificationProcessValueType" use="required"/>
+        <attribute name="lang" type="language" default="en"/>
+      </extension>
+    </simpleContent>
+  </complexType>
+                                                                                                                                                       
+  <simpleType name="qualificationProcessValueType">
+    <restriction base="token">
+      <enumeration value="start"/>
+      <enumeration value="problem"/>
+      <enumeration value="finished"/>
     </restriction>
   </simpleType>
 

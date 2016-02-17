@@ -1,24 +1,25 @@
 PATH
   remote: .
   specs:
-    epp-client-afnic (0.12.0)
+    epp-client-afnic (0.15.0)
       builder (>= 2.1.2)
-      epp-client-base (= 0.12.0)
-      epp-client-rgp (= 0.12.0)
-      epp-client-secdns (= 0.12.0)
+      epp-client-base (= 0.15.0)
+      epp-client-rgp (= 0.15.0)
+      epp-client-secdns (= 0.15.0)
       nokogiri (~> 1.4)
-    epp-client-base (0.12.0)
-      builder (>= 2.1.2)
-      nokogiri (~> 1.4)
-    epp-client-rgp (0.12.0)
+    epp-client-base (0.15.0)
       builder (>= 2.1.2)
       nokogiri (~> 1.4)
-    epp-client-secdns (0.12.0)
+    epp-client-rgp (0.15.0)
       builder (>= 2.1.2)
       nokogiri (~> 1.4)
-    epp-client-smallregistry (0.12.0)
+    epp-client-secdns (0.15.0)
       builder (>= 2.1.2)
-      epp-client-base (= 0.12.0)
+      nokogiri (~> 1.4)
+    epp-client-smallregistry (0.15.0)
+      builder (>= 2.1.2)
+      epp-client-base (= 0.15.0)
+      epp-client-secdns (= 0.15.0)
       nokogiri (~> 1.4)
 
 GEM
@@ -37,3 +38,6 @@ DEPENDENCIES
   epp-client-rgp!
   epp-client-secdns!
   epp-client-smallregistry!
+
+BUNDLED WITH
+   1.11.2
