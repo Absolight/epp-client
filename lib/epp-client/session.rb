@@ -1,36 +1,34 @@
 module EPPClient
+  # This handles the basic session, login, logout, and hello.
   module Session
-
     # Sends an hello epp command.
     def hello
-      send_request(command do |xml|
-	xml.hello
-      end)
+      send_request(command(&:hello))
     end
 
     def login_xml(new_pw = nil) #:nodoc:
       command do |xml|
-	xml.login do
-	  xml.clID(@client_id)
-	  xml.pw(@password)
-	  xml.newPW(new_pw) unless new_pw.nil?
-	  xml.options do
-	    xml.version(@version)
-	    xml.lang(@lang)
-	  end
-	  xml.svcs do
-	    services.each do |s|
-	      xml.objURI(s)
-	    end
-	    unless extensions.empty?
-	      xml.svcExtension do
-		extensions.each do |e|
-		  xml.extURI(e)
-		end
-	      end
-	    end
-	  end
-	end
+        xml.login do
+          xml.clID(@client_id)
+          xml.pw(@password)
+          xml.newPW(new_pw) unless new_pw.nil?
+          xml.options do
+            xml.version(@version)
+            xml.lang(@lang)
+          end
+          xml.svcs do
+            services.each do |s|
+              xml.objURI(s)
+            end
+            unless extensions.empty?
+              xml.svcExtension do
+                extensions.each do |e|
+                  xml.extURI(e)
+                end
+              end
+            end
+          end
+        end
       end
     end
     private :login_xml
@@ -46,9 +44,7 @@ module EPPClient
     # Performs the logout command, after it, the server terminates the
     # connection.
     def logout
-      response = send_request(command do |xml|
-	xml.logout
-      end)
+      response = send_request(command(&:logout))
 
       get_result(response)
     end

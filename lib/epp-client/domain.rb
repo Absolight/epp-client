@@ -1,17 +1,20 @@
 module EPPClient
+  # This module handles all the Domain interactions.!
+  #
+  # See RFC 5731 for more informations
   module Domain
     EPPClient::Poll::PARSERS['domain:panData'] = :domain_pending_action_process
     EPPClient::Poll::PARSERS['domain:trnData'] = :domain_transfer_response
 
     def domain_check_xml(*domains) # :nodoc:
       command do |xml|
-	xml.check do
-	  xml.check('xmlns' => EPPClient::SCHEMAS_URL['domain-1.0']) do
-	    domains.each do |dom|
-	      xml.name(dom)
-	    end
-	  end
-	end
+        xml.check do
+          xml.check('xmlns' => EPPClient::SCHEMAS_URL['domain-1.0']) do
+            domains.each do |dom|
+              xml.name(dom)
+            end
+          end
+        end
       end
     end
 
@@ -32,33 +35,33 @@ module EPPClient
 
     def domain_check_process(xml) # :nodoc:
       xml.xpath('epp:resData/domain:chkData/domain:cd', EPPClient::SCHEMAS_URL).map do |dom|
-	ret = {
-	  :name => dom.xpath('domain:name', EPPClient::SCHEMAS_URL).text,
-	  :avail => dom.xpath('domain:name', EPPClient::SCHEMAS_URL).attr('avail').value == '1',
-	}
-	unless (reason = dom.xpath('domain:reason', EPPClient::SCHEMAS_URL).text).empty?
-	  ret[:reason] = reason
-	end
-	ret
+        ret = {
+          :name => dom.xpath('domain:name', EPPClient::SCHEMAS_URL).text,
+          :avail => dom.xpath('domain:name', EPPClient::SCHEMAS_URL).attr('avail').value == '1',
+        }
+        unless (reason = dom.xpath('domain:reason', EPPClient::SCHEMAS_URL).text).empty?
+          ret[:reason] = reason
+        end
+        ret
       end
     end
 
     def domain_info_xml(args) # :nodoc:
       command do |xml|
-	xml.info do
-	  xml.info('xmlns' => EPPClient::SCHEMAS_URL['domain-1.0']) do
-	    xml.name(args[:name])
-	    if args.key?(:authInfo)
-	      xml.authInfo do
-		if args.key?(:roid)
-		  xml.pw({:roid => args[:roid]}, args[:authInfo])
-		else
-		  xml.pw(args[:authInfo])
-		end
-	      end
-	    end
-	  end
-	end
+        xml.info do
+          xml.info('xmlns' => EPPClient::SCHEMAS_URL['domain-1.0']) do
+            xml.name(args[:name])
+            if args.key?(:authInfo)
+              xml.authInfo do
+                if args.key?(:roid)
+                  xml.pw({ :roid => args[:roid] }, args[:authInfo])
+                else
+                  xml.pw(args[:authInfo])
+                end
+              end
+            end
+          end
+        end
       end
     end
 
@@ -113,9 +116,7 @@ module EPPClient
     # [<tt>:authInfo</tt>]
     #   authorization information associated with the domain object.
     def domain_info(args)
-      if String === args
-	args = {:name => args}
-      end
+      args = { :name => args } if args.is_a?(String)
       response = send_request(domain_info_xml(args))
 
       get_result(:xml => response, :callback => :domain_info_process)
@@ -124,117 +125,113 @@ module EPPClient
     def domain_info_process(xml) # :nodoc:
       dom = xml.xpath('epp:resData/domain:infData', EPPClient::SCHEMAS_URL)
       ret = {
-	:name => dom.xpath('domain:name', EPPClient::SCHEMAS_URL).text,
-	:roid => dom.xpath('domain:roid', EPPClient::SCHEMAS_URL).text,
+        :name => dom.xpath('domain:name', EPPClient::SCHEMAS_URL).text,
+        :roid => dom.xpath('domain:roid', EPPClient::SCHEMAS_URL).text,
       }
       if (status = dom.xpath('domain:status', EPPClient::SCHEMAS_URL)).size > 0
-	ret[:status] = status.map {|s| s.attr('s')}
+        ret[:status] = status.map { |s| s.attr('s') }
       end
       if (registrant = dom.xpath('domain:registrant', EPPClient::SCHEMAS_URL)).size > 0
-	ret[:registrant] = registrant.text
+        ret[:registrant] = registrant.text
       end
       if (contact = dom.xpath('domain:contact', EPPClient::SCHEMAS_URL)).size > 0
-	ret[:contacts] = contact.inject({}) do |a,c|
-	  s = c.attr('type').to_sym
-	  a[s] ||= []
-	  a[s] << c.text
-	  a
-	end
+        ret[:contacts] = contact.inject({}) do |a, c|
+          s = c.attr('type').to_sym
+          a[s] ||= []
+          a[s] << c.text
+          a
+        end
       end
       if (ns = dom.xpath('domain:ns', EPPClient::SCHEMAS_URL)).size > 0
-	if (hostObj = ns.xpath('domain:hostObj', EPPClient::SCHEMAS_URL)).size > 0
-	  ret[:ns] = hostObj.map {|h| h.text}
-	elsif (hostAttr = ns.xpath('domain:hostAttr', EPPClient::SCHEMAS_URL)).size > 0
-	  ret[:ns] = hostAttr.map do |h|
-	    r = { :hostName => h.xpath('domain:hostName', EPPClient::SCHEMAS_URL).text }
-	    if (v4 = h.xpath('domain:hostAddr[@ip="v4"]', EPPClient::SCHEMAS_URL)).size > 0
-	      r[:hostAddrv4] = v4.map {|v| v.text}
-	    end
-	    if (v6 = h.xpath('domain:hostAddr[@ip="v6"]', EPPClient::SCHEMAS_URL)).size > 0
-	      r[:hostAddrv6] = v6.map {|v| v.text}
-	    end
-	    r
-	  end
-	end
+        if (hostObj = ns.xpath('domain:hostObj', EPPClient::SCHEMAS_URL)).size > 0
+          ret[:ns] = hostObj.map(&:text)
+        elsif (hostAttr = ns.xpath('domain:hostAttr', EPPClient::SCHEMAS_URL)).size > 0
+          ret[:ns] = hostAttr.map do |h|
+            r = { :hostName => h.xpath('domain:hostName', EPPClient::SCHEMAS_URL).text }
+            if (v4 = h.xpath('domain:hostAddr[@ip="v4"]', EPPClient::SCHEMAS_URL)).size > 0
+              r[:hostAddrv4] = v4.map(&:text)
+            end
+            if (v6 = h.xpath('domain:hostAddr[@ip="v6"]', EPPClient::SCHEMAS_URL)).size > 0
+              r[:hostAddrv6] = v6.map(&:text)
+            end
+            r
+          end
+        end
       end
       if (host = dom.xpath('domain:host', EPPClient::SCHEMAS_URL)).size > 0
-	ret[:host] = host.map {|h| h.text}
+        ret[:host] = host.map(&:text)
       end
       %w(clID upID).each do |val|
-	if (r = dom.xpath("domain:#{val}", EPPClient::SCHEMAS_URL)).size > 0
-	  ret[val.to_sym] = r.text
-	end
+        if (r = dom.xpath("domain:#{val}", EPPClient::SCHEMAS_URL)).size > 0
+          ret[val.to_sym] = r.text
+        end
       end
       %w(crDate exDate upDate trDate).each do |val|
-	if (r = dom.xpath("domain:#{val}", EPPClient::SCHEMAS_URL)).size > 0
-	  ret[val.to_sym] = DateTime.parse(r.text)
-	end
+        if (r = dom.xpath("domain:#{val}", EPPClient::SCHEMAS_URL)).size > 0
+          ret[val.to_sym] = DateTime.parse(r.text)
+        end
       end
       if (authInfo = dom.xpath('domain:authInfo', EPPClient::SCHEMAS_URL)).size > 0
-	ret[:authInfo] = authInfo.xpath('domain:pw', EPPClient::SCHEMAS_URL).text
+        ret[:authInfo] = authInfo.xpath('domain:pw', EPPClient::SCHEMAS_URL).text
       end
-      return ret
+      ret
     end
 
     def domain_nss_xml(xml, nss) #:nodoc:
       xml.ns do
-	if nss.first.is_a?(Hash)
-	  nss.each do |ns|
-	    xml.hostAttr do
-	      xml.hostName ns[:hostName]
-	      if ns.key?(:hostAddrv4)
-		ns[:hostAddrv4].each do |v4|
-		  xml.hostAddr({:ip => :v4}, v4)
-		end
-	      end
-	      if ns.key?(:hostAddrv6)
-		ns[:hostAddrv6].each do |v6|
-		  xml.hostAddr({:ip => :v6}, v6)
-		end
-	      end
-	    end
-	  end
-	else
-	  nss.each do |ns|
-	    xml.hostObj ns
-	  end
-	end
+        if nss.first.is_a?(Hash)
+          nss.each do |ns|
+            xml.hostAttr do
+              xml.hostName ns[:hostName]
+              if ns.key?(:hostAddrv4)
+                ns[:hostAddrv4].each do |v4|
+                  xml.hostAddr({ :ip => :v4 }, v4)
+                end
+              end
+              if ns.key?(:hostAddrv6)
+                ns[:hostAddrv6].each do |v6|
+                  xml.hostAddr({ :ip => :v6 }, v6)
+                end
+              end
+            end
+          end
+        else
+          nss.each do |ns|
+            xml.hostObj ns
+          end
+        end
       end
     end
 
     def domain_contacts_xml(xml, args) #:nodoc:
-      args.each do |type,contacts|
-	contacts.each do |c|
-	  xml.contact({:type => type}, c)
-	end
+      args.each do |type, contacts|
+        contacts.each do |c|
+          xml.contact({ :type => type }, c)
+        end
       end
     end
 
     def domain_create_xml(args) #:nodoc:
       command do |xml|
-	xml.create do
-	  xml.create('xmlns' => EPPClient::SCHEMAS_URL['domain-1.0']) do
-	    xml.name args[:name]
+        xml.create do
+          xml.create('xmlns' => EPPClient::SCHEMAS_URL['domain-1.0']) do
+            xml.name args[:name]
 
-	    if args.key?(:period)
-	      xml.period({:unit => args[:period][:unit]}, args[:period][:number])
-	    end
+            if args.key?(:period)
+              xml.period({ :unit => args[:period][:unit] }, args[:period][:number])
+            end
 
-	    if args.key?(:ns)
-	      domain_nss_xml(xml, args[:ns])
-	    end
+            domain_nss_xml(xml, args[:ns]) if args.key?(:ns)
 
-	    xml.registrant args[:registrant] if args.key?(:registrant)
+            xml.registrant args[:registrant] if args.key?(:registrant)
 
-	    if args.key?(:contacts)
-	      domain_contacts_xml(xml, args[:contacts])
-	    end
+            domain_contacts_xml(xml, args[:contacts]) if args.key?(:contacts)
 
-	    xml.authInfo do
-	      xml.pw args[:authInfo]
-	    end
-	  end
-	end
+            xml.authInfo do
+              xml.pw args[:authInfo]
+            end
+          end
+        end
       end
     end
 
@@ -278,19 +275,20 @@ module EPPClient
     def domain_create_process(xml) #:nodoc:
       dom = xml.xpath('epp:resData/domain:creData', EPPClient::SCHEMAS_URL)
       ret = {
-	:name => dom.xpath('domain:name', EPPClient::SCHEMAS_URL).text,
-	:crDate => DateTime.parse(dom.xpath('domain:crDate', EPPClient::SCHEMAS_URL).text),
-	:upDate => DateTime.parse(dom.xpath('domain:crDate', EPPClient::SCHEMAS_URL).text),
+        :name => dom.xpath('domain:name', EPPClient::SCHEMAS_URL).text,
+        :crDate => DateTime.parse(dom.xpath('domain:crDate', EPPClient::SCHEMAS_URL).text),
+        :upDate => DateTime.parse(dom.xpath('domain:crDate', EPPClient::SCHEMAS_URL).text),
       }
+      ret
     end
 
     def domain_delete_xml(domain) #:nodoc:
       command do |xml|
-	xml.delete do
-	  xml.delete('xmlns' => EPPClient::SCHEMAS_URL['domain-1.0']) do
-	    xml.name domain
-	  end
-	end
+        xml.delete do
+          xml.delete('xmlns' => EPPClient::SCHEMAS_URL['domain-1.0']) do
+            xml.name domain
+          end
+        end
       end
     end
 
@@ -307,44 +305,41 @@ module EPPClient
 
     def domain_update_xml(args) #:nodoc:
       command do |xml|
-	xml.update do
-	  xml.update('xmlns' => EPPClient::SCHEMAS_URL['domain-1.0']) do
-	    xml.name args[:name]
-	    [:add, :rem].each do |ar|
-	      if args.key?(ar) && (args[ar].key?(:ns) || args[ar].key?(:contacts) || args[ar].key?(:status))
-		xml.__send__(ar) do
-		  if args[ar].key?(:ns)
-		    domain_nss_xml(xml, args[ar][:ns])
-		  end
-		  if args[ar].key?(:contacts)
-		    domain_contacts_xml(xml, args[ar][:contacts])
-		  end
-		  if args[ar].key?(:status)
-		    args[ar][:status].each do |st,text|
-		      if text.nil?
-			xml.status(:s => st)
-		      else
-			xml.status({:s => st}, text)
-		      end
-		    end
-		  end
-		end
-	      end
-	    end
-	    if args.key?(:chg) && (args[:chg].key?(:registrant) || args[:chg].key?(:authInfo))
-	      xml.chg do
-		if args[:chg].key?(:registrant)
-		  xml.registrant args[:chg][:registrant]
-		end
-		if args[:chg].key?(:authInfo)
-		  xml.authInfo do
-		    xml.pw args[:chg][:authInfo]
-		  end
-		end
-	      end
-	    end
-	  end
-	end
+        xml.update do
+          xml.update('xmlns' => EPPClient::SCHEMAS_URL['domain-1.0']) do
+            xml.name args[:name]
+            [:add, :rem].each do |ar|
+              next unless args.key?(ar) && (args[ar].key?(:ns) || args[ar].key?(:contacts) || args[ar].key?(:status))
+              xml.__send__(ar) do
+                domain_nss_xml(xml, args[ar][:ns]) if args[ar].key?(:ns)
+                if args[ar].key?(:contacts)
+                  domain_contacts_xml(xml, args[ar][:contacts])
+                end
+                if args[ar].key?(:status)
+                  args[ar][:status].each do |st, text|
+                    if text.nil?
+                      xml.status(:s => st)
+                    else
+                      xml.status({ :s => st }, text)
+                    end
+                  end
+                end
+              end
+            end
+            if args.key?(:chg) && (args[:chg].key?(:registrant) || args[:chg].key?(:authInfo))
+              xml.chg do
+                if args[:chg].key?(:registrant)
+                  xml.registrant args[:chg][:registrant]
+                end
+                if args[:chg].key?(:authInfo)
+                  xml.authInfo do
+                    xml.pw args[:chg][:authInfo]
+                  end
+                end
+              end
+            end
+          end
+        end
       end
     end
 
@@ -383,54 +378,54 @@ module EPPClient
       get_result(response)
     end
 
-
     def domain_pending_action_process(xml) #:nodoc:
       dom = xml.xpath('epp:resData/domain:panData', EPPClient::SCHEMAS_URL)
       ret = {
-	:name => dom.xpath('domain:name', EPPClient::SCHEMAS_URL).text,
-	:paResult => dom.xpath('domain:name', EPPClient::SCHEMAS_URL).attribute('paResult').value,
-	:paTRID => get_trid(dom.xpath('domain:paTRID', EPPClient::SCHEMAS_URL)),
-	:paDate => DateTime.parse(dom.xpath('domain:paDate', EPPClient::SCHEMAS_URL).text),
+        :name => dom.xpath('domain:name', EPPClient::SCHEMAS_URL).text,
+        :paResult => dom.xpath('domain:name', EPPClient::SCHEMAS_URL).attribute('paResult').value,
+        :paTRID => get_trid(dom.xpath('domain:paTRID', EPPClient::SCHEMAS_URL)),
+        :paDate => DateTime.parse(dom.xpath('domain:paDate', EPPClient::SCHEMAS_URL).text),
       }
+      ret
     end
 
     def domain_transfer_response(xml) #:nodoc:
       dom = xml.xpath('epp:resData/domain:trnData', EPPClient::SCHEMAS_URL)
       ret = {
-	:name => dom.xpath('domain:name', EPPClient::SCHEMAS_URL).text,
-	:trStatus => dom.xpath('domain:trStatus', EPPClient::SCHEMAS_URL).text,
-	:reID => dom.xpath('domain:reID', EPPClient::SCHEMAS_URL).text,
-	:reDate => DateTime.parse(dom.xpath('domain:reDate', EPPClient::SCHEMAS_URL).text),
-	:acID => dom.xpath('domain:acID', EPPClient::SCHEMAS_URL).text,
-	:acDate => DateTime.parse(dom.xpath('domain:acDate', EPPClient::SCHEMAS_URL).text)
+        :name => dom.xpath('domain:name', EPPClient::SCHEMAS_URL).text,
+        :trStatus => dom.xpath('domain:trStatus', EPPClient::SCHEMAS_URL).text,
+        :reID => dom.xpath('domain:reID', EPPClient::SCHEMAS_URL).text,
+        :reDate => DateTime.parse(dom.xpath('domain:reDate', EPPClient::SCHEMAS_URL).text),
+        :acID => dom.xpath('domain:acID', EPPClient::SCHEMAS_URL).text,
+        :acDate => DateTime.parse(dom.xpath('domain:acDate', EPPClient::SCHEMAS_URL).text),
       }
       if (exDate = dom.xpath('domain:exDate', EPPClient::SCHEMAS_URL)).size > 0
-	ret[:exDate] = DateTime.parse(exDate)
+        ret[:exDate] = DateTime.parse(exDate)
       end
       ret
     end
 
     def domain_transfer_xml(args) # :nodoc:
       command do |xml|
-	xml.transfer('op' => args[:op]) do
-	  xml.transfer('xmlns' => EPPClient::SCHEMAS_URL['domain-1.0']) do
-	    xml.name(args[:name])
-	    if args.key?(:period)
-	      xml.period('unit' => args[:period][:unit]) do
-		args[:period][:number]
-	      end
-	    end
-	    if args.key?(:authInfo)
-	      xml.authInfo do
-		if args.key?(:roid)
-		  xml.pw({:roid => args[:roid]}, args[:authInfo])
-		else
-		  xml.pw(args[:authInfo])
-		end
-	      end
-	    end
-	  end
-	end
+        xml.transfer('op' => args[:op]) do
+          xml.transfer('xmlns' => EPPClient::SCHEMAS_URL['domain-1.0']) do
+            xml.name(args[:name])
+            if args.key?(:period)
+              xml.period('unit' => args[:period][:unit]) do
+                args[:period][:number]
+              end
+            end
+            if args.key?(:authInfo)
+              xml.authInfo do
+                if args.key?(:roid)
+                  xml.pw({ :roid => args[:roid] }, args[:authInfo])
+                else
+                  xml.pw(args[:authInfo])
+                end
+              end
+            end
+          end
+        end
       end
     end
 

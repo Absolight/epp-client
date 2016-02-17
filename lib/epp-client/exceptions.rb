@@ -1,4 +1,5 @@
 module EPPClient
+  # This "strange" exception allows having more informative error messages.
   class EPPErrorResponse < StandardError
     attr_accessor :response_xml, :response_code, :message
 

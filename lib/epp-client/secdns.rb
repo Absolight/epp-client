@@ -1,10 +1,11 @@
 module EPPClient
+  # This implements the DNSSEC bits.
   module SecDNS
-    SCHEMAS_SECDNS = %w[
+    SCHEMAS_SECDNS = %w(
       secDNS-1.1
-    ]
+    ).freeze
 
-    EPPClient::SCHEMAS_URL.merge!(SCHEMAS_SECDNS.inject({}) do |a,s|
+    EPPClient::SCHEMAS_URL.merge!(SCHEMAS_SECDNS.inject({}) do |a, s|
       a[s.sub(/-1\.1$/, '')] = "urn:ietf:params:xml:ns:#{s}" if s =~ /-1\.1$/
       a[s] = "urn:ietf:params:xml:ns:#{s}"
       a
@@ -65,16 +66,16 @@ module EPPClient
       ret = super
       ret_secdns = {}
       if (maxSigLife = xml.xpath('epp:extension/secDNS:infData/secDNS:maxSigLife', EPPClient::SCHEMAS_URL)).size > 0
-	ret_secdns[:maxSigLife] = maxSigLife.text
+        ret_secdns[:maxSigLife] = maxSigLife.text
       end
       ret_secdns[:dsData] = xml.xpath('epp:extension/secDNS:infData/secDNS:dsData', EPPClient::SCHEMAS_URL).map do |s|
-	parse_ds_data(s)
+        parse_ds_data(s)
       end
       ret_secdns[:keyData] = xml.xpath('epp:extension/secDNS:infData/secDNS:keyData', EPPClient::SCHEMAS_URL).map do |s|
-	parse_key_data(s)
+        parse_key_data(s)
       end
 
-      ret[:secDNS] = ret_secdns unless ret_secdns.values.reject {|v| v.nil?}.size == 0
+      ret[:secDNS] = ret_secdns unless ret_secdns.values.count(&:nil?) == 0
       ret
     end
 
@@ -97,27 +98,24 @@ module EPPClient
     def domain_create_xml(domain) #:nodoc:
       ret = super
 
-      if domain.key?(:maxSigLife) || domain.key?(:dsData) || domain.key?(:keyData)
-	ext = extension do |xml|
-	  xml.create( :xmlns => EPPClient::SCHEMAS_URL['secDNS']) do
-	    if domain.key?(:maxSigLife)
-	      xml.maxSigLife(domain[:maxSigLife])
-	    end
-	    if domain.key?(:dsData)
-	      domain[:dsData].each do |ds|
-		make_ds_data(xml, ds)
-	      end
-	    elsif domain.key?(:keyData)
-	      domain[:keyData].each do |key|
-		make_key_data(xml, key)
-	      end
-	    end
-	  end
-	end
-	return insert_extension(ret, ext)
-      else
-	return ret
+      return ret unless domain.key?(:maxSigLife) || domain.key?(:dsData) || domain.key?(:keyData)
+
+      ext = extension do |xml|
+        xml.create(:xmlns => EPPClient::SCHEMAS_URL['secDNS']) do
+          xml.maxSigLife(domain[:maxSigLife]) if domain.key?(:maxSigLife)
+          if domain.key?(:dsData)
+            domain[:dsData].each do |ds|
+              make_ds_data(xml, ds)
+            end
+          elsif domain.key?(:keyData)
+            domain[:keyData].each do |key|
+              make_key_data(xml, key)
+            end
+          end
+        end
       end
+
+      insert_extension(ret, ext)
     end
 
     # Extends the EPPClient::Domain#domain_update so that secDNS informations
@@ -156,89 +154,92 @@ module EPPClient
     def domain_update_xml(domain) #:nodoc:
       ret = super
 
-      if domain.key?(:secDNS)
-	sd = domain[:secDNS]
-	ext = extension do |xml|
-	  xml.update(sd[:urgent] == true ? {:urgent => true}: {}, {:xmlns => EPPClient::SCHEMAS_URL['secDNS']}) do
-	    if sd.key?(:rem)
-	      xml.rem do
-		if sd[:rem].key?(:all) && sd[:rem][:all] == true
-		  xml.all true
-		elsif sd[:rem].key?(:dsData)
-		  sd[:rem][:dsData].each do |ds|
-		    make_ds_data(xml, ds)
-		  end
-		elsif sd[:rem].key?(:keyData)
-		  sd[:rem][:keyData].each do |key|
-		    make_key_data(xml, key)
-		  end
-		end
-	      end
-	    end
-	    if sd.key?(:add)
-	      xml.add do
-		if sd[:add].key?(:dsData)
-		  sd[:add][:dsData].each do |ds|
-		    make_ds_data(xml, ds)
-		  end
-		elsif sd[:add].key?(:keyData)
-		  sd[:add][:keyData].each do |key|
-		    make_key_data(xml, key)
-		  end
-		end
-	      end
-	    end
-	    if sd.key?(:chg) && sd[:chg].key?(:maxSigLife)
-	      xml.chg do
-		xml.maxSigLife sd[:chg][:maxSigLife]
-	      end
-	    end
-	  end
-	end
-	return insert_extension(ret, ext)
-      else
-	return ret
+      return ret unless domain.key?(:secDNS)
+
+      sd = domain[:secDNS]
+
+      ext = extension do |xml|
+        xml.update(sd[:urgent] == true ? { :urgent => true } : {}, :xmlns => EPPClient::SCHEMAS_URL['secDNS']) do
+          if sd.key?(:rem)
+            xml.rem do
+              if sd[:rem].key?(:all) && sd[:rem][:all] == true
+                xml.all true
+              elsif sd[:rem].key?(:dsData)
+                sd[:rem][:dsData].each do |ds|
+                  make_ds_data(xml, ds)
+                end
+              elsif sd[:rem].key?(:keyData)
+                sd[:rem][:keyData].each do |key|
+                  make_key_data(xml, key)
+                end
+              end
+            end
+          end
+          if sd.key?(:add)
+            xml.add do
+              if sd[:add].key?(:dsData)
+                sd[:add][:dsData].each do |ds|
+                  make_ds_data(xml, ds)
+                end
+              elsif sd[:add].key?(:keyData)
+                sd[:add][:keyData].each do |key|
+                  make_key_data(xml, key)
+                end
+              end
+            end
+          end
+          if sd.key?(:chg) && sd[:chg].key?(:maxSigLife)
+            xml.chg do
+              xml.maxSigLife sd[:chg][:maxSigLife]
+            end
+          end
+        end
       end
+
+      insert_extension(ret, ext)
     end
 
     private
+
     def make_key_data(xml, key)
       xml.keyData do
-	xml.flags key[:flags]
-	xml.protocol key[:protocol]
-	xml.alg key[:alg]
-	xml.pubKey key[:pubKey]
+        xml.flags key[:flags]
+        xml.protocol key[:protocol]
+        xml.alg key[:alg]
+        xml.pubKey key[:pubKey]
       end
     end
+
     def make_ds_data(xml, ds)
       xml.dsData do
-	xml.keyTag ds[:keyTag]
-	xml.alg ds[:alg]
-	xml.digestType ds[:digestType]
-	xml.digest ds[:digest]
-	make_key_data(xml, ds[:keyData]) if ds.key?(:keyData)
+        xml.keyTag ds[:keyTag]
+        xml.alg ds[:alg]
+        xml.digestType ds[:digestType]
+        xml.digest ds[:digest]
+        make_key_data(xml, ds[:keyData]) if ds.key?(:keyData)
       end
     end
+
     def parse_key_data(xml)
       {
-	:flags => xml.xpath("secDNS:flags", EPPClient::SCHEMAS_URL).text.to_i,
-	:protocol => xml.xpath("secDNS:protocol", EPPClient::SCHEMAS_URL).text.to_i,
-	:alg => xml.xpath("secDNS:alg", EPPClient::SCHEMAS_URL).text.to_i,
-	:pubKey => xml.xpath("secDNS:pubKey", EPPClient::SCHEMAS_URL).text,
+        :flags => xml.xpath('secDNS:flags', EPPClient::SCHEMAS_URL).text.to_i,
+        :protocol => xml.xpath('secDNS:protocol', EPPClient::SCHEMAS_URL).text.to_i,
+        :alg => xml.xpath('secDNS:alg', EPPClient::SCHEMAS_URL).text.to_i,
+        :pubKey => xml.xpath('secDNS:pubKey', EPPClient::SCHEMAS_URL).text,
       }
     end
+
     def parse_ds_data(xml)
       ret = {
-	:keyTag => xml.xpath("secDNS:keyTag", EPPClient::SCHEMAS_URL).text.to_i,
-	:alg => xml.xpath("secDNS:alg", EPPClient::SCHEMAS_URL).text.to_i,
-	:digestType => xml.xpath("secDNS:digestType", EPPClient::SCHEMAS_URL).text.to_i,
-	:digest => xml.xpath("secDNS:digest", EPPClient::SCHEMAS_URL).text
+        :keyTag => xml.xpath('secDNS:keyTag', EPPClient::SCHEMAS_URL).text.to_i,
+        :alg => xml.xpath('secDNS:alg', EPPClient::SCHEMAS_URL).text.to_i,
+        :digestType => xml.xpath('secDNS:digestType', EPPClient::SCHEMAS_URL).text.to_i,
+        :digest => xml.xpath('secDNS:digest', EPPClient::SCHEMAS_URL).text,
       }
       if (keyData = xml.xpath('secDNS:keyData', EPPClient::SCHEMAS_URL)).size > 0
-	ret[:keyData] = parse_key_data(keyData)
+        ret[:keyData] = parse_key_data(keyData)
       end
       ret
     end
-
   end
 end

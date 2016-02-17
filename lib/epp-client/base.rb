@@ -3,7 +3,8 @@ require 'socket'
 require 'nokogiri'
 require 'builder'
 require 'date'
-require "epp-client/version"
+require 'English'
+require 'epp-client/version'
 require 'epp-client/xml'
 require 'epp-client/session'
 require 'epp-client/connection'
@@ -14,23 +15,26 @@ require 'epp-client/domain'
 require 'epp-client/contact'
 
 module EPPClient
+  # This is the base class.
+  #
+  # It can be used directly to talk to EPP servers that have no specific
+  # requirements.
   class Base
-
-    SCHEMAS = %w[
+    SCHEMAS = %w(
       epp-1.0
       domain-1.0
       host-1.0
       contact-1.0
-    ]
-    SCHEMAS_EXT_IETF = %w[
+    )
+    SCHEMAS_EXT_IETF = %w(
       rgp-1.0
-    ]
+    )
 
-    EPPClient::SCHEMAS_URL = SCHEMAS.inject({}) do |a,s|
+    EPPClient::SCHEMAS_URL = SCHEMAS.inject({}) do |a, s|
       a[s.sub(/-1\.0$/, '')] = "urn:ietf:params:xml:ns:#{s}" if s =~ /-1\.0$/
       a[s] = "urn:ietf:params:xml:ns:#{s}"
       a
-    end.merge!(SCHEMAS_EXT_IETF.inject({}) do |a,s|
+    end.merge!(SCHEMAS_EXT_IETF.inject({}) do |a, s|
       a[s.sub(/-1\.0$/, '')] = "urn:ietf:params:xml:ns:#{s}" if s =~ /-1\.0$/
       a[s] = "urn:ietf:params:xml:ns:#{s}"
       a
@@ -77,23 +81,23 @@ module EPPClient
     # [<tt>:ssl_key</tt>] The file containing the key of the certificate.
     def initialize(attrs)
       unless attrs.key?(:server) && attrs.key?(:client_id) && attrs.key?(:password)
-	raise ArgumentError, "server, client_id and password are required"
+        fail ArgumentError, 'server, client_id and password are required'
       end
 
-      attrs.each do |k,v|
-	begin
-	  self.send("#{k}=", v)
-	rescue NoMethodError
-	  raise ArgumentError, "there is no #{k} argument"
-	end
+      attrs.each do |k, v|
+        begin
+          send("#{k}=", v)
+        rescue NoMethodError
+          raise ArgumentError, "there is no #{k} argument"
+        end
       end
 
       @port ||= 700
-      @lang ||= "en"
+      @lang ||= 'en'
       @services ||= EPPClient::SCHEMAS_URL.values_at('domain', 'contact', 'host')
       @extensions ||= []
-      @version ||= "1.0"
-      @clTRID ||= "test-#{$$}-#{rand(1000)}"
+      @version ||= '1.0'
+      @clTRID ||= "test-#{$PROCESS_ID}-#{rand(1000)}"
       @clTRID_index = 0
 
       @context ||= OpenSSL::SSL::SSLContext.new
