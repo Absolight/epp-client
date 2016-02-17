@@ -25,6 +25,8 @@ Gem::Specification.new do |gem|
     'vendor/afnic/frnic-1.0.xsd',
     'vendor/afnic/frnic-1.1.xsd',
     'vendor/afnic/frnic-1.2.xsd',
+    'vendor/afnic/frnic-1.3.xsd',
+    'vendor/afnic/frnic-1.4.xsd',
   ]
 
   gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
