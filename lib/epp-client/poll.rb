@@ -45,7 +45,7 @@ module EPPClient
                       when Symbol
                         send(parser, xml)
                       else
-                        fail NotImplementedError
+                        raise NotImplementedError
                       end
         end
       end

@@ -75,7 +75,7 @@ module EPPClient
       res = xml.xpath('epp:epp/epp:response/epp:result', EPPClient::SCHEMAS_URL)
       code = res.attribute('code').value.to_i
 
-      fail EPPClient::EPPErrorResponse.new(:xml => xml, :code => code, :message => res.xpath('epp:msg', EPPClient::SCHEMAS_URL).text) unless args[:range].include?(code)
+      raise EPPClient::EPPErrorResponse.new(:xml => xml, :code => code, :message => res.xpath('epp:msg', EPPClient::SCHEMAS_URL).text) unless args[:range].include?(code)
 
       return true unless args.key?(:callback)
 
@@ -83,7 +83,7 @@ module EPPClient
       when Symbol
         return send(cb, xml.xpath('epp:epp/epp:response', EPPClient::SCHEMAS_URL))
       else
-        fail ArgumentError, 'Invalid callback type'
+        raise ArgumentError, 'Invalid callback type'
       end
     end
 
