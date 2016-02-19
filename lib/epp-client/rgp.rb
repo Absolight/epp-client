@@ -14,7 +14,7 @@ module EPPClient
 
     def domain_info_process(xml) #:nodoc:
       ret = super(xml)
-      if (rgp_status = xml.xpath('epp:extension/rgp:infData/rgp:rgpStatus', EPPClient::SCHEMAS_URL)).size > 0
+      unless (rgp_status = xml.xpath('epp:extension/rgp:infData/rgp:rgpStatus', EPPClient::SCHEMAS_URL)).empty?
         ret[:rgpStatus] = rgp_status.map { |s| s.attr('s') }
       end
       ret

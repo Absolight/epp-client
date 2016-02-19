@@ -128,13 +128,13 @@ module EPPClient
         :name => dom.xpath('domain:name', EPPClient::SCHEMAS_URL).text,
         :roid => dom.xpath('domain:roid', EPPClient::SCHEMAS_URL).text,
       }
-      if (status = dom.xpath('domain:status', EPPClient::SCHEMAS_URL)).size > 0
+      unless (status = dom.xpath('domain:status', EPPClient::SCHEMAS_URL)).empty?
         ret[:status] = status.map { |s| s.attr('s') }
       end
-      if (registrant = dom.xpath('domain:registrant', EPPClient::SCHEMAS_URL)).size > 0
+      unless (registrant = dom.xpath('domain:registrant', EPPClient::SCHEMAS_URL)).empty?
         ret[:registrant] = registrant.text
       end
-      if (contact = dom.xpath('domain:contact', EPPClient::SCHEMAS_URL)).size > 0
+      unless (contact = dom.xpath('domain:contact', EPPClient::SCHEMAS_URL)).empty?
         ret[:contacts] = contact.inject({}) do |a, c|
           s = c.attr('type').to_sym
           a[s] ||= []
@@ -142,36 +142,36 @@ module EPPClient
           a
         end
       end
-      if (ns = dom.xpath('domain:ns', EPPClient::SCHEMAS_URL)).size > 0
-        if (hostObj = ns.xpath('domain:hostObj', EPPClient::SCHEMAS_URL)).size > 0
+      unless (ns = dom.xpath('domain:ns', EPPClient::SCHEMAS_URL)).empty?
+        if !(hostObj = ns.xpath('domain:hostObj', EPPClient::SCHEMAS_URL)).empty?
           ret[:ns] = hostObj.map(&:text)
-        elsif (hostAttr = ns.xpath('domain:hostAttr', EPPClient::SCHEMAS_URL)).size > 0
+        elsif !(hostAttr = ns.xpath('domain:hostAttr', EPPClient::SCHEMAS_URL)).empty?
           ret[:ns] = hostAttr.map do |h|
             r = { :hostName => h.xpath('domain:hostName', EPPClient::SCHEMAS_URL).text }
-            if (v4 = h.xpath('domain:hostAddr[@ip="v4"]', EPPClient::SCHEMAS_URL)).size > 0
+            unless (v4 = h.xpath('domain:hostAddr[@ip="v4"]', EPPClient::SCHEMAS_URL)).empty?
               r[:hostAddrv4] = v4.map(&:text)
             end
-            if (v6 = h.xpath('domain:hostAddr[@ip="v6"]', EPPClient::SCHEMAS_URL)).size > 0
+            unless (v6 = h.xpath('domain:hostAddr[@ip="v6"]', EPPClient::SCHEMAS_URL)).empty?
               r[:hostAddrv6] = v6.map(&:text)
             end
             r
           end
         end
       end
-      if (host = dom.xpath('domain:host', EPPClient::SCHEMAS_URL)).size > 0
+      unless (host = dom.xpath('domain:host', EPPClient::SCHEMAS_URL)).empty?
         ret[:host] = host.map(&:text)
       end
       %w(clID upID).each do |val|
-        if (r = dom.xpath("domain:#{val}", EPPClient::SCHEMAS_URL)).size > 0
+        unless (r = dom.xpath("domain:#{val}", EPPClient::SCHEMAS_URL)).empty?
           ret[val.to_sym] = r.text
         end
       end
       %w(crDate exDate upDate trDate).each do |val|
-        if (r = dom.xpath("domain:#{val}", EPPClient::SCHEMAS_URL)).size > 0
+        unless (r = dom.xpath("domain:#{val}", EPPClient::SCHEMAS_URL)).empty?
           ret[val.to_sym] = DateTime.parse(r.text)
         end
       end
-      if (authInfo = dom.xpath('domain:authInfo', EPPClient::SCHEMAS_URL)).size > 0
+      unless (authInfo = dom.xpath('domain:authInfo', EPPClient::SCHEMAS_URL)).empty?
         ret[:authInfo] = authInfo.xpath('domain:pw', EPPClient::SCHEMAS_URL).text
       end
       ret
@@ -399,7 +399,7 @@ module EPPClient
         :acID => dom.xpath('domain:acID', EPPClient::SCHEMAS_URL).text,
         :acDate => DateTime.parse(dom.xpath('domain:acDate', EPPClient::SCHEMAS_URL).text),
       }
-      if (exDate = dom.xpath('domain:exDate', EPPClient::SCHEMAS_URL)).size > 0
+      unless (exDate = dom.xpath('domain:exDate', EPPClient::SCHEMAS_URL)).empty?
         ret[:exDate] = DateTime.parse(exDate)
       end
       ret

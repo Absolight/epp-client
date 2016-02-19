@@ -132,15 +132,15 @@ module EPPClient
         :id => contact.xpath('contact:id', EPPClient::SCHEMAS_URL).text,
         :roid => contact.xpath('contact:roid', EPPClient::SCHEMAS_URL).text,
       }
-      if (status = contact.xpath('contact:status', EPPClient::SCHEMAS_URL)).size > 0
+      unless (status = contact.xpath('contact:status', EPPClient::SCHEMAS_URL)).empty?
         ret[:status] = status.map { |s| s.attr('s') }
       end
 
-      if (postalInfo = contact.xpath('contact:postalInfo', EPPClient::SCHEMAS_URL)).size > 0
+      unless (postalInfo = contact.xpath('contact:postalInfo', EPPClient::SCHEMAS_URL)).empty?
         ret[:postalInfo] = postalInfo.inject({}) do |acc, p|
           type = p.attr('type').to_sym
           acc[type] = { :name => p.xpath('contact:name', EPPClient::SCHEMAS_URL).text, :addr => {} }
-          if (org = p.xpath('contact:org', EPPClient::SCHEMAS_URL)).size > 0
+          unless (org = p.xpath('contact:org', EPPClient::SCHEMAS_URL)).empty?
             acc[type][:org] = org.text
           end
           addr = p.xpath('contact:addr', EPPClient::SCHEMAS_URL)
@@ -150,7 +150,7 @@ module EPPClient
             acc[type][:addr][val.to_sym] = addr.xpath("contact:#{val}", EPPClient::SCHEMAS_URL).text
           end
           %w(sp pc).each do |val|
-            if (r = addr.xpath("contact:#{val}", EPPClient::SCHEMAS_URL)).size > 0
+            unless (r = addr.xpath("contact:#{val}", EPPClient::SCHEMAS_URL)).empty?
               acc[type][:addr][val.to_sym] = r.text
             end
           end
@@ -160,19 +160,19 @@ module EPPClient
       end
 
       %w(voice fax email clID crID upID).each do |val|
-        if (value = contact.xpath("contact:#{val}", EPPClient::SCHEMAS_URL)).size > 0
+        unless (value = contact.xpath("contact:#{val}", EPPClient::SCHEMAS_URL)).empty?
           ret[val.to_sym] = value.text
         end
       end
       %w(crDate upDate trDate).each do |val|
-        if (date = contact.xpath("contact:#{val}", EPPClient::SCHEMAS_URL)).size > 0
+        unless (date = contact.xpath("contact:#{val}", EPPClient::SCHEMAS_URL)).empty?
           ret[val.to_sym] = DateTime.parse(date.text)
         end
       end
-      if (authInfo = contact.xpath('contact:authInfo', EPPClient::SCHEMAS_URL)).size > 0
+      unless (authInfo = contact.xpath('contact:authInfo', EPPClient::SCHEMAS_URL)).empty?
         ret[:authInfo] = authInfo.xpath('contact:pw', EPPClient::SCHEMAS_URL).text
       end
-      if (disclose = contact.xpath('contact:disclose', EPPClient::SCHEMAS_URL)).size > 0
+      unless (disclose = contact.xpath('contact:disclose', EPPClient::SCHEMAS_URL)).empty?
         ret[:disclose] = { :flag => disclose.attr('flag').value == '1', :elements => [] }
         disclose.children.each do |c|
           r = { :name => c.name }

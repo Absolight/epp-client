@@ -70,14 +70,14 @@ module EPPClient
 
     def contact_info_process(xml) #:nodoc:
       ret = super
-      if (contact = xml.xpath('epp:extension/sr:ext/sr:infData/sr:contact', EPPClient::SCHEMAS_URL)).size > 0
-        if (person = contact.xpath('sr:person', EPPClient::SCHEMAS_URL)).size > 0
+      unless (contact = xml.xpath('epp:extension/sr:ext/sr:infData/sr:contact', EPPClient::SCHEMAS_URL)).empty?
+        unless (person = contact.xpath('sr:person', EPPClient::SCHEMAS_URL)).empty?
           ret[:person] = {
             :birthDate => Date.parse(person.xpath('sr:birthDate', EPPClient::SCHEMAS_URL).text),
             :birthPlace => person.xpath('sr:birthPlace', EPPClient::SCHEMAS_URL).text,
           }
         end
-        if (org = contact.xpath('sr:org', EPPClient::SCHEMAS_URL)).size > 0
+        unless (org = contact.xpath('sr:org', EPPClient::SCHEMAS_URL)).empty?
           ret[:org] = { :companySerial => org.xpath('sr:companySerial', EPPClient::SCHEMAS_URL).text }
         end
       end

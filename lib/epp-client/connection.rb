@@ -23,7 +23,7 @@ module EPPClient
       @srv_version = xml.xpath('epp:epp/epp:greeting/epp:svcMenu/epp:version', EPPClient::SCHEMAS_URL).map(&:text)
       @srv_lang = xml.xpath('epp:epp/epp:greeting/epp:svcMenu/epp:lang', EPPClient::SCHEMAS_URL).map(&:text)
       @srv_ns = xml.xpath('epp:epp/epp:greeting/epp:svcMenu/epp:objURI', EPPClient::SCHEMAS_URL).map(&:text)
-      if (ext = xml.xpath('epp:epp/epp:greeting/epp:svcMenu/epp:svcExtension/epp:extURI', EPPClient::SCHEMAS_URL)).size > 0
+      unless (ext = xml.xpath('epp:epp/epp:greeting/epp:svcMenu/epp:svcExtension/epp:extURI', EPPClient::SCHEMAS_URL)).empty?
         @srv_ext = ext.map(&:text)
       end
 
