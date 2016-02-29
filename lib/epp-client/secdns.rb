@@ -65,7 +65,7 @@ module EPPClient
     def domain_info_process(xml) #:nodoc:
       ret = super
       ret_secdns = {}
-      if (maxSigLife = xml.xpath('epp:extension/secDNS:infData/secDNS:maxSigLife', EPPClient::SCHEMAS_URL)).size > 0
+      unless (maxSigLife = xml.xpath('epp:extension/secDNS:infData/secDNS:maxSigLife', EPPClient::SCHEMAS_URL)).empty?
         ret_secdns[:maxSigLife] = maxSigLife.text
       end
       ret_secdns[:dsData] = xml.xpath('epp:extension/secDNS:infData/secDNS:dsData', EPPClient::SCHEMAS_URL).map do |s|
@@ -75,7 +75,7 @@ module EPPClient
         parse_key_data(s)
       end
 
-      ret[:secDNS] = ret_secdns unless ret_secdns.values.count(&:nil?) == 0
+      ret[:secDNS] = ret_secdns if ret_secdns.values.count(&:nil?) == 0
       ret
     end
 
@@ -236,7 +236,7 @@ module EPPClient
         :digestType => xml.xpath('secDNS:digestType', EPPClient::SCHEMAS_URL).text.to_i,
         :digest => xml.xpath('secDNS:digest', EPPClient::SCHEMAS_URL).text,
       }
-      if (keyData = xml.xpath('secDNS:keyData', EPPClient::SCHEMAS_URL)).size > 0
+      unless (keyData = xml.xpath('secDNS:keyData', EPPClient::SCHEMAS_URL)).empty?
         ret[:keyData] = parse_key_data(keyData)
       end
       ret

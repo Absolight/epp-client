@@ -23,7 +23,7 @@ module EPPClient
       @srv_version = xml.xpath('epp:epp/epp:greeting/epp:svcMenu/epp:version', EPPClient::SCHEMAS_URL).map(&:text)
       @srv_lang = xml.xpath('epp:epp/epp:greeting/epp:svcMenu/epp:lang', EPPClient::SCHEMAS_URL).map(&:text)
       @srv_ns = xml.xpath('epp:epp/epp:greeting/epp:svcMenu/epp:objURI', EPPClient::SCHEMAS_URL).map(&:text)
-      if (ext = xml.xpath('epp:epp/epp:greeting/epp:svcMenu/epp:svcExtension/epp:extURI', EPPClient::SCHEMAS_URL)).size > 0
+      unless (ext = xml.xpath('epp:epp/epp:greeting/epp:svcMenu/epp:svcExtension/epp:extURI', EPPClient::SCHEMAS_URL)).empty?
         @srv_ext = ext.map(&:text)
       end
 
@@ -61,7 +61,7 @@ module EPPClient
     # gets a frame from the socket and returns the parsed response.
     def one_frame
       size = @socket.read(4)
-      fail SocketError, @socket.eof? ? 'Connection closed by remote server' : 'Error reading frame from remote server' if size.nil?
+      raise SocketError, @socket.eof? ? 'Connection closed by remote server' : 'Error reading frame from remote server' if size.nil?
       size = size.unpack('N')[0]
       @recv_frame = @socket.read(size - 4)
       recv_frame_to_xml

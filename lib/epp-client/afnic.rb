@@ -71,7 +71,7 @@ module EPPClient
 
     def domain_info_process(xml) #:nodoc:
       ret = super
-      if (frnic_status = xml.xpath('epp:extension/frnic:ext/frnic:resData/frnic:infData/frnic:domain/frnic:status', EPPClient::SCHEMAS_URL)).size > 0
+      unless (frnic_status = xml.xpath('epp:extension/frnic:ext/frnic:resData/frnic:infData/frnic:domain/frnic:status', EPPClient::SCHEMAS_URL)).empty?
         ret[:status] ||= [] # The status is optional, there may be none at this point.
         ret[:status] += frnic_status.map { |s| s.attr('s') }
       end
@@ -82,22 +82,22 @@ module EPPClient
     def legalEntityInfos(leI) #:nodoc:
       ret = {}
       ret[:legalStatus] = leI.xpath('frnic:legalStatus', EPPClient::SCHEMAS_URL).attr('s').value
-      if (r = leI.xpath('frnic:idStatus', EPPClient::SCHEMAS_URL)).size > 0
+      unless (r = leI.xpath('frnic:idStatus', EPPClient::SCHEMAS_URL)).empty?
         ret[:idStatus] = { :value => r.text }
         ret[:idStatus][:when] = r.attr('when').value if r.attr('when')
         ret[:idStatus][:source] = r.attr('source').value if r.attr('source')
       end
       %w(siren VAT trademark DUNS local).each do |val|
-        if (r = leI.xpath("frnic:#{val}", EPPClient::SCHEMAS_URL)).size > 0
+        unless (r = leI.xpath("frnic:#{val}", EPPClient::SCHEMAS_URL)).empty?
           ret[val.to_sym] = r.text
         end
       end
-      if (asso = leI.xpath('frnic:asso', EPPClient::SCHEMAS_URL)).size > 0
+      unless (asso = leI.xpath('frnic:asso', EPPClient::SCHEMAS_URL)).empty?
         ret[:asso] = {}
-        if (r = asso.xpath('frnic:waldec', EPPClient::SCHEMAS_URL)).size > 0
+        if !(r = asso.xpath('frnic:waldec', EPPClient::SCHEMAS_URL)).empty?
           ret[:asso][:waldec] = r.text
         else
-          if (decl = asso.xpath('frnic:decl', EPPClient::SCHEMAS_URL)).size > 0
+          unless (decl = asso.xpath('frnic:decl', EPPClient::SCHEMAS_URL)).empty?
             ret[:asso][:decl] = Date.parse(decl.text)
           end
           publ = asso.xpath('frnic:publ', EPPClient::SCHEMAS_URL)
@@ -182,31 +182,31 @@ module EPPClient
 
     def contact_info_process(xml) #:nodoc:
       ret = super
-      if (contact = xml.xpath('epp:extension/frnic:ext/frnic:resData/frnic:infData/frnic:contact', EPPClient::SCHEMAS_URL)).size > 0
-        if (list = contact.xpath('frnic:list', EPPClient::SCHEMAS_URL)).size > 0
+      unless (contact = xml.xpath('epp:extension/frnic:ext/frnic:resData/frnic:infData/frnic:contact', EPPClient::SCHEMAS_URL)).empty?
+        unless (list = contact.xpath('frnic:list', EPPClient::SCHEMAS_URL)).empty?
           ret[:list] = list.map(&:text)
         end
-        if (firstName = contact.xpath('frnic:firstName', EPPClient::SCHEMAS_URL)).size > 0
+        unless (firstName = contact.xpath('frnic:firstName', EPPClient::SCHEMAS_URL)).empty?
           ret[:firstName] = firstName.text
         end
-        if (iI = contact.xpath('frnic:individualInfos', EPPClient::SCHEMAS_URL)).size > 0
+        unless (iI = contact.xpath('frnic:individualInfos', EPPClient::SCHEMAS_URL)).empty?
           ret[:individualInfos] = {}
           ret[:individualInfos][:birthDate] = Date.parse(iI.xpath('frnic:birthDate', EPPClient::SCHEMAS_URL).text)
-          if (r = iI.xpath('frnic:idStatus', EPPClient::SCHEMAS_URL)).size > 0
+          unless (r = iI.xpath('frnic:idStatus', EPPClient::SCHEMAS_URL)).empty?
             ret[:individualInfos][:idStatus] = { :value => r.text }
             ret[:individualInfos][:idStatus][:when] = r.attr('when').value if r.attr('when')
             ret[:individualInfos][:idStatus][:source] = r.attr('source').value if r.attr('source')
           end
           %w(birthCity birthPc birthCc).each do |val|
-            if (r = iI.xpath("frnic:#{val}", EPPClient::SCHEMAS_URL)).size > 0
+            unless (r = iI.xpath("frnic:#{val}", EPPClient::SCHEMAS_URL)).empty?
               ret[:individualInfos][val.to_sym] = r.text
             end
           end
         end
-        if (leI = contact.xpath('frnic:legalEntityInfos', EPPClient::SCHEMAS_URL)).size > 0
+        unless (leI = contact.xpath('frnic:legalEntityInfos', EPPClient::SCHEMAS_URL)).empty?
           ret[:legalEntityInfos] = legalEntityInfos(leI)
         end
-        if (obsoleted = contact.xpath('frnic:obsoleted', EPPClient::SCHEMAS_URL)).size > 0
+        unless (obsoleted = contact.xpath('frnic:obsoleted', EPPClient::SCHEMAS_URL)).empty?
           if obsoleted.text != '0'
             ret[:obsoleted] = {}
             if (v_when = obsoleted.attr('when'))
@@ -214,7 +214,7 @@ module EPPClient
             end
           end
         end
-        if (reachable = contact.xpath('frnic:reachable', EPPClient::SCHEMAS_URL)).size > 0
+        unless (reachable = contact.xpath('frnic:reachable', EPPClient::SCHEMAS_URL)).empty?
           if reachable.text != '0'
             ret[:reachable] = {}
             if (v_when = reachable.attr('when'))
@@ -278,7 +278,7 @@ module EPPClient
               if contact.key?(:reachable)
                 reachable = contact[:reachable]
 
-                fail ArgumentError, 'reachable has to be a Hash' unless reachable.is_a?(Hash)
+                raise ArgumentError, 'reachable has to be a Hash' unless reachable.is_a?(Hash)
 
                 xml.reachable(reachable, 1)
               end
@@ -362,7 +362,7 @@ module EPPClient
 
     def contact_create_process(xml) #:nodoc:
       ret = super
-      if (creData = xml.xpath('epp:extension/frnic:ext/frnic:resData/frnic:creData', EPPClient::SCHEMAS_URL)).size > 0
+      unless (creData = xml.xpath('epp:extension/frnic:ext/frnic:resData/frnic:creData', EPPClient::SCHEMAS_URL)).empty?
         ret[:nhStatus] = creData.xpath('frnic:nhStatus', EPPClient::SCHEMAS_URL).attr('new').value == '1'
         ret[:idStatus] = creData.xpath('frnic:idStatus', EPPClient::SCHEMAS_URL).text
       end
@@ -373,14 +373,14 @@ module EPPClient
     # <tt>:ns</tt>, <tt>:dsData</tt> or <tt>:keyData</tt> records, AFNIC's
     # servers sends quite a strange error when there is.
     def domain_create(args)
-      fail ArgumentError, "You can't create a domain with ns records, you must do an update afterwards" if args.key?(:ns)
-      fail ArgumentError, "You can't create a domain with ds or key records, you must do an update afterwards" if args.key?(:dsData) || args.key?(:keyData)
+      raise ArgumentError, "You can't create a domain with ns records, you must do an update afterwards" if args.key?(:ns)
+      raise ArgumentError, "You can't create a domain with ds or key records, you must do an update afterwards" if args.key?(:dsData) || args.key?(:keyData)
       super
     end
 
     # Raises an exception, as contacts are deleted with a garbage collector.
     def contact_delete(_args)
-      fail NotImplementedError, 'Contacts are deleted with a garbage collector'
+      raise NotImplementedError, 'Contacts are deleted with a garbage collector'
     end
 
     def contact_update_xml(args) #:nodoc:
@@ -400,7 +400,7 @@ module EPPClient
                   if args[c].key?(:reachable)
                     reachable = args[c][:reachable]
 
-                    fail ArgumentError, 'reachable has to be a Hash' unless reachable.is_a?(Hash)
+                    raise ArgumentError, 'reachable has to be a Hash' unless reachable.is_a?(Hash)
 
                     xml.reachable(reachable, 1)
                   end
@@ -441,13 +441,13 @@ module EPPClient
     # * update status & authInfo
     def domain_update(args)
       if args.key?(:chg) && args[:chg].key?(:registrant)
-        fail ArgumentError, 'You need to do a trade or recover operation to change the registrant'
+        raise ArgumentError, 'You need to do a trade or recover operation to change the registrant'
       end
       has_contacts = args.key?(:add) && args[:add].key?(:contacts) || args.key?(:add) && args[:add].key?(:contacts)
       has_ns = args.key?(:add) && args[:add].key?(:ns) || args.key?(:add) && args[:add].key?(:ns)
       has_other = args.key?(:add) && args[:add].key?(:status) || args.key?(:add) && args[:add].key?(:status) || args.key?(:chg) && args[:chg].key?(:authInfo)
       if [has_contacts, has_ns, has_other].count { |v| v } > 1
-        fail ArgumentError, "You can't update all that at one time"
+        raise ArgumentError, "You can't update all that at one time"
       end
       [:add, :rem].each do |ar|
         if args.key?(ar) && args[ar].key?(:ns) && args[ar][:ns].first.is_a?(String)
@@ -471,15 +471,15 @@ module EPPClient
       qP = contact.xpath('frnic:qualificationProcess', EPPClient::SCHEMAS_URL)
       ret[:qualificationProcess] = { :s => qP.attr('s').value }
       ret[:qualificationProcess][:lang] = qP.attr('lang').value if qP.attr('lang')
-      if (leI = contact.xpath('frnic:legalEntityInfos', EPPClient::SCHEMAS_URL)).size > 0
+      unless (leI = contact.xpath('frnic:legalEntityInfos', EPPClient::SCHEMAS_URL)).empty?
         ret[:legalEntityInfos] = legalEntityInfos(leI)
       end
       reach = contact.xpath('frnic:reachability', EPPClient::SCHEMAS_URL)
       ret[:reachability] = { :reStatus => reach.xpath('frnic:reStatus', EPPClient::SCHEMAS_URL).text }
-      if (voice = reach.xpath('frnic:voice', EPPClient::SCHEMAS_URL)).size > 0
+      unless (voice = reach.xpath('frnic:voice', EPPClient::SCHEMAS_URL)).empty?
         ret[:reachability][:voice] = voice.text
       end
-      if (email = reach.xpath('frnic:email', EPPClient::SCHEMAS_URL)).size > 0
+      unless (email = reach.xpath('frnic:email', EPPClient::SCHEMAS_URL)).empty?
         ret[:reachability][:email] = email.text
       end
       ret
@@ -499,12 +499,12 @@ module EPPClient
 
       # FIXME: there are discrepencies between the 1.2 xmlschema, the documentation and the reality, I'm trying to stick to reality here.
       %w(reHldID acHldID).each do |f|
-        if (field = dom.xpath("frnic:#{f}", EPPClient::SCHEMAS_URL)).size > 0
+        unless (field = dom.xpath("frnic:#{f}", EPPClient::SCHEMAS_URL)).empty?
           ret[f.to_sym] = field.text
         end
       end
       %w(rhDate ahDate).each do |f|
-        if (field = dom.xpath("frnic:#{f}", EPPClient::SCHEMAS_URL)).size > 0
+        unless (field = dom.xpath("frnic:#{f}", EPPClient::SCHEMAS_URL)).empty?
           ret[f.to_sym] = DateTime.parse(field.text)
         end
       end

@@ -59,7 +59,7 @@ module EPPClient
 
       args[:range] ||= 1000..1999
 
-      if (mq = xml.xpath('epp:epp/epp:response/epp:msgQ', EPPClient::SCHEMAS_URL)).size > 0
+      if !(mq = xml.xpath('epp:epp/epp:response/epp:msgQ', EPPClient::SCHEMAS_URL)).empty?
         @msgQ_count = mq.attribute('count').value.to_i
         @msgQ_id = mq.attribute('id').value
         puts "DEBUG: MSGQ : count=#{@msgQ_count}, id=#{@msgQ_id}\n" if debug
@@ -68,14 +68,14 @@ module EPPClient
         @msgQ_id = nil
       end
 
-      if (trID = xml.xpath('epp:epp/epp:response/epp:trID', EPPClient::SCHEMAS_URL)).size > 0
+      unless (trID = xml.xpath('epp:epp/epp:response/epp:trID', EPPClient::SCHEMAS_URL)).empty?
         @trID = get_trid(trID)
       end
 
       res = xml.xpath('epp:epp/epp:response/epp:result', EPPClient::SCHEMAS_URL)
       code = res.attribute('code').value.to_i
 
-      fail EPPClient::EPPErrorResponse.new(:xml => xml, :code => code, :message => res.xpath('epp:msg', EPPClient::SCHEMAS_URL).text) unless args[:range].include?(code)
+      raise EPPClient::EPPErrorResponse.new(:xml => xml, :code => code, :message => res.xpath('epp:msg', EPPClient::SCHEMAS_URL).text) unless args[:range].include?(code)
 
       return true unless args.key?(:callback)
 
@@ -83,7 +83,7 @@ module EPPClient
       when Symbol
         return send(cb, xml.xpath('epp:epp/epp:response', EPPClient::SCHEMAS_URL))
       else
-        fail ArgumentError, 'Invalid callback type'
+        raise ArgumentError, 'Invalid callback type'
       end
     end
 

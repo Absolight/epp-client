@@ -29,23 +29,23 @@ module EPPClient
 
     def poll_req_process(xml) #:nodoc:
       ret = {}
-      if (date = xml.xpath('epp:msgQ/epp:qDate', EPPClient::SCHEMAS_URL)).size > 0
+      unless (date = xml.xpath('epp:msgQ/epp:qDate', EPPClient::SCHEMAS_URL)).empty?
         ret[:qDate] = DateTime.parse(date.text)
       end
-      if (msg = xml.xpath('epp:msgQ/epp:msg', EPPClient::SCHEMAS_URL)).size > 0
+      unless (msg = xml.xpath('epp:msgQ/epp:msg', EPPClient::SCHEMAS_URL)).empty?
         ret[:msg] = msg.text
         ret[:msg_xml] = msg.to_s
       end
-      if (obj = xml.xpath('epp:resData', EPPClient::SCHEMAS_URL)).size > 0 ||
-         (obj = xml.xpath('epp:extension', EPPClient::SCHEMAS_URL)).size > 0
+      if !(obj = xml.xpath('epp:resData', EPPClient::SCHEMAS_URL)).empty? ||
+         !(obj = xml.xpath('epp:extension', EPPClient::SCHEMAS_URL)).empty?
         ret[:obj_xml] = obj.to_s
         PARSERS.each do |xpath, parser|
-          next unless obj.xpath(xpath, EPPClient::SCHEMAS_URL).size > 0
+          next if obj.xpath(xpath, EPPClient::SCHEMAS_URL).empty?
           ret[:obj] = case parser
                       when Symbol
                         send(parser, xml)
                       else
-                        fail NotImplementedError
+                        raise NotImplementedError
                       end
         end
       end
