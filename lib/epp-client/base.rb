@@ -111,7 +111,7 @@ module EPPClient
     end
 
     def debug
-      $DEBUG || ENV['EPP_CLIENT_DEBUG']
+      @debug ||= $DEBUG || ENV['EPP_CLIENT_DEBUG']
     end
   end
 end
